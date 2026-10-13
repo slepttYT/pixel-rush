@@ -723,6 +723,7 @@ summary:hover{color:var(--bone)}
   </div>
 
   <div id="tutbox" hidden><small id="tutstep"></small><b id="tutt"></b><span id="tutd"></span><i id="tutbar"><i></i></i><button type="button" class="btn ghost sm" id="tutskip">SKIP TUTORIAL</button></div>
+  <div id="tutask" hidden role="dialog" aria-modal="true" aria-labelledby="tutaskt"><div class="tabox"><h2 id="tutaskt">WANT A TUTORIAL?</h2><p>A short practice run: move, attack, dash, dodge and the shop. Finish it to go up one account level.</p><div class="trow"><button class="btn gold" id="tutyes" type="button">YES, SHOW ME</button><button class="btn ghost" id="tutno" type="button">NO THANKS</button></div></div></div>
   <div id="help" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="helpt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -3174,6 +3175,8 @@ const UPDATES=[
   'Pets are pixel art with a shadow and calmer, smoother effects: a trail while they move, a few motes while they rest.',
   'Menus open at full size with a clean fade (no more small-then-big jump), and selected buttons stay dark with a bright border instead of turning solid green.',
   'The main menu scene is pixel art, like the arenas. Saves moved to their own SAVES screen, under Settings.',
+  'A new title screen: the game opens on PIXEL RUSH with a live battle behind it. Press PLAY, pick your save, then you are on the main menu. The PIXEL RUSH logo on the main menu is bigger too.',
+  'New players are asked if they want the tutorial before their first run (say no to skip it). Finishing the tutorial now gives you one account level.',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
@@ -5307,7 +5310,12 @@ function beginRun(){
   $('home').hidden=true;reset();stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
   juke.paused=false;if(!muted)musicStart();
 }
-$('play').addEventListener('click',()=>{if(state==='menu')brWant=false;if(state==='menu'&&!stats.tutDone&&!(stats.runs>0)&&!(stats.kills>0)){startTutorial();return}startGame()});
+$('play').addEventListener('click',()=>{if(state==='menu')brWant=false;if(state==='menu'&&!sub&&acct().L===1&&!stats.tutAsk){tutAsk(true);return}startGame()});
+/* account level 1 and never asked: offer the tutorial before the first run. NO skips it and goes on to the run */
+function tutAsk(on){$('tutask').hidden=!on;if(on)setTimeout(()=>$('tutyes').focus(),0)}
+$('tutyes').addEventListener('click',()=>{tutAsk(false);stats.tutAsk=1;saveMeta();startTutorial()});
+$('tutno').addEventListener('click',()=>{tutAsk(false);stats.tutAsk=1;saveMeta();sfx(330,.08,'triangle',.05,1);startGame()});
+addEventListener('keydown',e=>{if($('tutask').hidden)return;if(e.key==='Escape'){e.preventDefault();$('tutno').click()}else if(e.key!=='Tab'&&e.key!=='Enter'&&e.key!==' ')e.preventDefault();e.stopPropagation()},true);
 $('pbtn').addEventListener('click',()=>{state==='win'?loopGame():startGame()});
 $('hbtn').addEventListener('click',()=>{state==='win'?endRun():showHome()});
 $('wbtn').addEventListener('click',nextWorld);
@@ -5910,9 +5918,15 @@ function startTutorial(){
   tut={step:0,t:0,prog:0,d:0,lx:p.x,ly:p.y,dash:0,dg:p.dgT||0};enemies=[];toSpawn=0;waveActive=false;wave=0;tutGo(0);banner('TUTORIAL');
 }
 function endTutorial(done){
-  stats.tutDone=1;saveMeta();tut=null;tutUI();
+  stats.tutDone=1;stats.tutAsk=1;
+  /* finishing the tutorial is worth exactly one account level (once per save) */
+  let lvUp=0;if(done&&!stats.tutLv){const a=acct();xpTotal+=a.need-a.x;try{LS.setItem('cinder-xp',String(xpTotal))}catch(e){}stats.tutLv=1;grantLevelCoins();saveOwn();lvUp=acct().L}
+  saveMeta();tut=null;tutUI();
   if(state!=='menu'){state='menu';$('panel').hidden=true;$('shop').hidden=true;$('pause').hidden=true;enemies=[];bullets=[];showHome()}
   if(done)setTimeout(()=>sfx(880,.2,'triangle',.06,1.3),50);
+  if(lvUp){refreshHome();let box=$('achpops');if(!box){box=document.createElement('div');box.id='achpops';stage.appendChild(box)}
+    const d=document.createElement('div');d.className='achpop';d.innerHTML='<div class="atx"><small>TUTORIAL COMPLETE</small><b>Account level '+lvUp+'</b><span>You went up one level for finishing the tutorial.</span></div>';
+    box.appendChild(d);setTimeout(()=>d.classList.add('out'),3600);setTimeout(()=>d.remove(),4000)}
 }
 function tutTick(dt){
   p.hp=p.maxhp;tut.t+=dt;
@@ -8244,6 +8258,9 @@ requestAnimationFrame(frame);
     if(cmd==='dev_skins_ssc'){
       dev.skin=true;saveDev();eq.k='dev_rainbow';eq.g='dev_gun';eq.b='dev_bomb';eq.f='dev_fist';syncEq();saveOwn();
       say('Prism fists, knife, gun and bomb granted and equipped.');
+    }else if(cmd==='dev_home'){ /* DEV_HOME: back to the title screen (before picking a save). Remove this branch to remove the command */
+      closeAdmin();if(sub)closeSub();if(state!=='menu')showHome();if(window.__title)window.__title.show(1);
+      return;
     }else if(cmd==='dev_boss_go'){
       startRush();closeAdmin();
       return;
@@ -8381,11 +8398,11 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
     go.disabled=!selSlot;
   }
   function show(screen){
-    T.hidden=false;s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
+    T.hidden=false;document.body.classList.add('ontitle');s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
     if(screen===2){selSlot=SLOT;selDiff=slotDiff(SLOT);drawSlots();drawDiffs();setTimeout(()=>go.focus(),0)}
     else setTimeout(()=>$('tplay').focus(),0);
   }
-  function hide(){T.hidden=true}
+  function hide(){T.hidden=true;document.body.classList.remove('ontitle');try{fitMenus()}catch(e){}}
   function delSave(n){
     try{slotKeysOf(n).forEach(k=>localStorage.removeItem(k))}catch(e){}
     confirmDel=0;
@@ -8435,7 +8452,8 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
   addEventListener('keyup',e=>{if(!T.hidden)e.stopPropagation()},true);
   window.__title={show:show,hide:hide,slotKeysOf:slotKeysOf};
   let boot=null;try{boot=sessionStorage.getItem('cinder-boot');sessionStorage.removeItem('cinder-boot')}catch(e){}
-  hide();
+  /* the game opens on the title screen (the menu battle plays behind it); switching saves reloads straight into the main menu */
+  if(boot==='home')hide();else show(boot==='select'?2:1);
 
   /* ---------- save switcher + manager (very top right of the main menu) ---------- */
   {
@@ -8724,5 +8742,35 @@ body:has(.sub:not([hidden])) #home .box,body:has(.sub:not([hidden])) #slots{visi
 #tutbar{display:block;width:100%;height:6px;background:#0b3315;border:2px solid #1e6b2c;border-radius:3px;overflow:hidden}
 #tutbar i{display:block;height:100%;width:0;background:#b4f7a8;transition:width .2s}
 #tutbox .btn{margin-top:2px;background:#0b3315;border:2px solid #1e6b2c;color:#b4f7a8;font-size:10px;padding:4px 10px}
+
+/* ===== v0.3: title screen over the live menu battle, tutorial prompt, bigger menu logo ===== */
+body.ontitle #home{visibility:hidden}
+#title{background:rgba(4,10,6,.28)!important;font-family:'Silkscreen','Press Start 2P',monospace}
+#title .tvig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,.05) 30%,rgba(0,0,0,.72) 100%)!important}
+#title::after{content:'';position:fixed;inset:0;border:10px solid #145a24;box-shadow:inset 0 0 0 4px #0b3a15,inset 0 0 0 8px #3cb04c;pointer-events:none;z-index:3}
+#title .kicker{color:#b4f7a8;font-family:'Silkscreen',monospace;text-shadow:2px 2px 0 #0b3a15}
+#title .kicker::before,#title .kicker::after{background:#b4f7a8;box-shadow:none}
+#title .logo,#title .logo em{font-family:'Press Start 2P',monospace!important;background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;-webkit-text-stroke:0!important;filter:none!important;animation:none!important;transform:none!important;letter-spacing:0!important;font-style:normal}
+#title .logo{font-size:clamp(44px,min(10cqw,17cqh),190px)!important;line-height:1.12;text-shadow:.07em .07em 0 #0b3a15,-.04em -.04em 0 #0b3a15,.04em -.04em 0 #0b3a15,-.04em .04em 0 #0b3a15}
+#title #tplay{background:#b4f7a8!important;color:#0d3d18!important;border:4px solid #e9ffe0!important;border-radius:8px!important;clip-path:none!important;box-shadow:0 0 0 4px #0b3a15,0 0 0 8px #3cb04c!important;letter-spacing:.2em;font-family:'Silkscreen',monospace;font-weight:700;animation:tpulse 1.6s ease-in-out infinite}
+#title #tplay::before,#title #tplay::after{display:none!important}
+#title #tplay:hover{filter:brightness(1.08)}
+@keyframes tpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+#title .thint{color:#d8ffd0;text-shadow:2px 2px 0 #0b3a15;font-family:'Silkscreen',monospace}
+#title #tscr2{background:rgba(8,14,10,.9);border:3px solid #1e6b2c;border-radius:8px;box-shadow:0 0 0 4px #0b3a15;padding:22px 22px 18px;max-width:820px;box-sizing:border-box}
+#title .tseh{font-family:'Press Start 2P',monospace;color:#fff;text-shadow:3px 3px 0 #0b3a15;font-size:clamp(18px,3.4vmin,28px)}
+#title .tdh{color:#b4f7a8}
+@media (prefers-reduced-motion:reduce){#title #tplay{animation:none}}
+#tutask{position:absolute;inset:0;z-index:70;display:grid;place-items:center;background:rgba(0,0,0,.62);padding:16px}
+#tutask[hidden]{display:none!important}
+#tutask .tabox{width:min(460px,100%);box-sizing:border-box;background:#0a120c;border:3px solid #3cb04c;border-radius:8px;box-shadow:0 0 0 4px #0b3a15,0 20px 60px rgba(0,0,0,.6);padding:24px 22px 20px;text-align:center;display:flex;flex-direction:column;gap:14px;font-family:'Silkscreen',monospace;animation:tain .2s ease-out both}
+@keyframes tain{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+#tutask h2{margin:0;font-family:'Press Start 2P',monospace;font-weight:400;font-size:clamp(16px,2.4cqw,22px);color:#fff;text-shadow:3px 3px 0 #0b3a15;line-height:1.4}
+#tutask p{margin:0;color:#d8ffd0;font-size:13px;line-height:1.6}
+#tutask .trow .btn{min-width:140px}
+#home.ov{padding-top:12px!important}
+#home .box{padding-top:0!important}
+#home .logo,#home .logo em{font-size:clamp(40px,min(8.4cqw,15cqh),150px)!important}
+#home .logo{margin-top:0!important;white-space:nowrap}
 </style>
 </body></html>
