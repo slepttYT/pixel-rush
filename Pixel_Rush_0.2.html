@@ -2554,6 +2554,49 @@ p.cp={};p.spdM=1;p.cdM=1;p.dmgB=0;p.reachM=1;p.dashM=1;p.every=0;p.coinM=1;p.xpM
 p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
 
 /* --- character art: drawn facing +x. phase 0 = body and gear, phase 1 = face (drawn after the sword) --- */
+/* ---------- character pixel sprites: every fighter is a side-view pixel sprite (like the mobs) that faces where you aim, with idle and walk frames.
+   The weapon still swings around them. Skins (gold, diamond, galaxy) repaint the outfit ---------- */
+const CHS_SKIN=[null,{b:'#ffd36b',t:'#7a5206'},{b:'#9fe8ff',t:'#1f6a9a'},{b:'#9a7bff',t:'#2a1a5a'}];
+function charSprite(ch,pose,sk){
+  const k=(ch.id||'x')+'|'+pose+'|'+(sk||0),C=CHS_CACHE;if(C[k])return C[k];
+  const S=CHS_SKIN[sk||0],body=S?S.b:ch.body,trim=S?S.t:ch.trim,acc=ch.acc,acc2=ch.acc2||mixHex(ch.acc,'#000000',.35),eye=ch.eye||'#12141c',sty=ch.sty||'plain';
+  const skin=sty==='golem'?body:sty==='phantom'?'#e8eeff':'#f2c9a0',dk=mixHex(body,'#000000',.3);
+  return C[k]=mobCanvas(18,22,8,d=>{
+    const w1=pose==='w1',w2=pose==='w2';
+    if(sty==='cape'||sty==='ascend'||sty==='sun'){d.r(2,9,3,9,acc);d.l(2,18,4,18,mixHex(acc,'#000000',.3))}
+    if(sty==='phantom'){d.el(8,16,4,3,body);d.l(5,18,3,21,body);d.l(8,19,8,21,body);d.l(11,18,13,20,body)}
+    else{
+      const a=w1?1:w2?-1:0;
+      d.r(5+a,15,2,5,trim);d.r(9-a,15,2,5,trim);d.r(4+a,20,3,1,'#1a1410');d.r(9-a,20,3,1,'#1a1410');
+    }
+    if(sty==='golem'){d.r(3,8,11,8,body);d.r(3,14,11,2,dk);d.el(3,10,2,3,body);d.el(14,10,2,3,body);d.p(6,11,dk);d.p(10,13,dk)}
+    else{d.r(4,9,8,7,body);d.r(4,14,8,1,dk);d.r(4,13,8,1,acc);d.r(3,10,2,4,dk)}
+    /* head */
+    if(sty==='golem'){d.r(5,2,8,7,body);d.r(5,8,8,1,dk);d.r(9,4,3,1,eye);d.p(12,4,eye)}
+    else{d.el(9,5,4,4,skin);d.r(6,8,7,1,mixHex(skin,'#000000',.2));d.p(11,4,eye);d.p(12,4,eye);if(sty!=='phantom')d.p(12,6,'#a0603a')}
+    /* headgear by style */
+    if(sty==='plain'){d.r(5,1,8,3,trim);d.r(5,4,2,2,trim)}
+    else if(sty==='headband'){d.r(5,1,8,2,trim);d.r(5,3,9,1,acc);d.l(4,3,2,6,acc)}
+    else if(sty==='mohawk'){d.r(7,0,3,3,acc);d.p(8,-1,acc2);d.r(5,3,2,2,trim)}
+    else if(sty==='ronin'){d.el(9,2,7,1,'#d8b878');d.r(7,0,4,2,'#c8a060');d.r(5,3,2,3,trim)}
+    else if(sty==='cowboy'){d.r(2,2,14,1,acc);d.r(5,0,8,3,acc);d.r(5,2,8,1,acc2)}
+    else if(sty==='helm'){d.el(9,5,5,5,'#aab4c6');d.r(9,4,5,1,'#10131c');d.p(12,4,acc);d.p(8,0,acc);d.p(7,0,acc);d.r(5,9,9,1,'#6b7388')}
+    else if(sty==='cap'){d.r(3,1,11,1,'#1d2548');d.r(6,2,6,2,'#1d2548');d.l(13,1,14,4,acc);d.p(14,5,acc)}
+    else if(sty==='cape'){d.r(5,1,8,3,trim);d.r(4,8,10,1,acc)}
+    else if(sty==='gambler'){d.r(4,2,10,1,'#2a0a14');d.r(6,-1,7,3,'#2a0a14');d.r(6,1,7,1,acc)}
+    else if(sty==='phantom'){d.r(5,2,8,2,'#c8d4ff')}
+    else if(sty==='sun'){for(let i=0;i<7;i++){const an=Math.PI+i*Math.PI/6;d.p(9+Math.round(Math.cos(an)*6),4+Math.round(Math.sin(an)*5),'#ffd36b')}d.r(6,1,7,2,acc)}
+    else if(sty==='ascend'){d.r(6,-1,7,1,'#fff3b0');d.p(5,0,'#fff3b0');d.p(13,0,'#fff3b0');d.r(5,1,8,2,trim)}
+    else{d.r(5,1,8,3,trim)}
+  });
+}
+const CHS_CACHE={};
+/* draw a fighter with its feet near (x, y+r): facing right unless flip */
+function drawCharSpr(c,ch,x,y,U,pose,flip,sk,alpha){
+  const s=charSprite(ch,pose,sk);c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);if(alpha!==undefined)c.globalAlpha*=alpha;else if(ch.alpha)c.globalAlpha*=ch.alpha;
+  c.drawImage(s.c,-s.ax*U,-s.c.height*U*.62,s.c.width*U,s.c.height*U);c.restore();
+}
+const charPose=(moving,t)=>moving?(((t*9)|0)%2?'w1':'w2'):'w0';
 function drawChar(c,ch,r,t,ph){
   const T=ch.trim,B=ch.body,A=ch.acc,A2=ch.acc2||ch.acc,S=ch.sty,lw=Math.max(1.2,r*.14),ga=c.globalAlpha;
   c.save();c.lineJoin='round';c.lineCap='round';
@@ -2671,8 +2714,7 @@ function drawPortrait(cv,ch,locked,t){
   const c=cv.getContext('2d'),w=cv.width,h=cv.height,r=Math.min(w,h)*(ch.sty==='golem'?.2:.24)*(ch.r?ch.r/11:1)*(ch.r?.9:1);
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h);c.globalAlpha=1;
   const g=c.createRadialGradient(w/2,h/2,2,w/2,h/2,w*.5);g.addColorStop(0,ch.acc+'55');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,w,h);
-  c.save();c.translate(w/2,h/2);c.rotate(-.5+Math.sin(t*1.3)*.25);
-  drawChar(c,ch,r,t,0);drawChar(c,ch,r,t,1);c.restore();
+  drawCharSpr(c,ch,w/2,h*.56,Math.max(2,Math.floor(Math.min(w,h)/26)),'w0',false,ch._pv!==undefined?ch._pv:cSkin(ch.id));
   if(locked){c.globalCompositeOperation='source-atop';c.fillStyle='rgba(8,10,16,.82)';c.fillRect(0,0,w,h);c.globalCompositeOperation='source-over'}
 }
 
@@ -2897,10 +2939,7 @@ function drawCharPrev(now){
   const cv=$('chprev'),ch=skinView===null?charById(chSel):Object.assign({},charById(chSel),{_pv:skinView}),lk=!charUnlocked(ch),t=now/1000,c=cv.getContext('2d'),w=cv.width,h=cv.height;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h);c.globalAlpha=1;
   const g=c.createRadialGradient(w/2,h*.55,6,w/2,h*.55,w*.6);g.addColorStop(0,ch.acc+'44');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,w,h);
-  c.save();c.translate(w/2,h*.52);c.rotate(Math.sin(t*1.1)*.6-.3);
-  const r=(ch.r||11)*3.3*(w/220);drawChar(c,ch,r,t,0);
-  c.save();c.translate(r*.45,0);c.rotate(Math.sin(t*2.2)*.5);c.fillStyle='#dfe6f2';c.strokeStyle='#12141c';c.lineWidth=2;c.beginPath();c.moveTo(0,-5);c.lineTo(r*2.1,-2);c.lineTo(r*2.4,0);c.lineTo(r*2.1,2);c.lineTo(0,5);c.closePath();c.fill();c.stroke();c.fillStyle=ch.acc;c.fillRect(-4,-9,8,18);c.restore();
-  drawChar(c,ch,r,t,1);c.restore();
+  drawCharSpr(c,ch,w/2,h*.56,Math.max(3,Math.floor(h/28)),charPose(true,t*.6),Math.sin(t*.5)<0,skinView===null?cSkin(ch.id):skinView); /* big pixel preview, walking and turning */
   if(lk){c.globalCompositeOperation='source-atop';c.fillStyle='rgba(8,10,16,.85)';c.fillRect(0,0,w,h);c.globalCompositeOperation='source-over';c.fillStyle='#ff4d5e';c.font='700 13px sans-serif';c.textAlign='center';c.fillText('LOCKED',w/2,h-12)}
 }
 function homeExtras(){
@@ -3040,6 +3079,7 @@ const UPDATES=[
   'Each Sand boss has an idle and an attack pose, and burns hotter in its final phase. The vault Pharaoh is the same king, bigger.',
   'Shop, Characters, Achievements, Jukebox, Help, Settings and every other menu screen now use the main menu look: pixel fonts and green panels over a faded black view of the menu scene.',
   'New TUTORIAL: a guided practice run (move, attack, dash, dodge, shop). It starts the first time you press New Run, and you can replay it from the menu.',
+  'Every fighter is now a side-view pixel sprite that faces where you aim and walks, with its own look: hats, helmets, capes, a rock body for Stonebreaker, a ghost for Phantom. Skins repaint them gold, diamond or galaxy.',
   'New version names: this is Pixel Rush 0.2 (Pixel_Rush_0.2.html).']],
  ['v4.8','Boss music, footsteps, win and loss','#ffd36b',[
   'New final boss track, Last Stand: a fast, relentless tune that plays while the Dragon, the Golem or the Pharaoh is awake. It is in the jukebox too.',
@@ -7826,7 +7866,7 @@ function draw(){
         ctx.lineWidth=ov?2.5:1.5;ctx.strokeStyle=ov?'#ffffff':'#ffd36b';ctx.globalAlpha=ov?.95:.45;ctx.stroke();ctx.restore()}
       ctx.save();ctx.globalAlpha=(p.blink>0&&hitstop<=0&&((performance.now()/55)|0)%2===0)?.35:1;
       ctx.translate(p.x,p.y);ctx.rotate(p.face);
-      {const pc=p.ch||CH();drawChar(ctx,pc,p.r,time,0);{const sp=swordPose();drawSword(sp.a,sp.off)}drawChar(ctx,pc,p.r,time,1)}
+      {const pc=p.ch||CH();ctx.rotate(-p.face);drawCharSpr(ctx,pc,0,0,MOB_U,charPose(Math.hypot(p.vx,p.vy)>40,time),Math.cos(p.face)<0,cSkin(pc.id));ctx.rotate(p.face);const sp=swordPose();drawSword(sp.a,sp.off)}
       ctx.restore();
     }
   }
@@ -7949,7 +7989,7 @@ function drawMenu(){
     /* borrow the real weapon drawing for a moment: swap the preview skin in, draw, swap back (nothing is saved) */
     const eqS=equip,swS=[p.sw,p.swMax,p.swHeavy,p.rec,p.swings,p.face,p.x,p.y];
     equip=mh.skin;p.sw=Math.max(0,mh.sw);p.swMax=mh.wt==='b'?.3:mh.wt==='g'?.09:.18;p.swHeavy=false;p.rec=0;p.swings=mh.swings;p.face=mh.face;p.x=mh.x;p.y=mh.y;
-    try{const sp=swordPose();ctx.save();ctx.translate(mh.x,mh.y);ctx.rotate(mh.face);const mc=CH();drawChar(ctx,mc,11,mt,0);drawSword(sp.a,sp.off);drawChar(ctx,mc,11,mt,1);ctx.restore();
+    try{const sp=swordPose();ctx.save();ctx.translate(mh.x,mh.y);const mc=CH();drawCharSpr(ctx,mc,0,0,MOB_U,charPose(true,mt),Math.cos(mh.face)<0,cSkin(mc.id));ctx.rotate(mh.face);drawSword(sp.a,sp.off);ctx.restore();
       if(myth&&R()<.5){const L=(sk.len||36)*(.35+R()*.65),rr=p.r*.45+sp.off+L;emitVfx(sk,mh.x+Math.cos(sp.a+mh.face)*rr,mh.y+Math.sin(sp.a+mh.face)*rr,mdt,mparts)}}
     finally{equip=eqS;[p.sw,p.swMax,p.swHeavy,p.rec,p.swings,p.face,p.x,p.y]=swS}
     if(mh.lab>0){const {cx:qx,cy:qy,R:qr}=menuCenter();ctx.globalAlpha=Math.min(1,mh.lab);ctx.font='700 13px Chakra Petch,sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a0a10';const tx=MW_NAME[mh.wt]+' · '+(sk.n||'Basic');ctx.strokeText(tx,qx,qy+qr+34);ctx.fillStyle=sc;ctx.fillText(tx,qx,qy+qr+34);ctx.globalAlpha=1}
