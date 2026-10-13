@@ -1,8 +1,12 @@
-# Publishes a GitHub Release with the game and server EXEs whenever a version tag (v0.5.1, v0.6, ...) is pushed.
+# Publishes a GitHub Release with the game and server EXEs.
+# Runs when main changes an EXE or details/VERSION (the release is named after the version in that file),
+# or by hand from the Actions tab. If the release already exists, its EXEs are replaced.
 name: Release
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths: ['Pixel-Rush-Game.exe', 'Pixel-Rush-Server.exe', 'details/VERSION', '.github/workflows/release.yml']
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -14,9 +18,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          VER="$(tr -d ' \r\n' < details/VERSION)"
+          TAG="v${VER}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" Pixel-Rush-Game.exe Pixel-Rush-Server.exe --clobber
           else
-            gh release create "$TAG" Pixel-Rush-Game.exe Pixel-Rush-Server.exe --title "Pixel Rush ${TAG#v}" --notes-file details/RELEASE_NOTES.md --latest
+            gh release create "$TAG" Pixel-Rush-Game.exe Pixel-Rush-Server.exe --target "$GITHUB_SHA" --title "Pixel Rush ${VER}" --notes-file details/RELEASE_NOTES.md --latest
           fi
