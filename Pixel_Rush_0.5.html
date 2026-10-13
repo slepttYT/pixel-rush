@@ -1068,6 +1068,8 @@ function stepSfx(){
   const alt=(p.stepN=(p.stepN||0)+1)%2;
   if(world===2){fnoise(.05,.05,'bandpass',alt?2600:2200);sfx(alt?190:170,.04,'triangle',.018,.6)}
   else if(world===3){fnoise(.09,.04,'highpass',alt?3200:2800)}
+  else if(world===4){fnoise(.03,.04,'bandpass',alt?4200:3800);sfx(alt?330:300,.03,'square',.012,.8)} /* metal floor plates */
+  else if(world===5){fnoise(.1,.045,'lowpass',alt?520:440);sfx(alt?70:62,.07,'sine',.02,.6)} /* squelchy mud */
   else{fnoise(.07,.05,'lowpass',alt?900:750);sfx(alt?95:85,.05,'sine',.02,.7)}
 }
 /* each mob has its own voice: base pitch and waveform */
@@ -5742,13 +5744,13 @@ function weaponRowHtml(){
 }
 function renderWorld(){
   const open=w2Open(),open3=w3Open();
-  const cards=[[1,'World 1','Dragon\u2019s Curse','Green grasslands that wither under a dragon\u2019s curse. Fight your way up to wave 100 and take down the Keeper and the Dragon he guards.','#7ad04a',ZONES1],[2,'World 2','Golem\u2019s Hideout','Cold stone-brick halls where a golem sleeps. New creatures and tougher fights, but 1.5x coins.','#b6c0d4',ZONES2],[3,'World 3','Pharaoh\u2019s Sands','A scorched desert ruled by an undying pharaoh. The hardest creatures and bosses yet, but 2x coins.','#ffcc4a',ZONES3]];
-  $('worldgrid').innerHTML=cards.map(c=>{const lk=(c[0]===2&&!open)||(c[0]===3&&!open3);return '<button type="button" class="wcard'+(lk?' lock':'')+(selWorld===c[0]&&!lk?' on':'')+'" data-w="'+c[0]+'" style="--tc:'+c[4]+'"><small>'+c[1]+(lk?' \u00b7 LOCKED':'')+'</small><h3>'+c[2]+'</h3><p>'+c[3]+'</p>'+(lk?'<p class="wl">Beat wave 100 in World '+(c[0]-1)+' to unlock this world.</p>':'')+'</button>'}).join('');
+  const cards=[[1,'World 1','Dragon\u2019s Curse','Green grasslands that wither under a dragon\u2019s curse. Fight your way up to wave 100 and take down the Keeper and the Dragon he guards.','#7ad04a',ZONES1],[2,'World 2','Golem\u2019s Hideout','Cold stone-brick halls where a golem sleeps. New creatures and tougher fights, but 1.5x coins.','#b6c0d4',ZONES2],[3,'World 3','Pharaoh\u2019s Sands','A scorched desert ruled by an undying pharaoh. The hardest creatures and bosses yet, but 2x coins.','#ffcc4a',ZONES3],[4,'World 4','Circuit Citadel','A humming fortress of robots and machines. Fire-hot circuits and the OMEGA core wait at wave 100. 2.5x coins.','#4dc3ff',ZONES4],[5,'World 5','Witch\u2019s Bog','A spooky swamp of poison, ghosts and graves. The Mire Leviathan sleeps under the bog. 3x coins.','#9ad84a',ZONES5]];
+  $('worldgrid').innerHTML=cards.map(c=>{const lk=!worldOpen(c[0]);return '<button type="button" class="wcard'+(lk?' lock':'')+(selWorld===c[0]&&!lk?' on':'')+'" data-w="'+c[0]+'" style="--tc:'+c[4]+'"><small>'+c[1]+(lk?' \u00b7 LOCKED':'')+'</small><h3>'+c[2]+'</h3><p>'+c[3]+'</p>'+(lk?'<p class="wl">Beat wave 100 in World '+(c[0]-1)+' to unlock this world.</p>':'')+'</button>'}).join('');
 }
 $('worldgrid').addEventListener('click',e=>{
   const b=e.target.closest('[data-w]');if(!b)return;const w=+b.dataset.w;
   if(w===2&&!w2Open()){sfx(110,.1,'square',.05,.7);$('worldnote').textContent='World 2 is locked. Beat wave 100 in World 1 to open it.';return}
-  if(w===3&&!w3Open()){sfx(110,.1,'square',.05,.7);$('worldnote').textContent='World 3 is locked. Beat wave 100 in World 2 to open it.';return}
+  if(w>=3&&!worldOpen(w)){sfx(110,.1,'square',.05,.7);$('worldnote').textContent='World '+w+' is locked. Beat wave 100 in World '+(w-1)+' to open it.';return}
   selWorld=w;worldGo=true;closeSub();worldGo=false;beginRun();
 });
 let runFlow=false; /* true while NEW RUN is walking through difficulty, character, weapon and world */
