@@ -2904,8 +2904,8 @@ const UPD_VER='4.0';
 const UPDATES=[
  ['v4.0','Pixel Rush 2.0, part 1: new mobs','#7fbf3f',[
   'Every regular enemy and mini boss is new, drawn as pixel art on the same grid as the arena: Goblins, Thieves, Wizards, Jesters and Archers, plus Lancer and Golem mini bosses.',
-  'World 2 has its own Stone versions with their own looks (horned cleaver goblins, hooded rock mages, crossbowmen, a skeleton knight on a stone steed, a golem with glowing cracks and huge fists), plus the Stone Worm and the Diamond Golem mini bosses.',
-  'World 3 has Sand versions (turbaned scimitar goblins, sun-staff mages, a camel-riding lancer), plus Sand Lizards, Sand Crabs, the Sand Giant, a burrowing great lizard and the Sand Phoenix.',
+  'World 2 has its own Stone versions with their own looks (rock-skinned goblins with curved stone swords, hooded rock mages, a skeleton knight on a grey steed, a club golem with glowing cracks), plus the Stone Worm and the Diamond Golem mini bosses.',
+  'World 3 has Sand versions (turbaned scimitar goblins, hooded sand mages, a lancer in a headwrap), plus Sand Lizards, Sand Crabs, the Sand Giant, a burrowing great lizard and the Sand Phoenix.',
   'Every attack has a wind-up you can read: a raised weapon, a dotted charge line or a red circle on the ground.',
   'Only one mini boss can be out at a time (two from wave 20).',
   'The old character roster is retired. Everyone plays as the Rookie for now; a new roster with real reasons to unlock each fighter is coming next.',
@@ -3458,8 +3458,8 @@ const MOB_PAL={
 };
 /* each world repaints the same roles: Stone World in grey rock and slate, Sand World in sandstone and ochre */
 const MOB_WPAL={
-  2:{goblin:{s:'#9a9078',S:'#655d4a',c:'#5a6070',C:'#3a3f4a',h:'#4a4f5a',e:'#6fe8ff'},thief:{c:'#5a6070',C:'#3a3f4a',h:'#4a4f5a',s:'#b8a890',S:'#867860',a:'#6fe8ff'},wizard:{c:'#4a5a78',C:'#2c3850',h:'#8fa8c8',a:'#c9a070'},jester:{c:'#7a7a8a',C:'#4a4f5a',h:'#7a7a8a',m:'#c9a070'},archer:{s:'#b8a890',S:'#867860',c:'#6a6458',C:'#45403a',h:'#5a5448'},lancer:{c:'#8d97a8',C:'#5a6070',h:'#7a6a5a',H:'#4a4038',a:'#6fe8ff'},golem:{c:'#5a8a6a',C:'#3a5a48'}},
-  3:{goblin:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#e8c070',e:'#12141c'},thief:{c:'#b8783a',C:'#7a4a1a',h:'#9a6028',s:'#d8a060',S:'#a06a30',a:'#ffcc4a'},wizard:{c:'#a8642a',C:'#6a3a12',h:'#e8c070',a:'#ffcc4a'},jester:{c:'#d89a40',C:'#9a5a20',h:'#d89a40',m:'#fff0c0'},archer:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#9a6028'},lancer:{c:'#d8a060',C:'#9a6028',h:'#b8783a',H:'#7a4a1a',a:'#ffcc4a'},golem:{s:'#d8a868',S:'#9a6a30',c:'#e8c880',C:'#b8884a',e:'#6fe8ff'},worm:{s:'#c8945a',S:'#8a5a2a',c:'#e8c070',C:'#a8743a'}}
+  2:{goblin:{s:'#a8906a',S:'#6e5a40',c:'#5a5048',C:'#3a342e',h:'#4a4038',m:'#b8b0a0',M:'#7a7468',e:'#ffb347'},thief:{c:'#5a6070',C:'#3a3f4a',h:'#4a4f5a',s:'#b8a890',S:'#867860',a:'#6fe8ff'},wizard:{c:'#4a5a78',C:'#2c3850',h:'#8fa8c8',a:'#c9a070'},jester:{c:'#7a7a8a',C:'#4a4f5a',h:'#7a7a8a',m:'#c9a070'},archer:{s:'#b8a890',S:'#867860',c:'#6a6458',C:'#45403a',h:'#5a5448'},lancer:{c:'#8d97a8',C:'#5a6070',h:'#7a6a5a',H:'#4a4038',a:'#6fe8ff'},golem:{c:'#5a8a6a',C:'#3a5a48'}},
+  3:{goblin:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#e8c070',e:'#12141c'},thief:{c:'#b8783a',C:'#7a4a1a',h:'#9a6028',s:'#d8a060',S:'#a06a30',a:'#ffcc4a'},wizard:{c:'#a8642a',C:'#6a3a12',h:'#e8c070',a:'#ffcc4a'},jester:{c:'#d89a40',C:'#9a5a20',h:'#d89a40',m:'#fff0c0'},archer:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#9a6028'},lancer:{c:'#d8a060',C:'#9a6028',h:'#c8945a',H:'#8a5a2a',a:'#ffcc4a',s:'#d8a060'},golem:{s:'#d8a868',S:'#9a6a30',c:'#e8c880',C:'#b8884a',e:'#6fe8ff'},worm:{s:'#c8945a',S:'#8a5a2a',c:'#e8c070',C:'#a8743a'}}
 };
 const mobPal=(w,t)=>Object.assign({},MOB_PAL[t],(MOB_WPAL[w]||{})[t]);
 function mobCanvas(cw,ch,ax,fn){
@@ -3479,7 +3479,7 @@ function mobCanvas(cw,ch,ax,fn){
 /* shared humanoid: legs, torso and head; the role draws its own hat, face and weapon on top */
 function mobLegs(d,P,x,y,st,lean){const k=st?1:0;d.r(x+lean,y,2,3-k,P.C);d.r(x+4+lean,y+k*0,2,3,P.C);d.r(x-1+lean+k,y+3-k,3,1,'#2a1c14');d.r(x+4+lean,y+3,3,1,'#2a1c14')}
 const MOB_ART={
-  /* World 1 leather-capped goblin with a short sword · Stone goblin in a horned rock helm with a stone cleaver · Sand goblin in a turban with a scimitar */
+  /* World 1 leather-capped goblin with a short sword · bare rock-skinned Stone goblin with a curved stone sword · Sand goblin in a turban with a scimitar */
   goblin:(P,f,w)=>mobCanvas(22,21,9,d=>{
     const st=f==='w1',Y=1;
     mobLegs(d,P,6,15+Y,st,0);
@@ -3487,17 +3487,17 @@ const MOB_ART={
     d.el(9,6+Y,4,4,P.s);d.r(6,9+Y,7,1,P.S);d.l(5,5+Y,3,3+Y,P.s);d.p(4,4+Y,P.S);d.l(13,5+Y,15,3+Y,P.s);d.p(15,3+Y,P.S);
     d.p(11,5+Y,P.e);d.p(12,5+Y,'#12141c');d.r(10,8+Y,3,1,'#2a1a10');d.p(11,8+Y,'#ffffff');
     if(w===1){d.r(6,2+Y,7,2,P.h);d.r(5,3+Y,1,1,P.h);d.p(9,11+Y,P.C)}
-    if(w===2){d.r(5,1+Y,9,3,P.h);d.r(5,4+Y,9,1,P.C);d.p(5,0+Y,P.h);d.p(4,-1+Y,P.h);d.p(13,0+Y,P.h);d.p(14,-1+Y,P.h);d.p(8,2+Y,P.S);d.p(11,1+Y,P.S);d.el(6,11+Y,2,2,P.h);d.el(13,11+Y,2,2,P.h);d.p(6,10+Y,P.S)}
+    if(w===2){d.p(8,3+Y,P.S);d.p(10,4+Y,P.S);d.p(7,6+Y,P.S);d.r(7,2+Y,4,1,P.S);d.el(13,11+Y,2,1,P.h);d.p(7,12+Y,P.h)}
     if(w===3){d.el(9,3+Y,5,2,P.h);d.r(5,4+Y,9,1,P.C);d.l(4,4+Y,2,8+Y,P.h);d.p(9,2+Y,P.a||'#c0392b');d.l(8,10+Y,10,14+Y,P.h);d.p(11,11+Y,P.h)}
     const W=f==='wind'?0:f==='act'?2:1;
     if(w===1){
       if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,1,2+Y,P.m);d.l(5,8+Y,2,2+Y,P.M);d.r(3,9+Y,3,1,P.M)}
       else if(W===2){d.r(12,11+Y,4,2,P.s);d.r(15,10+Y,1,4,P.M);d.l(16,12+Y,21,12+Y,P.m);d.l(16,11+Y,20,11+Y,P.m)}
       else{d.r(12,11+Y,2,3,P.s);d.r(13,13+Y,3,1,P.M);d.l(14,12+Y,18,7+Y,P.m);d.l(15,12+Y,19,7+Y,P.M)}}
-    if(w===2){ /* stone cleaver: a long handle with a heavy square head */
-      if(W===0){d.r(3,8+Y,2,3,P.s);d.l(4,9+Y,1,4+Y,P.M);d.r(0,1+Y,4,4,P.m);d.p(0,1+Y,P.M)}
-      else if(W===2){d.r(12,11+Y,4,2,P.s);d.l(15,12+Y,19,12+Y,P.M);d.r(18,10+Y,4,6,P.m);d.r(21,10+Y,1,6,'#ffffff')}
-      else{d.r(12,11+Y,2,3,P.s);d.l(14,13+Y,17,7+Y,P.M);d.r(16,3+Y,4,5,P.m);d.r(19,3+Y,1,5,'#ffffff')}}
+    if(w===2){ /* heavy curved stone sword */
+      if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,2,4+Y,P.m);d.l(5,8+Y,3,4+Y,P.m);d.l(2,4+Y,3,0+Y,P.m);d.l(3,4+Y,4,1+Y,P.M)}
+      else if(W===2){d.r(12,11+Y,4,2,P.s);d.l(16,12+Y,19,12+Y,P.m);d.l(16,13+Y,19,13+Y,P.M);d.l(19,12+Y,21,9+Y,P.m);d.l(20,13+Y,21,11+Y,P.M);d.l(18,8+Y,21,4+Y,'#e8e2d0');d.l(21,4+Y,21,16+Y,'#e8e2d0')}
+      else{d.r(12,11+Y,2,3,P.s);d.l(14,12+Y,16,8+Y,P.m);d.l(15,13+Y,17,9+Y,P.M);d.l(16,8+Y,16,5+Y,P.m);d.l(17,8+Y,17,5+Y,P.M);d.p(15,4+Y,P.m)}}
     if(w===3){ /* curved scimitar */
       if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,3,4+Y,P.m);d.l(3,4+Y,3,1+Y,P.m);d.p(4,0+Y,P.m)}
       else if(W===2){d.r(12,11+Y,4,2,P.s);d.p(15,11+Y,P.a||'#ffcc4a');d.l(16,12+Y,19,12+Y,P.m);d.l(19,11+Y,20,10+Y,P.m);d.p(21,9+Y,P.m)}
@@ -3517,7 +3517,7 @@ const MOB_ART={
     if(f==='act'){d.r(13,10,4,2,P.s);d.l(17,10,21,9,P.m);if(w===2)d.l(16,12,20,13,P.m);if(w===3){d.el(20,10,1,1,'#ffcc4a')}}
     else{d.r(12+ln,11,2,2,P.s);d.l(14+ln,12,16+ln,10,P.m);if(w===2)d.l(5+ln,12,3+ln,14,P.m)}
   }),
-  /* World 1 pointy-hat wizard · Stone wizard in a deep hood with a floating rock · Sand wizard in a tall turban with a sun-disc staff */
+  /* World 1 pointy-hat wizard · Stone wizard in a deep hood with a floating rock · Sand wizard in a hooded robe with a sand orb */
   wizard:(P,f,w)=>mobCanvas(22,22,9,d=>{
     const cast=f==='wind'||f==='act',sw=f==='w1'?1:0;
     d.r(5,13,9,7,P.c);d.r(4,17,11,3,P.c);d.r(4,19,11,1,P.C);d.r(9,13,1,7,P.C);d.r(6,20,2,1,'#2a1c14');d.r(11-sw,20,2,1,'#2a1c14');
@@ -3525,11 +3525,11 @@ const MOB_ART={
     if(w===1){d.r(8,10,3,6,P.h);d.el(9,8,3,3,P.s);d.p(11,8,P.e);d.r(7,10,5,2,'#e8e8f0');d.p(9,12,'#e8e8f0');
       d.r(5,6,9,2,P.C);d.r(6,4,6,2,P.c);d.r(7,2,4,2,P.c);d.r(8,0,2,2,P.c);d.p(10,1,P.c);d.r(5,6,9,1,P.h)}
     if(w===2){d.el(9,7,4,4,P.c);d.r(5,9,9,2,P.c);d.el(10,8,2,2,'#12141c');d.p(10,8,P.a);d.p(11,8,P.a);d.r(5,5,2,6,P.C);d.el(5,11,2,1,P.S);d.el(13,11,2,1,P.S);d.p(4,10,P.S)}
-    if(w===3){d.el(9,8,3,3,P.s);d.p(11,8,P.e);d.r(8,10,4,1,P.S);d.r(6,1,7,5,P.h);d.r(6,5,7,1,P.C);d.r(7,0,5,1,P.h);d.p(9,2,'#c0392b');d.p(9,3,'#ff5a4a');d.r(6,12,7,1,P.a);d.r(12,12,1,4,P.a)}
+    if(w===3){d.el(9,7,4,4,P.c);d.r(5,9,9,2,P.c);d.el(10,8,2,2,P.S);d.p(10,8,P.s);d.p(11,8,'#12141c');d.r(5,5,2,6,P.C);d.p(9,2,P.C);d.r(6,12,7,1,P.a)}
     const sx=cast?16:14,sy=cast?2:5;d.l(sx,sy+2,sx-1,20,P.m);d.l(sx+1,sy+2,sx,20,P.M);
     if(w===1){d.el(sx+.5,sy+1,1.5,1.5,P.a);d.p(sx,sy,'#ffffff')}
     if(w===2){d.el(sx+.5,sy-1+(f==='w1'?1:0),2,2,'#8a8478');d.p(sx,sy-2,'#c9c2b0');d.p(sx+1,sy,'#5f5a50')}
-    if(w===3){d.el(sx+.5,sy,2,2,'#ffcc4a');d.p(sx-2,sy,'#ffcc4a');d.p(sx+3,sy,'#ffcc4a');d.p(sx+.5,sy-3,'#ffcc4a');d.p(sx,sy,'#fff3b0')}
+    if(w===3){d.el(sx+.5,sy,2,2,'#e8b860');d.p(sx,sy-1,'#fff0c0');d.p(sx+2,sy+1,'#a8743a')}
     d.r(12,cast?10:12,sx-12,2,P.s);
     if(f==='act'){d.el(19,3,2,2,w===2?'#c9a070':'#ffd36b');d.p(19,3,'#ffffff')}
   }),
@@ -3545,18 +3545,14 @@ const MOB_ART={
     if(thr){d.r(12,10,4,2,P.s);d.r(16,8,3,4,w===2?'#b8b0a0':'#ffffff');d.p(17,10,'#d8304a')}
     else{d.r(12,11,2,3,P.s);d.r(13,13,3,4,w===2?'#b8b0a0':'#ffffff');d.p(14,15,'#d8304a')}
   }),
-  /* World 1 hooded longbow archer · Stone archer in a pot helm with a crossbow · Sand archer in a headwrap with a short recurve */
+  /* World 1 hooded longbow archer · Stone archer in a rock-grey hood · Sand archer in a headwrap with a short recurve */
   archer:(P,f,w)=>mobCanvas(22,20,9,d=>{
     const st=f==='w1',draw=f==='wind',rel=f==='act';
     mobLegs(d,P,6,15,st,0);
     d.r(6,9,7,6,P.c);d.r(6,13,7,1,P.M);d.r(4,8,3,6,P.M);d.l(4,7,6,5,'#e8e8e8');
-    if(w===1){d.el(9,6,4,4,P.h);d.r(9,5,4,4,P.s);d.r(9,8,4,1,P.S);d.p(11,6,P.e);d.r(6,2,3,4,P.c)}
-    if(w===2){d.el(9,6,3,3,P.s);d.p(11,6,P.e);d.r(5,2,9,3,P.h);d.r(4,4,11,1,P.C);d.p(9,1,P.h);d.r(11,6,2,2,P.h)}
+    if(w!==3){d.el(9,6,4,4,P.h);d.r(9,5,4,4,P.s);d.r(9,8,4,1,P.S);d.p(11,6,P.e);d.r(6,2,3,4,P.c)}
     if(w===3){d.el(9,6,3,3,P.s);d.p(11,6,P.e);d.el(9,3,4,2,P.h);d.r(9,7,4,2,P.h);d.l(5,4,3,8,P.h)}
-    if(w===2){ /* crossbow held level */
-      d.r(12,10,3,2,P.s);d.l(12,11,19,11,P.m);d.l(18,8,18,14,P.M);d.l(17,8,17,8,P.M);d.p(17,14,P.M);
-      d.l(18,8,draw?14:16,11,P.a);d.l(18,14,draw?14:16,11,P.a);if(draw||rel){d.l(14,10,20,10,'#dfe6f2');d.p(21,10,'#ffffff')}}
-    else{
+    {
       const bx=draw?16:15,top=w===3?6:4,bot=w===3?14:16;d.l(bx,top,bx+2,top+3,P.m);d.l(bx+2,top+3,bx+2,bot-3,P.m);d.l(bx+2,bot-3,bx,bot,P.m);d.l(bx+1,top,bx+3,top+3,P.M);
       d.l(bx,top,draw?11:bx,draw?10:bot,P.a);if(draw)d.l(11,10,bx,bot,P.a);
       d.r(12,10,draw?2:4,2,P.s);if(draw){d.l(11,10,18,10,P.m);d.p(19,10,'#ffffff')}
@@ -3579,16 +3575,10 @@ const MOB_ART={
     d.el(2,cy,2,2,P.s);d.p(0,cy-2,P.c);d.p(1,cy-2,P.c);d.l(4,cy+1,6,9,P.S);
     d.el(22,cy,2,2,P.s);d.p(24,cy-2,P.c);d.p(23,cy-2,P.c);d.l(20,cy+1,18,9,P.S);
   }),
-  /* World 1 knight on a horse · Stone World skeleton knight on a stone steed · Sand World rider on a camel */
+  /* World 1 knight · Stone World skeleton knight on a grey steed · Sand World rider in a headwrap on a sand horse */
   lancer:(P,f,w)=>mobCanvas(34,27,14,d=>{
     const st=f==='w1',ch=f==='dash',aim=f==='wind'||ch,k=st?1:0,Y=1;
-    if(w===3){ /* camel: long legs, hump, long curved neck */
-      d.r(6,15+Y,2,8-k,P.H);d.r(10,15+Y,2,8,P.H);d.r(17,15+Y,2,8,P.H);d.r(21,15+Y,2,8-k,P.H);
-      d.r(5,22+Y-k,3,1,'#5a3a18');d.r(9,22+Y,3,1,'#5a3a18');d.r(16,22+Y,3,1,'#5a3a18');d.r(20,22+Y-k,3,1,'#5a3a18');
-      d.el(14,13+Y,9,3,P.h);d.el(9,9+Y,3,3,P.h);d.r(6,15+Y,17,1,P.H);d.l(4,12+Y,2,17+Y,P.H);
-      d.l(22,12+Y,25,9+Y,P.h);d.l(23,12+Y,26,9+Y,P.h);d.r(25,4+Y,2,6,P.h);d.r(25,3+Y,5,3,P.h);d.p(28,4+Y,'#12141c');d.r(29,5+Y,1,1,P.H);
-      d.r(12,9+Y,7,2,'#c0392b');d.r(12,11+Y,7,1,'#ffcc4a')}
-    else{ /* horse; the Stone steed is grey with a cracked flank */
+    { /* horse; the Stone steed is grey with a cracked flank */
       d.r(6,15+Y,2,7-k,P.H);d.r(10,15+Y,2,7,P.H);d.r(17,15+Y,2,7,P.H);d.r(21,15+Y,2,7-k,P.H);
       d.r(5,21+Y-k,3,1,'#2a1c14');d.r(9,21+Y,3,1,'#2a1c14');d.r(16,21+Y,3,1,'#2a1c14');d.r(20,21+Y-k,3,1,'#2a1c14');
       d.el(14,13+Y,9,3,P.h);d.r(6,15+Y,17,1,P.H);d.l(3,11+Y,0,17+Y,P.H);d.l(4,11+Y,1,17+Y,P.H);
@@ -3602,7 +3592,7 @@ const MOB_ART={
     if(aim){d.r(16,10+Y,4,2,P.m);d.l(13,11+Y,33,11+Y,P.M);d.l(13,10+Y,30,10+Y,P.m);d.r(31,9+Y,2,3,P.m);d.p(33,10+Y,'#ffffff')}
     else{d.r(16,10+Y,2,3,P.m);d.l(17,13+Y,29,1+Y,P.M);d.l(18,13+Y,30,1+Y,P.m);d.p(30,0+Y,'#ffffff')}
   }),
-  /* World 1 mossy golem with a club · Stone golem with glowing cracks and huge fists · Sand Giant: a hulking bearded giant of packed sand */
+  /* World 1 mossy golem with a club · Stone golem with glowing cracks and a stone club · Sand Giant: a hulking bearded giant of packed sand */
   golem:(P,f,w)=>mobCanvas(34,31,14,d=>{
     const st=f==='w1',up=f==='wind',sm=f==='act',k=st?1:0;
     if(w===3){
@@ -3622,14 +3612,10 @@ const MOB_ART={
     if(w===1){d.r(9,18,3,2,P.c);d.r(16,13,4,2,P.c);d.r(4,9,3,1,P.c);d.r(12,3,3,1,P.c);d.p(21,19,P.C);d.p(10,14,P.C)}
     if(w===2){d.l(10,13,12,20,P.e);d.l(12,20,11,22,P.e);d.l(17,14,19,18,P.e);d.l(5,9,7,13,P.e);d.p(14,3,P.e);d.p(13,4,P.e);d.p(9,7,'#8a8478');d.p(19,6,'#8a8478')}
     d.el(4,18,3,4,P.s);d.el(4,23,2,2,P.S);
-    if(w===1){
+    {
       if(up){d.el(24,6,3,3,P.s);d.l(24,4,30,0,P.m);d.l(25,4,31,0,P.m);d.el(31,1,2,2,P.M)}
       else if(sm){d.el(24,19,3,3,P.s);d.l(25,21,31,28,P.m);d.l(26,21,32,28,P.m);d.el(32,28,2,2,P.M)}
       else{d.el(24,17,3,3,P.s);d.el(25,21,2,2,P.S);d.l(26,20,31,13,P.m);d.l(27,20,32,13,P.m);d.el(32,12,2,2,P.M)}}
-    else{ /* bare stone fists, as big as its head */
-      if(up){d.el(25,7,3,3,P.s);d.el(27,3,4,4,P.S);d.p(27,2,P.e)}
-      else if(sm){d.el(25,20,3,3,P.s);d.el(28,25,4,4,P.S);d.p(28,25,P.e);d.l(18,29,33,29,P.e)}
-      else{d.el(24,17,3,3,P.s);d.el(25,22,4,4,P.S);d.p(25,22,P.e)}}
   }),
   /* Stone worm: rock segments with crystal spines · Sand World: a burrowing great lizard */
   worm:(P,f,w)=>mobCanvas(28,26,12,d=>{
