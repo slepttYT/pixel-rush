@@ -647,6 +647,7 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="ask" class="ov" hidden role="alertdialog" aria-modal="true" aria-labelledby="askt"><div class="box"><h2 id="askt"></h2><div id="askb"></div><div class="row"><button class="btn ghost" id="askno" type="button">CANCEL</button><button class="btn gold" id="askok" type="button">OK</button></div></div></div>
   <div id="panel" class="ov" hidden>
     <div class="box">
       <div class="pport"><canvas id="pport" width="96" height="96"></canvas><div id="pwho"></div></div>
@@ -672,6 +673,7 @@ summary:hover{color:var(--bone)}
       <h1 class="logo">PIXEL<br><em>RUSH</em></h1>
       <dl class="stats" id="hstats"></dl>
       <div class="menulist">
+        <button class="btn gold big cont" id="pcont" type="button" hidden><span>CONTINUE RUN</span><small id="pcontsub"></small></button>
         <button class="btn gold big" id="play" type="button">NEW RUN</button>
         <button class="btn ghost mi" id="hdiff" type="button" aria-label="Change difficulty"><span class="ddot"></span><span class="dtxt"><small>DIFFICULTY</small><b id="hdname"></b></span><span class="dsub" id="hdsub"></span><span class="dchg">&#9654;</span></button>
         <button class="btn ghost mi" id="hchar" type="button"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4.2"/><path d="M3.5 21c.6-5 4-7.6 8.5-7.6s7.9 2.6 8.5 7.6z"/></svg>CHARACTERS</button>
@@ -786,7 +788,7 @@ summary:hover{color:var(--bone)}
   </div>
 
   <div id="flash"></div>
-  <div id="pause" class="ov" hidden><div class="box"><h2>PAUSED</h2><button class="btn gold" id="presume" type="button">RESUME</button><button class="btn ghost" id="psnd" type="button">SOUND: ON</button><button class="btn ghost" id="pcheat" type="button" hidden>CHEATS</button><button class="btn ghost" id="pquit" type="button">END RUN</button><p class="tiphint pconly">Esc or P resumes</p></div></div>
+  <div id="pause" class="ov" hidden><div class="box"><h2>PAUSED</h2><button class="btn gold" id="presume" type="button">RESUME</button><button class="btn ghost" id="psnd" type="button">SOUND: ON</button><button class="btn ghost" id="pcheat" type="button" hidden>CHEATS</button><button class="btn ghost" id="psave" type="button">SAVE &amp; EXIT</button><button class="btn ghost" id="pquit" type="button">END RUN</button><p class="ptime" id="ptime"></p><p class="tiphint pconly">Esc or P resumes</p></div></div>
   <div id="xh"><i></i></div>
   <div id="cos" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="cosname">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
@@ -818,6 +820,12 @@ summary:hover{color:var(--bone)}
       <h3 class="pdh">Sound and extras</h3>
       <div class="row"><button class="btn ghost" id="hsnd" type="button">SOUND: ON</button><button class="btn ghost" id="hcheat" type="button">CHEATS</button></div>
       <div class="row"><button class="btn ghost" id="skeys" type="button">CONTROLS</button><button class="btn ghost" id="sreset" type="button">RESET</button></div>
+      <h3 class="pdh">Save data management</h3>
+      <p class="note sdnote">Back up all three saves (progress, coins, unlocks, settings and any unfinished run) to a file, or load a backup. Files work in both the browser version and the Windows version. Your game still saves automatically.</p>
+      <div class="row"><button class="btn ghost" id="sexp" type="button">EXPORT SAVE DATA</button><button class="btn ghost" id="simp" type="button">IMPORT SAVE DATA</button></div>
+      <div class="row"><button class="btn ghost" id="sundo" type="button" hidden>RESTORE PRE-IMPORT BACKUP</button></div>
+      <input type="file" id="simpf" accept=".json,application/json" hidden>
+      <p class="note" id="sdmsg" role="status" aria-live="polite"></p>
     </div>
   </div>
 
@@ -922,7 +930,7 @@ const cv=$('cv'),stage=$('stage');let ctx=cv.getContext('2d'); /* let: bosses br
 const R=Math.random,TAU=Math.PI*2,M=18;
 let W=800,H=560,S=1,DPR=1;
 const p={r:11};
-const SETD={mv:.8,sv:.8,zoom:1,ui:1,q:1,shake:true,fps:false,res:'1920x1080'};
+const SETD={mv:.8,sv:.8,zoom:1,ui:1,q:1,shake:true,fps:false,res:'1920x1080',dmgN:true,autoP:true};
 const RESL=['fill','1920x1080','1720x1080','2560x1080','1600x900','1440x900','1366x768','1280x720','1024x768'];
 let set=Object.assign({},SETD);
 try{const sv=JSON.parse(LS.getItem('cinder-set')||'null');if(sv&&typeof sv==='object')for(const k in SETD)if(typeof sv[k]===typeof SETD[k])set[k]=sv[k]}catch(e){}
@@ -2520,6 +2528,8 @@ function renderSet(){
    '<div class="srow"><span>Render quality</span><button type="button" class="btn ghost" data-s="q">'+QL[set.q]+'</button></div>'+
    '<div class="srow"><span>Screen shake</span><button type="button" class="btn ghost" data-s="shake">'+(set.shake?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>FPS counter</span><button type="button" class="btn ghost" data-s="fps">'+(set.fps?'ON':'OFF')+'</button></div>'+
+   '<div class="srow"><span>Damage numbers</span><button type="button" class="btn ghost" data-s="dmgN">'+(set.dmgN?'ON':'OFF')+'</button></div>'+
+   '<div class="srow"><span>Pause when the game loses focus</span><button type="button" class="btn ghost" data-s="autoP">'+(set.autoP?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>Music volume '+Math.round(set.mv*100)+'%</span>'+rg('mv',0,100)+'</div>'+
    '<div class="srow"><span>Sound effects '+Math.round(set.sv*100)+'%</span>'+rg('sv',0,100)+'</div>';
 }
@@ -2546,6 +2556,71 @@ document.addEventListener('fullscreenchange',()=>{if(sub==='set')renderSet();res
 $('skeys').addEventListener('click',e=>{fromSet=true;openSub('keys',e.currentTarget)});
 $('sreset').addEventListener('click',()=>{set=Object.assign({},SETD);saveSet();applySet();renderSet()});
 $('sdone')?.addEventListener('click',closeSub);
+
+/* ---------- 0.5: save data export / import ----------
+   One JSON file holds every 'cinder-' key (all three saves, global settings, unfinished runs). Same format in the browser and the EXE. */
+const SAVE_FMT='pixel-rush-save',SAVE_BAK='pxr-backup-prev';
+function saveDump(){const data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf('cinder-')===0)data[k]=localStorage.getItem(k)}return {format:SAVE_FMT,fv:1,game:'Pixel Rush',ver:UPD_VER,at:new Date().toISOString(),data}}
+function saveCheck(o){
+  if(!o||typeof o!=='object'||o.format!==SAVE_FMT||typeof o.fv!=='number'||o.fv>1||!o.data||typeof o.data!=='object'||Array.isArray(o.data))return null;
+  const ks=Object.keys(o.data);if(!ks.length||ks.length>2000)return null;
+  for(const k of ks){if(k.indexOf('cinder-')!==0||typeof o.data[k]!=='string'||o.data[k].length>2e6)return null}
+  return o.data;
+}
+function sdMsg(t,bad){const m=$('sdmsg');m.textContent=t;m.classList.toggle('bad',!!bad)}
+async function exportSave(){
+  saveMeta();saveOwn();saveSet();
+  const txt=JSON.stringify(saveDump(),null,1),d=new Date(),fn='pixel-rush-save-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
+  try{
+    if(window.Neutralino&&Neutralino.os&&Neutralino.filesystem){ /* the Windows EXE: a native save dialog */
+      const path=await Neutralino.os.showSaveDialog('Export Pixel Rush save data',{defaultPath:fn,filters:[{name:'Pixel Rush save',extensions:['json']}]});
+      if(!path){sdMsg('Export cancelled.');return}
+      await Neutralino.filesystem.writeFile(path,txt);sdMsg('Saved to '+path);return;
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);sdMsg('Exported '+fn+'.');
+  }catch(e){sdMsg('Export failed: '+(e&&e.message||e),true)}
+}
+function applySaveData(data,msg){
+  const keep=saveDump();
+  try{localStorage.setItem(SAVE_BAK,JSON.stringify(keep))}catch(e){sdMsg('Could not make a backup of your current save, so nothing was changed.',true);return false}
+  const old=Object.keys(keep.data);
+  try{old.forEach(k=>localStorage.removeItem(k));for(const k in data)localStorage.setItem(k,data[k])}
+  catch(e){ /* storage full or blocked: put the old save back exactly */
+    try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf('cinder-')===0)localStorage.removeItem(k)}for(const k in keep.data)localStorage.setItem(k,keep.data[k])}catch(x){}
+    sdMsg('The file could not be written (storage full?). Your existing save was kept.',true);return false}
+  sdMsg(msg);
+  try{sessionStorage.setItem('cinder-boot','select')}catch(e){}
+  pxWipe(()=>location.reload(),true);return true;
+}
+function importText(txt){
+  let o=null;try{o=JSON.parse(txt)}catch(e){}
+  const data=saveCheck(o);
+  if(!data){sdMsg('That file is not a valid Pixel Rush save. Nothing was changed.',true);return}
+  pxAsk({t:'WARNING: Overwrite Save Data?',b:'<p>Importing this file will overwrite your current save data and replace it with the progress stored in the selected file.</p><p>Are you sure you want to continue?</p>',ok:'Import & Overwrite',no:'Cancel',danger:1},v=>{
+    if(!v){sdMsg('Import cancelled. Nothing was changed.');return}
+    applySaveData(data,'Imported. Reloading...');
+  });
+}
+$('sexp').addEventListener('click',exportSave);
+$('simp').addEventListener('click',async()=>{
+  sdMsg('');
+  if(window.Neutralino&&Neutralino.os&&Neutralino.filesystem){
+    try{const ps=await Neutralino.os.showOpenDialog('Import Pixel Rush save data',{filters:[{name:'Pixel Rush save',extensions:['json']}]});if(!ps||!ps.length)return;importText(await Neutralino.filesystem.readFile(ps[0]))}catch(e){sdMsg('Could not read that file. Nothing was changed.',true)}
+    return;
+  }
+  $('simpf').value='';$('simpf').click();
+});
+$('simpf').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  if(f.size>8e6){sdMsg('That file is too big to be a Pixel Rush save. Nothing was changed.',true);return}
+  const rd=new FileReader();rd.onload=()=>importText(String(rd.result||''));rd.onerror=()=>sdMsg('Could not read that file. Nothing was changed.',true);rd.readAsText(f);
+});
+$('sundo').addEventListener('click',()=>{
+  let o=null;try{o=JSON.parse(localStorage.getItem(SAVE_BAK)||'null')}catch(e){}
+  const data=saveCheck(o);if(!data){sdMsg('No usable backup found.',true);return}
+  pxAsk({t:'Restore the backup?',b:'<p>This puts back the save data you had right before your last import. Your current save data is replaced.</p>',ok:'RESTORE',no:'CANCEL',danger:1},v=>{if(v)applySaveData(data,'Backup restored. Reloading...')});
+});
 
 /* ---------- achievements ---------- */
 const ACH=[
@@ -3382,7 +3457,7 @@ function openSub(k,opener){
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
   $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
-  else if(k==='set'){renderSet()}
+  else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent=''}
   else if(k==='ach'){renderAch()}
   else if(k==='wpn'){renderWpn();const f=$('wpngrid').querySelector('.on');if(f)f.focus()}
   else if(k==='dsel'){renderDsel()}
@@ -3758,7 +3833,7 @@ function openLoot(){stats.vault++;
   renderShop();$('shop').hidden=false;
 }
 function closeLoot(){
-  $('shop').hidden=true;state='play';shopMode='shop';vault.looted=true;
+  $('shop').hidden=true;state='play';shopMode='shop';vault.looted=true;if(!waveActive&&wave<LOOP_WAVES)snapRun(wave+1);
   $('reroll').hidden=true;$('go').hidden=false;$('go').textContent='SKIP →';
   $('thp').textContent=TIP_P;$('thg').textContent=TIP_G;
   banner('LOOT TAKEN');sfx(300,.15,'square',.04,1.6);
@@ -4186,6 +4261,7 @@ function closeShop(){
   if(state!=='shop')return;
   if(shopMode==='loot'){if(!shopOffers.length)closeLoot();return}
   $('shop').hidden=true;state='play';clearT=.6;pickT=0;sfx(300,.15,'square',.04,1.6);
+  if(!waveActive&&wave<LOOP_WAVES)snapRun(wave+1);
 }
 function buy(i){
   const id=shopOffers[i];if(!id||state!=='shop')return;
@@ -4241,6 +4317,7 @@ function homeEvo(){
 }
 function refreshHome(){
   renderSlots();try{refreshMailDot()}catch(e){}
+  {const r=loadRun(),b=$('pcont');b.hidden=!r;if(r){const c=charById(r.ch);$('pcontsub').textContent='World '+r.world+' \u00b7 Wave '+(r.loop*LOOP_WAVES+r.resume)+' \u00b7 '+c.n+' \u00b7 '+fmtT(r.runT)}}
   $('hstats').innerHTML='<div><svg class="si" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.7 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><span><dt>Best score</dt><dd>'+fmtK(best)+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5c-4.7 0-8 3.2-8 7.6 0 2.6 1.2 4.4 3 5.6V20h2.5v-2.2h1.3V20h2.4v-2.2h1.3V20H17v-4.3c1.8-1.2 3-3 3-5.6 0-4.4-3.300-7.6-8-7.6zM8.4 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM15.6 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM12 13.2l1.2 2.4h-2.4z"/></svg><span><dt>Best wave</dt><dd>'+bestWave+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd36b"/></svg><span><dt>Coins</dt><dd>'+fmtK(wallet)+'</dd></span></div>'+(bestLoop?'<div><span><dt>Loops</dt><dd>'+bestLoop+'</dd></span></div>':'')+'';
   $('hxp').innerHTML=xpHtml(acct())+'<small class="ahint">VIEW REWARDS &#9654;</small>';renderDiffs();homeExtras();
 }
@@ -4260,7 +4337,7 @@ $('slots').addEventListener('click',e=>{
 function showHome(){
   lowHp=false;stage.classList.remove('lowhp');cine=null;cam.x=0;cam.y=0;
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
-  brWant=false;setWorld(1);bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
+  brWant=false;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
 }
 
@@ -4272,7 +4349,7 @@ function reset(){
   p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});p.rageS=0;p.rageT=0;p.gramp=0;
   hudC={};pickT=0;coins=0;gain=0;runWallet=0;floats=[];
   enemies=[];parts=[];slashes=[];drops=[];bolts=[];bullets=[];thrown=[];meteors=[];pbul=[];pbomb=[];p.wlv=0;lava=[];pools=[];shadows=[];score=0;kills=0;wave=0;combo=0;comboT=0;toSpawn=0;
-  loop=0;dynS=1;runXp=0;winT=0;lastRun=null;runT=0;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
+  loop=0;dynS=1;runXp=0;winT=0;lastRun=null;runT=0;runSnap=null;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
   $('panel').hidden=true;$('shop').hidden=true;
   p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
@@ -4287,6 +4364,7 @@ function banner(t){if(bossIn||cine)return; /* the boss name card is already up: 
 function nextWave(){
   if(brMode)brAdvance();
   wave++;spawnT=0;waveActive=true;p.hitW=false;p.wardUsed=false;
+  snapRun(wave);
   if(wave<=1&&loop===0)dynS=1; /* new run starts neutral */
   {const t=dynTarget();dynS+=(t-dynS)*.6;dynS=Math.round(dynS*100)/100;if(brMode)dynS=1} /* ease toward the target so one pick never swings it */
   waveTL=0;spawn0=0;
@@ -5357,7 +5435,8 @@ addEventListener('keydown',e=>{
   if(binds.mute.includes(k)&&!e.repeat)setMuted(!muted);
 });
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
-addEventListener('blur',()=>{for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;if(state==='play'&&!sub)pauseGame()});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;if(set.autoP&&state==='play'&&!sub)pauseGame()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in keys)keys[k]=false;btnAtk=false;if(set.autoP&&state==='play'&&!sub)pauseGame()}}); /* phones: switching apps or tabs pauses too */
 function setMouse(e){const q=cpt(e,cv);mouse.x=q.x/S;mouse.y=q.y/S}
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){aimMode='mouse';setMouse(e)}});
 cv.addEventListener('pointerdown',e=>{
@@ -5452,6 +5531,8 @@ $('dselgrid').addEventListener('click',e=>{
 });
 function startGame(){
   if(sub||(state!=='menu'&&state!=='over'))return;
+  if(state==='menu'&&!$('ask').hidden)return;
+  if(state==='menu'&&hasRun()){const r=loadRun();pxAsk({t:'Start a new run?',b:'<p>You have a saved run (World '+r.world+', wave '+(r.loop*LOOP_WAVES+r.resume)+'). Starting a new run deletes it.</p>',ok:'NEW RUN',no:'CANCEL',danger:1},v=>{if(v){try{LS.removeItem(RUN_KEY)}catch(e){}refreshHome();startGame()}});return}
   /* the difficulty is the one this save was made with (picked on the save screen), so NEW RUN goes straight to the fighters */
   if(state==='menu'){runFlow=true;charMode='play';openSub('chars',$('play'));return}
   openSub('wpn',$('pbtn'));
@@ -5523,7 +5604,7 @@ function padNav(){
     for(let i=0;i<17;i++)if(padHit(i)){const a=plisten.a,s=plisten.i;plisten=null;setPadBind(a,s,i===8?-1:i);renderPad();return}
     return;
   }
-  if(state==='play'&&!sub){xhOff();if(padHit(9))pauseGame();return}
+  if(state==='play'&&!sub&&$('ask').hidden){xhOff();if(padHit(9))pauseGame();return}
   if(!xh.on){xh.on=true;if(!xh.x){xh.x=innerWidth/2;xh.y=innerHeight/2}$('xh').style.display='block'}
   xh.x=Math.min(innerWidth-2,Math.max(2,xh.x+pad.ax*680*dt));xh.y=Math.min(innerHeight-2,Math.max(2,xh.y+pad.ay*680*dt));
   $('xh').style.transform='translate('+xh.x+'px,'+xh.y+'px)';
@@ -5531,6 +5612,7 @@ function padNav(){
   if(tt!==xh.el){if(xh.el)xh.el.classList.remove('padhov');if(tt)tt.classList.add('padhov');xh.el=tt}
   if(Math.abs(pad.ry)>.3&&el){let s=el;while(s&&s!==document.body){const oy=getComputedStyle(s).overflowY;if((oy==='auto'||oy==='scroll')&&s.scrollHeight>s.clientHeight+2){s.scrollTop+=pad.ry*600*dt;break}s=s.parentElement}}
   if(pa('confirm')&&tt){tt.click();sfx(500,.04,'square',.03)}
+  else if(!$('ask').hidden){if(pa('back'))askDone(false)}
   else if(pa('back')){if(rollSt)skipRoll();else if(sub)closeSub();else if(state==='over')showHome();else if(state==='win')endRun();else if(state==='pause')resumeGame()}
   else if(padHit(9)&&!sub){if(state==='menu'||state==='over')startGame();else if(state==='win')loopGame();else if(state==='shop')closeShop();else if(state==='pause')resumeGame()}
   else if(pa('extra')&&!sub&&state==='menu')openSub('juke');
@@ -5560,6 +5642,15 @@ function chillP(t){if(cheat.god||dev.god||(p.cp&&p.cp.noChill))return;if(!(p.chi
 const MOB_ELEM=['','#ff6a1a','#6fe8ff','#9be04a'];
 function applyElem(w,ev){const t=ev>=2?2.1:1.1;if(w===2)chillP(t*1.5);else if(w===3)poisonP(t*1.2);else igniteP(t)}
 function floatTxt(x,y,t,c){floats.push({x,y,t,c,l:1.1})}
+/* 0.5: damage numbers (Settings can turn them off). Rapid hits on one enemy add up in one number instead of stacking a pile of text */
+const dmgFmt=v=>v>=99999?'KO':v>=10?String(Math.round(v)):String(Math.round(v*10)/10);
+function dmgNum(e,v,heavy){
+  if(!(v>0))return;
+  const q=e._dn;
+  if(q&&q.l>.55&&floats.indexOf(q)>=0){q.v+=v;q.t=dmgFmt(q.v);q.l=.9;if(heavy)q.c='#ffd36b';return}
+  const n={x:e.x+(R()-.5)*14,y:e.y-e.r-6,t:dmgFmt(v),c:heavy?'#ffd36b':'#ffffff',l:.9,v:v,sm:1};floats.push(n);e._dn=n;
+  if(floats.length>80)floats.splice(0,floats.length-80);
+}
 function spark(x,y,c,n,sp){for(let i=0;i<n;i++){const a=R()*TAU,v=(.3+R()*.7)*(sp||200);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.3+R()*.3,m:.6,c,s:2+R()*3})}}
 const SWING={japan:[330,'triangle',.35],viking:[170,'sawtooth',.6],knight:[260,'sawtooth',.45],pirate:[300,'square',.5],cyber:[520,'sine',.3],dragon:[200,'sawtooth',.3],arcane:[420,'sine',.4],ocean:[280,'triangle',.5],shadow:[150,'square',.35],candy:[620,'triangle',.4],punch:[110,'square',.3],knife:[640,'triangle',.25]};
 function swingSfx(heavy){
@@ -5852,7 +5943,7 @@ function hurtE(e,dmg,a,heavy,pierce){
   if(e.burrowed)return; /* the Serpent cannot be hurt while it is underground */
   if(world>=2&&e.shell>0&&!pierce){spark(e.x,e.y,'#e8d8a0',3,140);if(ok('block',60)){sfx(500,.05,'square',.05,.6)}return}
   hitSfx(e);
-  e.hp-=(cheat.onehit?99999:dmg)*DF().pd;e.flash=.1;
+  const dealt=(cheat.onehit?99999:dmg)*DF().pd;e.hp-=dealt;e.flash=.1;if(set.dmgN)dmgNum(e,dealt,heavy);
   const k=e.kb*(heavy?1.4:1);e.kx=Math.cos(a)*k;e.ky=Math.sin(a)*k;
   if(heavy&&e.wind>0){e.wind=0;e.chargeT=1.5}
   spark(e.x,e.y,e.c,6,200);
@@ -6121,13 +6212,79 @@ function endRun(){
   state='over';finalize();
   showRunPanel('RUN <em>COMPLETE</em>','You finished '+(loop?loop+1+' loops':'the run')+'.','GO AGAIN','HOME',false);
 }
+/* 0.5: one pixel popup for every 'are you sure?' (abandon a run, overwrite a saved run, import save data).
+   Cancel has focus first so Enter never destroys anything by accident. */
+let askCb=null,askPrev=null;
+function pxAsk(o,cb){
+  $('askt').textContent=o.t||'';$('askb').innerHTML=o.b||'';$('askok').textContent=o.ok||'OK';$('askno').textContent=o.no||'CANCEL';
+  $('ask').classList.toggle('danger',!!o.danger);askCb=cb;askPrev=document.activeElement;$('ask').hidden=false;setTimeout(()=>$('askno').focus(),0);
+}
+function askDone(v){if($('ask').hidden)return;$('ask').hidden=true;const c=askCb;askCb=null;if(askPrev&&askPrev.focus&&document.contains(askPrev))askPrev.focus();askPrev=null;if(c)c(v)}
+$('askok').addEventListener('click',()=>askDone(true));$('askno').addEventListener('click',()=>askDone(false));
+addEventListener('keydown',e=>{if($('ask').hidden)return;if(e.key==='Escape'){e.preventDefault();askDone(false)}else if(e.key!=='Tab'&&e.key!=='Enter'&&e.key!==' ')e.preventDefault();e.stopImmediatePropagation()},true);
+
+/* 0.5: Save & Exit / Continue Run. A checkpoint is taken when each wave starts and when a wave is cleared;
+   Save & Exit writes that checkpoint (plus your current hearts and run time) to this save's storage.
+   Continue Run picks up at the start of that wave and uses the saved run up. Nothing is banked until the run really ends,
+   so permanent progression is never touched. Not offered in Boss Rush or the tutorial. */
+let runSnap=null;
+const RUN_KEY='cinder-run';
+function snapRun(resume){
+  if(tut||brMode||devWarp)return;
+  try{runSnap={v:1,ch:CH().id,wt:wType,eq:equip||'',diff,world,loop,resume,score,kills,coins,runWallet,runXp,dynS,runAch:runAch.slice(),
+    p:JSON.parse(JSON.stringify(p,(k,v)=>k==='ch'?undefined:v))}}catch(e){runSnap=null}
+}
+function loadRun(){
+  try{const r=JSON.parse(LS.getItem(RUN_KEY)||'null');
+    if(!r||r.v!==1||typeof r.p!=='object'||!r.p||typeof r.p.mods!=='object')return null;
+    const num=x=>typeof x==='number'&&isFinite(x);
+    if(![r.world,r.loop,r.resume,r.score,r.kills,r.coins,r.runXp,r.hp,r.runT].every(num))return null;
+    if(r.resume<1||r.resume>LOOP_WAVES||r.world<1||r.world>3||r.loop<0||!DIFFS[r.diff]||eq[r.wt]===undefined)return null;
+    return r}catch(e){return null}
+}
+const hasRun=()=>!!loadRun();
+function saveExit(){
+  if(state!=='pause'||tut||brMode)return;
+  if(!runSnap)snapRun(Math.max(1,wave));
+  if(!runSnap){return}
+  const r=Object.assign({},runSnap,{hp:Math.max(1,Math.min(p.hp,runSnap.p.maxhp||p.maxhp)),runT:Math.round(runT),at:Date.now()});
+  try{LS.setItem(RUN_KEY,JSON.stringify(r))}catch(e){pxAsk({t:'Could not save',b:'<p>Your browser refused to store the run (storage may be full or blocked). The run is still paused.</p>',ok:'OK',no:'BACK'},()=>{});return}
+  sfx(520,.1,'triangle',.06,1.4);setTimeout(()=>sfx(780,.18,'triangle',.06,1.3),110);
+  runSnap=null;$('pause').hidden=true;musicStop&&musicStop();
+  pxWipe(()=>{showHome()});
+}
+function continueRun(){
+  if(state!=='menu'||sub)return;
+  const r=loadRun();
+  if(!r){try{LS.removeItem(RUN_KEY)}catch(e){}refreshHome();pxAsk({t:'Saved run unreadable',b:'<p>The saved run was damaged and has been removed. Your progress, coins and unlocks are safe.</p>',ok:'OK',no:'CLOSE'},()=>{});return}
+  const c=charById(r.ch);
+  const wOpen=r.world===1||(r.world===2&&w2Open())||(r.world===3&&w3Open());
+  if(c.id!==r.ch||!charUnlocked(c)||!typeOpen(r.wt)||!wOpen){try{LS.removeItem(RUN_KEY)}catch(e){}refreshHome();pxAsk({t:'Saved run unavailable',b:'<p>That run used a fighter, weapon or world this save no longer has, so it could not continue. It has been removed.</p>',ok:'OK',no:'CLOSE'},()=>{});return}
+  try{
+    curChar=r.ch;wType=r.wt;if(r.eq===''||owns(r.eq)||isDevId(r.eq)||STARTERS.some(x=>x.id===r.eq))eq[r.wt]=r.eq;syncEq();
+    diff=r.diff;brWant=false;selWorld=r.world;nwGo=true;try{beginRun()}finally{nwGo=false}
+    const keep={x:p.x,y:p.y,ch:p.ch};
+    Object.assign(p,r.p,{x:keep.x,y:keep.y,vx:0,vy:0,ix:0,iy:0,dashT:0,dashCd:0,cd:0,sw:0,inv:1.5,blink:1.5,ch:keep.ch});
+    p.hot=Array.isArray(p.hot)&&p.hot.length===4?p.hot:[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=Array.isArray(p.hotMx)&&p.hotMx.length===4?p.hotMx:[1,1,1,1];
+    ABIL.forEach(a=>{if(typeof p.mods[a.id]!=='number')p.mods[a.id]=0});
+    p.maxhp=Math.max(1,p.maxhp|0);p.hp=Math.max(1,Math.min(p.maxhp,r.hp|0));buildHp();hudC={};
+    loop=r.loop;score=r.score;kills=r.kills;coins=r.coins;runWallet=r.runWallet||0;runXp=r.runXp;dynS=r.dynS||1;runAch=Array.isArray(r.runAch)?r.runAch:[];runT=r.runT;
+    wave=r.resume-1;toSpawn=0;waveActive=false;clearT=1.6;pickT=0;winT=0;
+    LS.removeItem(RUN_KEY);
+    banner('RUN CONTINUED \u00b7 WAVE '+r.resume);
+  }catch(e){try{LS.removeItem(RUN_KEY)}catch(x){}showHome();pxAsk({t:'Saved run unreadable',b:'<p>The saved run could not be loaded and has been removed. Your progress, coins and unlocks are safe.</p>',ok:'OK',no:'CLOSE'},()=>{})}
+}
 function pauseGame(){
   if(state!=='play'||sub)return;
   state='pause';for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;joy.x=joy.y=0;
-  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('presume').focus();$('bossintro').classList.add('paused');
+  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
 }
 function resumeGame(){if(state!=='pause')return;state='play';$('pause').hidden=true;$('bossintro').classList.remove('paused')}
 function quitRun(){
+  if(state!=='pause')return;
+  pxAsk(tut?{t:'Leave the tutorial?',b:'<p>You can play it again any time from the main menu.</p>',ok:'LEAVE',no:'STAY'}:{t:'End this run?',b:'<p>The run ends here. The XP and coins you have earned so far are banked.</p>',ok:'END RUN',no:'KEEP PLAYING',danger:1},v=>{if(v)quitNow()});
+}
+function quitNow(){
   if(state!=='pause')return;
   if(tut){$('pause').hidden=true;endTutorial(false);return} /* quitting the tutorial goes straight home: not a run, nothing banked */
   $('pause').hidden=true;state='over';finalize();
@@ -6319,6 +6476,7 @@ function update(dt){
       if(bw)p.hp=p.maxhp;else if(p.hp<p.maxhp)p.hp++;
       if(p.cp.waveHeal)healP(p.cp.waveHeal);
       banner(bw?'BOSS DOWN':'WAVE CLEAR');
+      if(wave<LOOP_WAVES)snapRun(wave+1);
     }
     else if(winT>0){winT-=dt;if(winT<=0)openWin()}
     else if(vault.stage){/* the vault comes first on boss waves; the shop opens when you walk back out */}
@@ -8207,7 +8365,7 @@ function draw(){
   }
   for(const q of parts){ctx.globalAlpha=Math.max(0,q.l/q.m);ctx.fillStyle=q.c;ctx.fillRect(q.x-q.s/2,q.y-q.s/2,q.s,q.s)}
   ctx.globalAlpha=1;
-  ctx.font='700 15px Chakra Petch,sans-serif';ctx.textAlign='center';for(const q of floats){ctx.globalAlpha=Math.min(1,q.l*2);ctx.lineWidth=3;ctx.strokeStyle='#12141c';ctx.strokeText(q.t,q.x,q.y);ctx.fillStyle=q.c;ctx.fillText(q.t,q.x,q.y)}ctx.textAlign='left';ctx.globalAlpha=1;
+  ctx.font='700 15px Chakra Petch,sans-serif';ctx.textAlign='center';for(const q of floats){ctx.font=q.sm?'400 12px "Press Start 2P",monospace':'700 15px Chakra Petch,sans-serif';ctx.globalAlpha=Math.min(1,q.l*2);ctx.lineWidth=3;ctx.strokeStyle='#12141c';ctx.strokeText(q.t,q.x,q.y);ctx.fillStyle=q.c;ctx.fillText(q.t,q.x,q.y)}ctx.textAlign='left';ctx.globalAlpha=1;
   for(const b of bolts){
     ctx.strokeStyle='#ffe9a8';ctx.lineWidth=3;ctx.lineJoin='round';ctx.globalAlpha=Math.min(1,b.l/.1);
     ctx.beginPath();ctx.moveTo(b.x1,b.y1);
@@ -8484,6 +8642,8 @@ $('hjuke').addEventListener('click',e=>openSub('juke',e.currentTarget));
 $('pz').addEventListener('click',e=>{pauseGame();e.currentTarget.blur()});
 $('presume').addEventListener('click',resumeGame);
 $('pquit').addEventListener('click',quitRun);
+$('psave').addEventListener('click',saveExit);
+$('pcont').addEventListener('click',()=>{if(state==='menu'&&!sub)pxWipe(continueRun)});
 $('psnd').addEventListener('click',()=>setMuted(!muted));
 $('hcos').addEventListener('click',e=>openSub('cos',e.currentTarget));
 $('cdone')?.addEventListener('click',closeSub);
@@ -9421,5 +9581,22 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 @media (max-width:620px){.pcard{grid-template-columns:1fr}.pcart{border-right:0;border-bottom:2px dashed #b8a47a;padding:0 0 12px}.pcside{padding:12px 0 0}}
 @media (max-height:480px){.pcard{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);padding:10px}.pcst dd{font-size:11px}.pcres{font-size:10px}}
 #panel .pbnew{grid-column:1/-1;font-family:'Press Start 2P',monospace;font-size:11px;color:#1a1204;background:#ffd36b;padding:8px 10px;box-shadow:inset 0 -3px 0 #c89a2a;animation:rise .5s .3s ease-out both}#panel .pbnew small{font-family:'Silkscreen',monospace;font-size:10px}#panel .pbnew.old{background:#141822;color:#ffd36b;box-shadow:inset 0 0 0 2px #3a2a08}
+/* ===== 0.5: pixel confirm popup, pause run timer, continue button ===== */
+#ask{z-index:60!important;background:rgba(6,8,12,.72)}
+#ask .box{max-width:min(460px,92vw);background:#0b0d12;border:0;border-radius:0;padding:20px 22px;text-align:center;gap:12px;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c,0 18px 50px rgba(0,0,0,.6);animation:pnlIn .25s steps(5) both}
+#ask.danger .box{box-shadow:0 0 0 4px #7a1b28,0 0 0 8px #3a0a12,0 0 0 12px #ff4d5e,0 18px 50px rgba(0,0,0,.6)}
+#ask h2{font-family:'Press Start 2P',monospace;font-size:15px;line-height:1.4;margin:0;color:#fff}
+#ask.danger h2{color:#ff8a9a}
+#askb p{margin:0 0 6px;font-size:13px;line-height:1.55;color:#d8dde8}
+#ask .row{justify-content:center;gap:10px;flex-wrap:wrap}
+#ask .btn{border-radius:0!important;font-family:'Silkscreen',monospace;font-weight:700;letter-spacing:.14em}
+#ask.danger #askok{background:#ff4d5e;color:#1a0408}
+.ptime{margin:4px 0 0;font-family:'Silkscreen',monospace;font-size:11px;letter-spacing:.14em;color:#ffd36b;text-align:center}
+#home .menulist .cont{display:flex;flex-direction:column;align-items:flex-start;gap:3px;background:#1e6b2c!important;color:#e9ffe0!important;box-shadow:inset 0 0 0 3px #3cb04c,inset 0 -5px 0 #0b3a15!important}
+#home .menulist .cont small{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.08em;opacity:.85;text-transform:none}
+#home .menulist .cont[hidden]{display:none}
+#pause .box{background:#0b0d12!important;border:0!important;border-radius:0!important;padding:20px 24px!important;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c,0 18px 50px rgba(0,0,0,.6)!important}
+#pause h2{font-family:'Press Start 2P',monospace}#pause .btn{border-radius:0!important;font-family:'Silkscreen',monospace;font-weight:700;letter-spacing:.14em}
+#set .sdnote{font-size:12px;line-height:1.5;color:#b8c4b8;margin:0 0 6px}#sdmsg{min-height:1.2em;color:#b4f7a8;font-size:12px}#sdmsg.bad{color:#ff8a9a}
 </style>
 </body></html>

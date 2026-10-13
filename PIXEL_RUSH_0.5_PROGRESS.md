@@ -74,7 +74,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [x] Pause → Cheats hides pause menu, shows cheat menu, game stays paused. Never overlap. Closing cheats returns to pause. Only Resume resumes.
 
 ### 11. Save & Exit / Continue Run
-- [ ] Pause menu "Save & Exit" stores run state (character, weapon + evolution, world, wave, health, score, coins/XP earned, upgrades/abilities, modifiers, hotbar, etc) in localStorage; main menu "Continue Run" restores it. Never overwrites permanent progression. Validate/guard against corrupted saves. Works the same in the EXE.
+- [x] Pause menu "Save & Exit" stores run state (character, weapon + evolution, world, wave, health, score, coins/XP earned, upgrades/abilities, modifiers, hotbar, etc) in localStorage; main menu "Continue Run" restores it. Never overwrites permanent progression. Validate/guard against corrupted saves. Works the same in the EXE.
 
 ### 12. Daily challenges
 - [ ] Refresh at 07:00 in the player's LOCAL time. Available until next local 07:00. Gold + XP reward. Uses existing mechanics/modifiers. One claim per day. Separate from normal runs.
@@ -89,12 +89,12 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [x] Best completion time per world (stats.pbt, first clear of wave 100, no cheats/boss rush), kept separate, shown in a stats/progression screen. Run time on the postcard.
 
 ### 16. Small QoL (recommended set, keep it modest)
-- [ ] Damage numbers toggle in Settings. [ ] Pause when the window loses focus. [ ] Run timer shown in pause menu. [ ] Confirm before abandoning a run from pause.
+- [x] Damage numbers toggle in Settings. [x] Pause when the window loses focus (setting, + visibilitychange). [x] Run timer shown in pause menu. [x] Confirm before abandoning a run from pause.
 
 ### Save data management (Settings)
-- [ ] "Save Data Management" section: Export Save Data (downloads a JSON backup of all progress incl. unfinished run) and Import Save Data (file picker).
-- [ ] Import shows pixel popup: "WARNING: Overwrite Save Data?" / "Importing this file will overwrite your current save data and replace it with the progress stored in the selected file." / "Are you sure you want to continue?" / [Cancel] [Import & Overwrite]. Cancel = no change. Import backs up current save first. Invalid file = keep existing save.
-- [ ] Same format in HTML and EXE (cross import/export). Autosave stays on.
+- [x] "Save Data Management" section: Export Save Data (downloads a JSON backup of all progress incl. unfinished run) and Import Save Data (file picker).
+- [x] Import shows pixel popup: "WARNING: Overwrite Save Data?" / "Importing this file will overwrite your current save data and replace it with the progress stored in the selected file." / "Are you sure you want to continue?" / [Cancel] [Import & Overwrite]. Cancel = no change. Import backs up current save first. Invalid file = keep existing save.
+- [~] Same format in HTML and EXE (Neutralino native dialogs coded; verify in EXE build) (cross import/export). Autosave stays on.
 
 ### 17. HTML + EXE release
 - [ ] `Pixel_Rush_0.5.html` standalone.
@@ -121,6 +121,8 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 - Save select redesign; Lucky/Average Joe text; cheat menu from pause (tested: stays paused, Esc/back return to pause, focus loss stays paused, only Resume resumes); run HUD hidden under menus.
 
 - Game over redesign; run timer (runT, play+shop only); postcard (cinder-postcard per save) + mailbox; PBs on Account screen and win badge. Helpers: fmtT, WNAME, drawFighter(g,ch,sk,ws,x,gy,U,t,world) for previews.
+- Save & Exit/Continue: checkpoint at wave start + wave clear/shop close (runSnap), stored in cinder-run per save, consumed on continue, validated; not in boss rush/tutorial; difficulty of the run used then restored on showHome. pxAsk() generic confirm popup (Esc/back = cancel, Cancel focused first).
+- Export/import: format 'pixel-rush-save' fv1 {data:{cinder-*}}; backup in pxr-backup-prev + RESTORE button; invalid/oversized files rejected; quota failure restores old data.
 
 ## Known bugs
 (append as found)
