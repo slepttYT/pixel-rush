@@ -3628,6 +3628,7 @@ const UPDATES=[
   'Every boss in Worlds 3, 4 and 5 has been redrawn as detailed pixel art with its real shape: a lean scrap hound, a hulking riveter, a fat toad, a bone gator, a moon moth, a cobra rearing up and more. The final-phase glow now follows the boss outline instead of a circle.',
   'World 4 bosses have new machine attacks: aimed lasers, turret drones, magnet pulls, electric floor grids, reactor shockwaves and scrap bombs.',
   'World 5 bosses have new swamp attacks: tongue lashes that pull you in, bursting bubbles, spore pods, skeleton hands from the ground, witch hex circles and homing swarms.',
+  'Boss warnings (the Dragon\u2019s breath, charge lines, fire rings and more) are no longer cut off at the edge of the boss, and the fire ring warning is easier to see.',
   'Worlds 4 and 5 have their own projectiles: gears, rivets, water drops, flames, magnets, glitch blocks and plasma bolts in World 4; spores, wisps, bubbles, bones, leeches, potions and hex skulls in World 5.'
  ]],
  ['v0.5','Pixel Rush 0.5: The Expansion and Polish Update','#4dc3ff',[
@@ -9018,7 +9019,6 @@ function drawBossBase(e,fl){
   if(e.bs==='acid'){const k=Math.min(1,(e.st||0)/(e.fireAt||.7));ctx.save();ctx.globalAlpha=.25+.5*k;ctx.strokeStyle='#a8ff3d';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,56-26*k,0,TAU);ctx.stroke();ctx.restore()}
   drawW45Tele(e);
   if(e.bs==='maw'){const k=e.sub===0?Math.min(1,e.st/.6):1;ctx.save();ctx.globalAlpha=.12+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.x,e.y,e.r*2.1,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.setLineDash([10,8]);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
-  ctx=_pc;
   if(e.bs==='burrow'&&e.sub===2){ /* the ground bulges: get out of the circle */
     const k=Math.min(1,e.st/e.wd);
     ctx.globalAlpha=.18+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.x,e.y,e.slamR*k,0,TAU);ctx.fill();
@@ -9031,15 +9031,16 @@ function drawBossBase(e,fl){
     ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.cx*520,e.y+e.cy*520);ctx.stroke();ctx.globalAlpha=1;
   }
   if(e.bs==='breath'&&e.st<e.fireAt){const k=Math.min(1,e.st/e.fireAt);ctx.save();ctx.globalAlpha=.08+.2*k;ctx.fillStyle='#ff6a3a';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,400,e.rot,e.rot+1.4);ctx.closePath();ctx.fill();ctx.restore()}
-  if(e.bs==='firering'){ctx.save();if(e.sub===0){const k=Math.min(1,e.st/.8);ctx.globalAlpha=.2+.5*k;ctx.strokeStyle='#ff7a2a';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(e.x,e.y,e.r+10+k*60,0,TAU);ctx.stroke();ctx.setLineDash([])}
+  if(e.bs==='firering'){ctx.save();if(e.sub===0){const k=Math.min(1,e.st/.8),rr=e.r+10+k*60;ctx.globalAlpha=.1+.18*k;ctx.fillStyle='#ff6a1a';ctx.beginPath();ctx.arc(e.x,e.y,rr,0,TAU);ctx.fill();ctx.globalAlpha=.5+.45*k;ctx.lineWidth=7;ctx.strokeStyle='#2a0a04';ctx.beginPath();ctx.arc(e.x,e.y,rr,0,TAU);ctx.stroke();ctx.strokeStyle='#ffb347';ctx.lineWidth=4;ctx.setLineDash([10,7]);ctx.lineDashOffset=-time*40;ctx.stroke();ctx.setLineDash([])} /* 0.5.1: a clearer warning ring */
     else for(const g of(e.frs||[])){ctx.lineCap='round';ctx.globalAlpha=.95;ctx.strokeStyle='#ff6a1a';ctx.lineWidth=12;ctx.beginPath();ctx.arc(e.x,e.y,g.R,g.g+.55,g.g+TAU-.55);ctx.stroke();ctx.strokeStyle='#ffd36b';ctx.lineWidth=5;ctx.stroke()}
     ctx.restore()}
   if(e.bs==='clawslam'&&e.sub===0){const k=Math.min(1,e.st/(e.wd||1));ctx.save();ctx.globalAlpha=.1+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.tx,e.ty,e.slamR,0,TAU);ctx.fill();ctx.globalAlpha=.3+.5*k;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.stroke();ctx.restore()}
   if(e.bs==='rocks'&&e.sub===1){const k=Math.min(1,e.st/(e.wd||1));ctx.save();ctx.globalAlpha=.25+.5*k;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.tx,e.ty,34-18*k,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(e.tx-44,e.ty);ctx.lineTo(e.tx+44,e.ty);ctx.moveTo(e.tx,e.ty-44);ctx.lineTo(e.tx,e.ty+44);ctx.stroke();ctx.restore()}
   if(e.fin){
     if(e.bs==='breath'&&e.st<e.fireAt){const k=Math.min(1,e.st/e.fireAt);ctx.save();ctx.globalAlpha=.08+.2*k;ctx.fillStyle='#ff6a3a';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,400,e.rot,e.rot+1.4);ctx.closePath();ctx.fill();ctx.globalAlpha=.3+.5*k;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=2;ctx.stroke();ctx.restore()}
-    drawFinal(e,fl);return;
+    ctx=_pc;drawFinal(e,fl);return;
   }
+  ctx=_pc; /* 0.5.1: every warning above (breath cones, charge lines, fire rings...) goes straight onto the arena, so none are clipped to the boss's own box */
   if(cf.ph){drawPlaceholderBoss(e,fl);return}
   if(cf.vine){drawVine(e,fl);return}
   if(cf.crab){

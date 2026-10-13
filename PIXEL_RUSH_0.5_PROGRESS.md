@@ -165,4 +165,4 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - [x] W4/W5 boss attacks (W45_ATK: laser turrets magnet grid overload bombs / tongue bubbles spores hands hex swarm) with telegraphs (drawW45Tele); zone + final atk lists updated.
 - [x] W4/W5 projectiles (P45 pixel sprites per boss, k45 tag; mob shots bolt/spore; homing b.home).
 - [x] Bosses redrawn from real shapes (vecSpr: vector shapes -> palette snap -> top-left light -> ink outline): all 20 W4/W5 + 10 W3 incl. The Pharaoh (final scale 1.05). Hot glow follows outline (no disc).
-- User then asked: "Fix dragon boss attack lines and fire ring not fully showing" (in progress).
+- [x] "Fix dragon boss attack lines and fire ring not fully showing": boss warnings were drawn inside the boss's pixel box (clipped); all of drawBossBase's warnings now draw on the arena (ctx=_pc moved down); fire ring warning thicker with fill.
