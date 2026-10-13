@@ -4762,7 +4762,7 @@ function bossIntroTick(dt){
     bossIn.hit=true;
     if(e&&!e.fin){e.spawnT=0;ringFx(e.x,e.y,e.r*3.4,.5);for(let i=0;i<4;i++)spark(e.x,e.y,i%2?'#ffffff':e.c,22,520)}
     shake=Math.max(shake,24);if(e&&e.fin){sfx(70,.6,'sawtooth',.12,.4);noise(.4,.08)}
-    if(e&&e.fin){sfx(48,1.2,'sawtooth',.12,.5);setTimeout(()=>sfx(90,.8,'square',.06,.5),300);beastCall(e.fk===2?'roar':e.fk===3?'hiss':'growl')}
+    if(e&&e.fin){sfx(48,1.2,'sawtooth',.12,.5);setTimeout(()=>sfx(90,.8,'square',.06,.5),300);beastCall(e.fk===2||e.fk>=4?'roar':e.fk===3?'hiss':'growl')}
     else if(e&&e.cfg)bossCall(e.cfg.boss);
   }
   if(bossIn.t>=bossIn.dur)bossIntroEnd();
@@ -4772,7 +4772,9 @@ function bossIntroTick(dt){
 const FIN_CFG={
   1:{n:'The Dragon Hoard',boss:'The Dragon',bc:'#c4392b',bl:'#ffb347',ed:'#ff8a3d',deco:'',atk:['breath','slam','firering'],teeth:0,hm:1.8,sm:.95,rs:1.3,r:54,intro:'THE DRAGON WAKES · FINAL BOSS'},
   2:{n:'The Buried Vault',boss:'The Golem',bc:'#8a8f9c',bl:'#d8d0b8',ed:'#7ae8ff',deco:'',atk:['slam','charge'],teeth:0,hm:2.1,sm:.78,rs:1.45,r:62,intro:'THE GOLEM AWAKENS · FINAL BOSS'},
-  3:{n:'The Pharaoh\u2019s Tomb',boss:'The Pharaoh',bc:'#d8a820',bl:'#fff0a0',ed:'#ffcc4a',deco:'',atk:['pillars','spiral','rain'],teeth:0,hm:2.2,sm:.9,rs:1.3,r:56,intro:'THE PHARAOH RISES · FINAL BOSS'}
+  3:{n:'The Pharaoh\u2019s Tomb',boss:'The Pharaoh',bc:'#d8a820',bl:'#fff0a0',ed:'#ffcc4a',deco:'',atk:['pillars','spiral','rain'],teeth:0,hm:2.2,sm:.9,rs:1.3,r:56,intro:'THE PHARAOH RISES \u00b7 FINAL BOSS'},
+  4:{n:'The Launch Bay',boss:'OMEGA',bc:'#5a6478',bl:'#4dc3ff',ed:'#4dc3ff',deco:'',atk:['burst','pillars','rain','charge'],teeth:0,hm:2.3,sm:.85,rs:1.4,r:60,intro:'OMEGA COMES ONLINE \u00b7 FINAL BOSS'},
+  5:{n:'The Black Mire',boss:'The Mire Leviathan',bc:'#3f6a44',bl:'#d8ff6a',ed:'#d84aff',deco:'',atk:['acid','spiral','rain','whip'],teeth:0,hm:2.4,sm:.9,rs:1.4,r:60,intro:'THE LEVIATHAN RISES \u00b7 FINAL BOSS'}
 };
 function spawnFinal(){
   const k=world,C=FIN_CFG[k]||FIN_CFG[1],tier=9;
@@ -4781,10 +4783,11 @@ function spawnFinal(){
   e.tier=tier;e.hp=e.maxhp=Math.ceil(hpS(Math.round((60+(tier-1)*38)*C.hm))*BOSS_HP_EASE*bossPace());e.pts=6000;
   e.bs='idle';e.bt=1.2;e.phase=1;e.last='';e.sumT=9;e.st=0;e.sub=0;e.msp=0;e.mx=0;e.my=1;
   e.tx=0;e.ty=0;e.wd=1;e.slamR=70;e.rep=0;e.rings=0;e.fireAt=0;e.rot=0;e.vol=0;
-  e.fin=true;e.fk=k;e.flyMax=k===2?2.7:k===3?2.2:2.4;e.fly=e.flyMax;e.fz=k===1?1:0;e.landR=k===2?150:k===3?120:130;
+  e.fin=true;e.fk=k;e.flyMax=k===2?2.7:(k===3||k===5)?2.2:2.4;e.fly=e.flyMax;e.fz=(k===1||k===4)?1:0;e.landR=k===2?150:k===3?120:130;
   e.al=1;e.rz=1;e.burrowed=false; /* Serpent: al is its see-through amount, rz how far it is reared up, burrowed means it is underground */
   if(k===2){e.sx=W+170;e.sy=H/2;e.lx=W*.66;e.ly=H/2}
-  else if(k===3){e.sx=W*.2;e.sy=H*.4;e.lx=W/2;e.ly=M+120}
+  else if(k===3||k===5){e.sx=W*.2;e.sy=H*.4;e.lx=W/2;e.ly=M+120}
+  else if(k===4){e.sx=W/2;e.sy=-H*.6;e.lx=W/2;e.ly=M+120}
   else{e.sx=W*.15;e.sy=H*.38;e.lx=W/2;e.ly=M+110}
   e.x=e.sx;e.y=e.sy;e.spawnT=99; /* untouchable while it makes its entrance */
   wallHole=0;
@@ -4794,7 +4797,7 @@ function spawnFinal(){
    vault beside World 2. The player is frozen while it plays; the name card shows once the boss has landed ---------- */
 let cine=null;const cam={x:0,y:0};
 const cez=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
-function cineStart(e){cine={e:e,k:e.fk,t:0,f:{}};e.cine=true;cam.x=0;cam.y=0;if(e.fk===3){e.rise=0;e.x=e.lx;e.y=e.ly}}
+function cineStart(e){cine={e:e,k:e.fk,t:0,f:{}};e.cine=true;cam.x=0;cam.y=0;if(e.fk===3||e.fk===5){e.rise=0;e.x=e.lx;e.y=e.ly}}
 function cineEnd(){const e=cine&&cine.e;cine=null;cam.x=0;cam.y=0;if(e){e.cine=false;e.rise=undefined;e.wake=undefined;bossIntroStart(e.cfg)}}
 function cineTick(dt){
   const c=cine,e=c.e,k=c.k,t=(c.t+=dt),once=n=>c.f[n]?false:(c.f[n]=1,true);
@@ -4824,14 +4827,25 @@ function cineTick(dt){
         for(let i=0;i<34;i++)parts.push({x:W-M-R()*20,y:H/2+(R()-.5)*130,vx:-120-R()*320,vy:(R()-.5)*260,l:.9,m:.9,c:R()<.5?'#8a8f9c':R()<.5?'#5a5d68':'#bdb8a6',s:3+R()*5})}
       const q=cez((t-3.8)/1.1);e.x=wx+(e.lx-wx)*q;e.y=H/2+(e.ly-H/2)*q;cam.x=W*.36*(1-q);shake=Math.max(shake,6)}
     else{finalLand(e);cineEnd()}
-  }else{ /* the sand swirls, then the Pharaoh rises out of it */
+  }else if(k===4){ /* the camera looks up into the night sky: OMEGA drops down on its thrusters and lands hard */
+    const up=-H*.62;
+    if(t<1){cam.y=up*cez(t);e.x=W/2;e.y=up-H*.25}
+    else if(t<2.6){const q=(t-1)/1.6;e.x=W/2+Math.sin(t*3)*8;e.y=up-H*.25+H*.42*q;
+      if(once('roar'))beastCall('roar');
+      if(R()<dt*60)parts.push({x:e.x+(R()<.5?-1:1)*e.r*.5,y:e.y+e.r*.9,vx:(R()-.5)*40,vy:160+R()*120,l:.4,m:.4,c:R()<.5?'#4dc3ff':'#ffffff',s:3+R()*3});
+      if(R()<dt*6)sfx(90+R()*30,.2,'sawtooth',.035,.6);shake=Math.max(shake,2)}
+    else if(t<3.6){const q=cez((t-2.6)/1),y0=up+H*.17;e.x=W/2;e.y=y0+(e.ly-y0)*q;cam.y=Math.min(0,up*(1-q));shake=Math.max(shake,3+q*6);
+      if(R()<dt*70)parts.push({x:e.x+(R()-.5)*e.r,y:e.y+e.r*.9,vx:(R()-.5)*80,vy:140+R()*80,l:.35,m:.35,c:R()<.5?'#4dc3ff':'#ffd36b',s:3+R()*3})}
+    else{finalLand(e);cineEnd()}
+  }else{ /* the sand (or the bog) swirls, then the Pharaoh (or the Leviathan) rises out of it */
+    const bog=k===5,c1=bog?'#4a6a3a':'#e8c070',c2=bog?'#8ee8c8':'#c8963a',c3=bog?'#d8ff6a':'#ffd36b';
     e.x=e.lx;e.y=e.ly;
     if(t<1.3){shake=Math.max(shake,2+t*3);e.rise=0;
-      if(R()<dt*70){const a=R()*TAU,d=e.r*(1.2+R()*1.6);parts.push({x:e.x+Math.cos(a)*d,y:e.y+e.r*.8+Math.sin(a)*d*.45,vx:-Math.sin(a)*120-Math.cos(a)*70,vy:Math.cos(a)*50-Math.sin(a)*30,l:.6,m:.6,c:R()<.5?'#e8c070':'#c8963a',s:2+R()*3})}
+      if(R()<dt*70){const a=R()*TAU,d=e.r*(1.2+R()*1.6);parts.push({x:e.x+Math.cos(a)*d,y:e.y+e.r*.8+Math.sin(a)*d*.45,vx:-Math.sin(a)*120-Math.cos(a)*70,vy:Math.cos(a)*50-Math.sin(a)*30,l:.6,m:.6,c:R()<.5?c1:c2,s:2+R()*3})}
       if(R()<dt*5)sfx(80+R()*40,.3,'sawtooth',.04,.6)}
     else if(t<3.4){const q=cez((t-1.3)/2.1);e.rise=q;shake=Math.max(shake,5);if(once('up')){ringFx(e.x,e.y+e.r*.8,e.r*2,.45);sfx(60,1,'sawtooth',.1,.5);noise(.4,.06)}
-      if(R()<dt*60)parts.push({x:e.x+(R()-.5)*e.r*1.6,y:e.y+e.r*.8-q*e.r*2.4*R(),vx:(R()-.5)*50,vy:60+R()*80,l:.6,m:.6,c:R()<.5?'#e8c070':'#ffd36b',s:2+R()*3})}
-    else if(t<3.9){e.rise=1;if(once('hiss')){beastCall('hiss');shake=Math.max(shake,16);for(let i=0;i<3;i++)spark(e.x,e.y,'#ffd36b',20,420)}}
+      if(R()<dt*60)parts.push({x:e.x+(R()-.5)*e.r*1.6,y:e.y+e.r*.8-q*e.r*2.4*R(),vx:(R()-.5)*50,vy:60+R()*80,l:.6,m:.6,c:R()<.5?c1:c3,s:2+R()*3})}
+    else if(t<3.9){e.rise=1;if(once('hiss')){beastCall(bog?'roar':'hiss');shake=Math.max(shake,16);for(let i=0;i<3;i++)spark(e.x,e.y,c3,20,420)}}
     else{finalLand(e);cineEnd()}
   }
 }
@@ -4839,10 +4853,11 @@ function cineTick(dt){
 function drawOffstage(){
   ctx.fillStyle=world===5?'#1a2414':world===4?'#151c28':world===3?'#8a6a3a':world===2?'#1c1f22':'#1f3a1a';ctx.fillRect(-W,0,W,H);ctx.fillRect(W,0,W,H);
   if(cam.y<0){
-    const SK=['#2a0f24','#4a1830','#6e2434','#9a3a34','#c85a3a','#e8843e','#f4a84a'],top=-H*1.3,bh=(H*1.3)/SK.length;
+    const SK=world===4?['#05070f','#080c1a','#0c1226','#101a34','#162444','#1c2e52','#243a60']:['#2a0f24','#4a1830','#6e2434','#9a3a34','#c85a3a','#e8843e','#f4a84a'],top=-H*1.3,bh=(H*1.3)/SK.length;
     SK.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(-W,top+i*bh,W*3,bh+1)});
-    ctx.fillStyle='#1a0c14';for(let x=-W;x<W*2;x+=24){const h=30+Math.abs(Math.sin(x*.013))*70+Math.abs(Math.sin(x*.041))*30;ctx.fillRect(x,-h,24,h)}
-    ctx.fillStyle='rgba(255,220,180,.5)';for(let i=0;i<8;i++){const cx=((i*317+time*12)%(W*3))-W,cy=top+40+(i*97)%(H*.6);ctx.fillRect(cx,cy,70,8);ctx.fillRect(cx+12,cy-8,40,8)}
+    ctx.fillStyle=world===4?'#0a0e18':'#1a0c14';for(let x=-W;x<W*2;x+=24){const h=30+Math.abs(Math.sin(x*.013))*70+Math.abs(Math.sin(x*.041))*30;ctx.fillRect(x,-h,24,h);if(world===4){ctx.fillStyle='#4dc3ff';for(let y=-h+8;y<-6;y+=10)if(((x/24+y/10)|0)%3===0)ctx.fillRect(x+6,y,4,3);ctx.fillStyle='#0a0e18'}} /* World 4: a city skyline with lit windows */
+    if(world===4){ctx.fillStyle='rgba(255,255,255,.7)';for(let i=0;i<60;i++)ctx.fillRect(((i*271)%(W*3))-W,top+((i*137)%(H*.9)),2,2)}
+    if(world!==4){ctx.fillStyle='rgba(255,220,180,.5)';for(let i=0;i<8;i++){const cx=((i*317+time*12)%(W*3))-W,cy=top+40+(i*97)%(H*.6);ctx.fillRect(cx,cy,70,8);ctx.fillRect(cx+12,cy-8,40,8)}}
   }
   if(cam.x>0){
     ctx.fillStyle='#121318';ctx.fillRect(W-M,-H,W*1.3,H*3);
@@ -4856,13 +4871,13 @@ function drawOffstage(){
 }
 /* the Pharaoh climbing out of the sand: only the part above the sand line shows, light pours out behind him */
 function drawPharaohRise(e){
-  const q=e.rise||0,gy=e.y+e.r*.85,T=time;
+  const q=e.rise||0,gy=e.y+e.r*.85,T=time,bog=e.fk===5;
   ctx.save();ctx.globalAlpha=.35+.4*q;ctx.translate(e.x,gy-e.r*1.2*q);
-  for(let i=0;i<10;i++){ctx.rotate(TAU/10);ctx.fillStyle=i%2?'rgba(255,224,140,.5)':'rgba(255,200,90,.35)';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-18,-e.r*3.2*q);ctx.lineTo(18,-e.r*3.2*q);ctx.closePath();ctx.fill()}ctx.restore();
-  ctx.save();ctx.fillStyle='#9a6a24';ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,0,TAU);ctx.fill();
-  ctx.strokeStyle='#e8c070';ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(e.x,gy,e.r*(.5+i*.45),e.r*(.17+i*.14),0,T*3+i,T*3+i+3.6);ctx.stroke()}ctx.restore();
+  for(let i=0;i<10;i++){ctx.rotate(TAU/10);ctx.fillStyle=bog?(i%2?'rgba(140,255,200,.4)':'rgba(216,74,255,.3)'):i%2?'rgba(255,224,140,.5)':'rgba(255,200,90,.35)';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-18,-e.r*3.2*q);ctx.lineTo(18,-e.r*3.2*q);ctx.closePath();ctx.fill()}ctx.restore();
+  ctx.save();ctx.fillStyle=bog?'#1a3a34':'#9a6a24';ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,0,TAU);ctx.fill();
+  ctx.strokeStyle=bog?'#8ee8c8':'#e8c070';ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(e.x,gy,e.r*(.5+i*.45),e.r*(.17+i*.14),0,T*3+i,T*3+i+3.6);ctx.stroke()}ctx.restore();
   ctx.save();ctx.beginPath();ctx.rect(e.x-e.r*4,gy-e.r*6,e.r*8,e.r*6);ctx.clip();ctx.translate(0,(1-q)*e.r*2.9);drawFinal(e,false);ctx.restore();
-  ctx.save();ctx.strokeStyle='#d8b060';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,.1,Math.PI-.1);ctx.stroke();ctx.restore();
+  ctx.save();ctx.strokeStyle=bog?'#24504a':'#d8b060';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,.1,Math.PI-.1);ctx.stroke();ctx.restore();
 }
 function finalFly(e,dt){
   const k=e.fk;e.fly-=dt;const el=e.flyMax-e.fly,T0=1.1;
@@ -7267,6 +7282,8 @@ const VT={
   2:{base:'#0e1c22',fa:'#112027',fb:'#17303a',vein:'122,232,255',grid:'80,170,190',trim:'#5fd0e0',trimRGB:'95,208,224',carp0:'#14393f',carp1:'#1d5058',rugA:'#0f2a30',rugB:'#17424a',wallA:'#2a3a42',wallB:'#1b2830',pil:['#3a4a52','#6a7f88','#27343b'],vig:'2,8,12',torch:['#4dd8ff','#d6f8ff','95,208,255'],shaft:'140,230,255',dust:'#bfefff',frame:'#3f8a99',rune:'122,232,255',bricks:true},
   3:{base:'#0e0a1a',fa:'#130d22',fb:'#1a1230',vein:'255,204,74',grid:'130,100,190',trim:'#ffcc4a',trimRGB:'255,204,74',carp0:'#2a0f3a',carp1:'#3a1650',rugA:'#1a0a2a',rugB:'#2a1242',wallA:'#2e2444',wallB:'#1c1530',pil:['#3a2f5c','#5a4c8a','#2a2146'],vig:'6,2,12',torch:['#b58cff','#ffe9a8','181,140,255'],shaft:'255,214,140',dust:'#ffe9a8',frame:'#6a4a9a',rune:'255,204,74',bricks:true}
 };
+VT[4]=Object.assign({},VT[2],{base:'#0c121c',fa:'#0f1622',fb:'#141e2e',trim:'#4dc3ff',trimRGB:'77,195,255',carp0:'#1a2a44',carp1:'#22365a',wallA:'#222c3c',wallB:'#161e2a'});
+VT[5]=Object.assign({},VT[3],{base:'#0c140e',fa:'#0f1a12',fb:'#14221a',trim:'#d8ff6a',trimRGB:'216,255,106',carp0:'#2a1a3a',carp1:'#3a2450',wallA:'#1e2a20',wallB:'#141c16'});
 function buildVaultBg(){
   const key=world+'|'+cv.width+'|'+cv.height;
   if(vbg&&vbg.key===key)return vbg.cv;
@@ -7520,6 +7537,11 @@ function drawVaultBg(){
   if(world===1)drawSleepingDragon(W*.2,H*.36);
   else if(world===2)drawDormantGolem(W*.2,H*.36);
   else if(world===3)drawDormantSnake(W*.2,H*.36);
+  else if(world===4||world===5){ /* OMEGA powered down in its bay; the Leviathan asleep under the bog water */
+    const nm=world===4?'OMEGA':'The Mire Leviathan',sp=sandBossSpr(nm,'w0',false),U=MOB_U*1.3,x=W*.2,y=H*.36,br=Math.sin(time*1.5);
+    glowAt(x,y-20,150,world===4?'77,195,255':'216,74,255',.16+.05*br);
+    ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.75;ctx.drawImage(sp.c,x-sp.ax*U,y+40-sp.c.height*U+br*2,sp.c.width*U,sp.c.height*U);ctx.globalAlpha=.45;ctx.fillStyle=world===4?'#0a1020':'#0c1a14';ctx.fillRect(x-sp.ax*U,y+40-sp.c.height*U*.45,sp.c.width*U,sp.c.height*U*.45);ctx.restore();
+    ctx.fillStyle=world===4?'#4dc3ff':'#d8ff6a';ctx.font='700 14px Chakra Petch,sans-serif';ctx.globalAlpha=.4+.3*Math.max(0,br);ctx.fillText('z',x+40,y-50-br*4);ctx.fillText('Z',x+52,y-66-br*4);ctx.globalAlpha=1}
   /* entrance on the left wall: sealed behind you */
   const px=M,py=H/2,g=.5+.5*Math.sin(t*4);
   ctx.fillStyle='#0e1017';ctx.fillRect(px-14,py-34,16,68);
@@ -8239,6 +8261,29 @@ Object.assign(SB_ART,{
     const hand=(x,y)=>{d.el(x,y,3,3,P.e);d.p(x,y,'#ffffff')};
     if(up){d.l(19,24,8,12,P.b);d.l(35,24,46,12,P.b);hand(7,11);hand(47,11)}else{d.l(19,26,10,34,P.b);d.l(35,26,44,34,P.b);hand(9,35);hand(45,35)}})
 });
+Object.assign(SB_ART,{
+  'OMEGA':(P,f)=>mobCanvas(70,70,35,d=>{ /* World 4 final: a giant war mech */
+    const up=f==='atk',k=f==='w1'?1:0;
+    for(const lx of[18,42]){d.r(lx,48,11,18,P.B);d.r(lx-2,64,15,5,P.D);d.r(lx+2,52,7,3,P.l)}
+    d.r(16,44,38,6,P.d);
+    d.r(12,16,46,30-k,P.b);d.r(12,16,46,3,P.l);d.r(12,42,46,3,P.B);for(const q of[[14,19],[54,19],[14,40],[54,40]])d.r(q[0],q[1],2,2,P.l);
+    d.el(35,30,9,9,'#12141c');d.el(35,30,8-k,8-k,P.d);d.el(35,30,5,5,P.e);d.el(35,30,up?4:2,up?4:2,'#ffffff');
+    d.r(25,4,20,12,P.b);d.r(25,4,20,2,P.l);d.r(27,8,16,4,'#12141c');d.r(28,9,14,2,P.e);d.l(30,4,26,0,P.B);d.l(40,4,44,0,P.B);
+    const cannon=(x,y,dir)=>{d.r(x,y,10,8,P.B);d.r(x,y,10,2,P.l);d.r(dir>0?x+10:x-6,y+2,6,4,P.D);d.p(dir>0?x+15:x-6,y+3,P.e)};
+    if(up){d.r(2,12,10,8,P.B);cannon(0,4,-1);d.r(58,12,10,8,P.B);cannon(60,4,1)}else{cannon(2,14,-1);cannon(58,14,1);d.r(3,22,8,16,P.B);d.r(59,22,8,16,P.B);d.r(2,36,10,6,P.d);d.r(58,36,10,6,P.d)}}),
+  'The Mire Leviathan':(P,f)=>mobCanvas(74,58,37,d=>{ /* World 5 final: a swamp serpent rising out of the bog */
+    const up=f==='atk',k=f==='w1'?1:0;
+    d.el(37,52,35,6,P.w);d.el(37,51,30,4,P.W);for(let i=0;i<10;i++)d.p(6+i*7,50+(i%2),'#8ee8c8');
+    for(const q of[[8,44,7],[64,42,8]]){d.el(q[0],q[1]-k,q[2],q[2],P.b);d.el(q[0],q[1]-k-2,q[2]-3,q[2]-4,P.B);d.p(q[0],q[1]-q[2]-k,P.l)}
+    const neck=up?[[37,46,11],[39,36,10],[42,27,10]]:[[37,47,11],[38,38,10],[40,30,10]];
+    for(const q of neck){d.el(q[0],q[1]-k,q[2],q[2]-1,P.b);d.l(q[0]-q[2]+2,q[1]-k+3,q[0]+q[2]-2,q[1]-k+3,P.B);for(let i=-1;i<=1;i++)d.p(q[0]+i*4,q[1]-k-3,P.l)}
+    const hy=up?14:18;d.el(42,hy-k,16,11,P.b);d.el(42,hy-k-3,13,6,P.l);
+    for(const ex of[33,51]){d.el(ex,hy-6-k,3,3,'#12141c');d.el(ex,hy-6-k,2,2,P.e)}
+    for(const hx of[28,56]){d.l(hx,hy-8-k,hx+(hx<40?-6:6),hy-16-k,P.B);d.l(hx+(hx<40?-6:6),hy-16-k,hx+(hx<40?-9:9),hy-13-k,P.B)}
+    const jaw=up?7:2;d.r(30,hy+3-k,24,2+jaw,'#2a0a14');for(let x=31;x<54;x+=3){d.p(x,hy+3-k,'#f4ecd8');d.p(x+1,hy+4+jaw-k,'#f4ecd8')}
+    for(let i=0;i<6;i++)d.l(28+i*5,hy+8-k,27+i*5,hy+14-k+(i%2)*3,P.m)})
+});
+Object.assign(SB_PAL,{'OMEGA':{b:'#5a6478',B:'#353c4c',l:'#9aa4b8',d:'#1c2230',D:'#151a24',e:'#4dc3ff'},'The Mire Leviathan':{b:'#3f6a44',B:'#24402a',l:'#7aa070',e:'#d8ff6a',m:'#5a7a2a',w:'#1a3a34',W:'#24504a'}});
 Object.assign(SB_PAL,{
   'Scrap Hound':{b:'#8a93a3',B:'#4a5260',l:'#c8ccd8',d:'#2a3044',D:'#22262e',e:'#4dc3ff'},
   'Riveter':{b:'#c8a040',B:'#6a5a30',l:'#ffe08a',d:'#4a4a52',D:'#2a2a30',e:'#ffb02e'},
@@ -8637,7 +8682,7 @@ function drawFinal(e,fl){
     ctx=_pc;
 
   }
-  if(e.fk===2)drawGolem(e,fl);else if(e.fk===3)drawPharaoh(e,fl);else drawDragon(e,fl);
+  if(e.fk===2)drawGolem(e,fl);else if(e.fk===3)drawPharaoh(e,fl);else if(e.fk===4)drawSandBoss(e,fl,'OMEGA',1.5);else if(e.fk===5)drawSandBoss(e,fl,'The Mire Leviathan',1.5);else drawDragon(e,fl);
 }
 /* the hole the Stone Colossus leaves in the right wall */
 function drawWallHole(){
@@ -9134,15 +9179,15 @@ function draw(){
   for(const z of pools){const k=Math.min(1,z.t/.6);ctx.save();ctx.globalAlpha=.8*k;const g=ctx.createRadialGradient(z.x,z.y,2,z.x,z.y,z.r);g.addColorStop(0,'#c8ff6a');g.addColorStop(.55,'#5fb52a');g.addColorStop(1,'rgba(40,90,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(z.x,z.y,z.r,z.r*.75,0,0,TAU);ctx.fill();ctx.restore()}
   for(const sh of shadows){ctx.globalAlpha=.5;ctx.fillStyle='#4a3a9a';ctx.beginPath();ctx.arc(sh.x,sh.y,p.r,0,TAU);ctx.fill();ctx.strokeStyle='#8a7bff';ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1}
   for(const e of enemies){
-    if(e.fin&&e.fly>0&&e.fk===3&&e.rise!==undefined){drawPharaohRise(e);continue}
+    if(e.fin&&e.fly>0&&(e.fk===3||e.fk===5)&&e.rise!==undefined){drawPharaohRise(e);continue}
     if(e.fin&&e.fly>0&&e.fk===2&&e.wake!==undefined){pixelDraw(e.x,e.y,bossHalf(e),()=>drawFinal(e,false));if(e.wake<1){ctx.save();ctx.globalAlpha=.55*(1-e.wake);ctx.fillStyle='#2a2b33';ctx.beginPath();ctx.ellipse(e.x,e.y,e.r*1.3,e.r*1.4,0,0,TAU);ctx.fill();ctx.restore()}if(e.wake>.55)glowAt(e.x,e.y-e.r*.7,e.r*.8,'122,232,255',.35+.25*Math.sin(time*10));continue}
-    if(e.fin&&e.fly>0){if(e.fk===3)drawFinal(e,false);else pixelDraw(e.x,e.y,bossHalf(e),()=>drawFinal(e,false));continue}
+    if(e.fin&&e.fly>0){if(e.fk>=3)drawFinal(e,false);else pixelDraw(e.x,e.y,bossHalf(e),()=>drawFinal(e,false));continue}
     if(e.spawnT>0){
       const k=e.spawnT/.75;ctx.strokeStyle=e.c;ctx.globalAlpha=Math.max(0,.9-k*.5);ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(e.x,e.y,e.r*(.6+k*1.4),0,TAU);ctx.stroke();ctx.globalAlpha=1;continue;
     }
     const fl=e.flash>0;
-    if(e.t==='boss'){if((e.cfg&&e.cfg.ph)||(e.fin&&e.fk===3))drawBoss(e,fl);else pixelDraw(e.x,e.y,bossHalf(e),()=>drawBoss(e,fl));continue}
+    if(e.t==='boss'){if((e.cfg&&e.cfg.ph)||(e.fin&&e.fk>=3))drawBoss(e,fl);else pixelDraw(e.x,e.y,bossHalf(e),()=>drawBoss(e,fl));continue}
     drawMobTele(e);
     drawMob(e,fl);
     if(world>=2&&e.shell>0){ctx.save();ctx.strokeStyle='#e8d8a0';ctx.lineWidth=4;ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(e.x,e.y,e.r+5,time*10,time*10+4.4);ctx.stroke();ctx.restore()}
