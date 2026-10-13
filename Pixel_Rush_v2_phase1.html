@@ -1077,7 +1077,13 @@ const SONGS={
     chords:[[54,57,61],[50,54,57],[57,61,64],[52,56,59]],bass:[42,38,45,40],
     melA:[[78,0,78,81,0,85,81,0],[74,0,78,0,81,0,78,74],[81,0,85,0,88,0,85,81],[80,0,83,0,87,0,83,80]],
     melB:[[0,90,0,85,81,0,85,90],[0,86,0,81,78,0,81,86],[0,88,0,85,81,0,85,88],[0,87,0,83,80,0,83,87]],
-    drums:{k:[0,2,4,6],kv:.09,s:[2,6],sv:.035,h:[1,3,5,7],hv:.01}}
+    drums:{k:[0,2,4,6],kv:.09,s:[2,6],sv:.035,h:[1,3,5,7],hv:.01}},
+  /* final: C minor, fast and relentless, for the vault final bosses (Dragon, Golem, Pharaoh). Driving kick, constant hats, a climbing two-part lead */
+  final:{bpm:152,vol:1.15,lead:'p25',lv:.032,len:1,arp:'square',av:.015,style:'bounce',echo:true,
+    chords:[[48,51,55],[44,48,51],[53,56,60],[43,47,50]],bass:[36,32,41,31],
+    melA:[[72,0,75,72,79,0,78,79],[80,0,79,75,72,0,75,80],[77,0,80,84,0,80,77,75],[74,0,79,83,86,0,83,79]],
+    melB:[[84,83,84,87,0,84,0,79],[80,79,80,84,0,80,0,75],[77,76,77,80,0,84,0,89],[86,0,83,0,79,0,74,71]],
+    drums:{k:[0,2,3,4,6],kv:.1,s:[2,6],sv:.04,h:[0,1,2,3,4,5,6,7],hv:.008}}
 };
 function pulseWave(){
   if(mus.pw)return mus.pw;
@@ -1148,6 +1154,7 @@ function setSong(k){
 /* which song fits what the player is doing: the in-game songs cycle each wave */
 function musicFor(){
   if(juke.track)return juke.track;
+  if(state==='play'&&enemies.some(e=>e.fin&&!e.dead))return 'final'; /* a vault final boss is awake */
   if(room==='vault')return 'vault';
   if(state==='pause')return mus.cur||'home';
   if(state==='shop'||state==='win')return wave%10===5?'shop2':'shop';
@@ -3146,7 +3153,8 @@ const TRACKS=[
   ['g7','Neon Rush','Waves','#4dfff0'],
   ['shop2','Lucky Streak','Shop','#ffe14d'],
   ['boss2','Iron Requiem','Boss fight','#c0c8d8'],
-  ['boss3','Crimson Crown','Boss fight','#ff4d5e']
+  ['boss3','Crimson Crown','Boss fight','#ff4d5e'],
+  ['final','Last Stand','Final boss','#ff5a2a']
 ];
 const MODE_LABEL={one:'REPEAT ONE',all:'PLAY ALL',shuffle:'SHUFFLE'};
 function jukeCur(){return juke.track||mus.cur||'home'}
