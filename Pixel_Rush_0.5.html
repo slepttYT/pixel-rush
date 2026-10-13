@@ -2310,6 +2310,7 @@ const ZONES5=[
   {n:'Moonlit Shrine',bg:'#0e1222',gr:'#161c34',ring:'#22284a',ed:'#e8f0ff',hue:225,deco:'',amb:['#e8f0ff',8,-10],boss:'Moon Moth',ph:1,bc:'#c8ccf0',bl:'#e8f0ff',atk:['halo','rain'],teeth:0,hm:1.55,sm:1.15,rs:1.25,bi:8},
   {n:'The Drowned Heart',bg:'#140c1a',gr:'#20142a',ring:'#321e40',ed:'#d84aff',hue:285,deco:'',amb:['#d84aff',8,-10],boss:'The Bog Witch',ph:1,bc:'#3a2a4a',bl:'#d84aff',warn:'MY DEATH WILL WAKE THE LEVIATHAN',atk:['pillars','spiral','rain'],teeth:0,hm:1.85,sm:1.05,rs:1.35,bi:9}
 ];
+const BR_N=50; /* 0.5: Boss Rush now runs through all five worlds (10 bosses each) */
 let ZONES=ZONES1;
 const WZONES={1:ZONES1,2:ZONES2,3:ZONES3,4:ZONES4,5:ZONES5};
 function setWorld(w){world=w;ZONES=WZONES[w]||ZONES1;DECOR=w===2?DECOR2:w>=3?DECOR3:DECOR1;bgc=null}
@@ -3213,11 +3214,32 @@ ACH.push(
  ['w3bs','Sovereign\u2019s Bane','Defeat 10 bosses in World 3',150,()=>(stats.w3b||0)>=10]
 );
 Object.assign(PROG,{w3a:()=>[stats.w3best||0,5],w3b:()=>[stats.w3best||0,25],w3c:()=>[stats.w3best||0,50],w3d:()=>[stats.w3best||0,75],w3e:()=>[stats.w3best||0,100],w3k:()=>[stats.w3k||0,1000],w3k5:()=>[stats.w3k||0,5000],w3bs:()=>[stats.w3b||0,10]});
+/* ================= 0.5: Worlds 4 and 5 ================= */
+ACH.push(
+ ['w4a','Booting Up','Reach wave 5 in World 4',30,()=>(stats.w4best||0)>=5],
+ ['w4b','Assembly Required','Reach wave 25 in World 4',60,()=>(stats.w4best||0)>=25],
+ ['w4c','Overclocked','Reach wave 50 in World 4',100,()=>(stats.w4best||0)>=50],
+ ['w4d','Core Breach','Reach wave 75 in World 4',150,()=>(stats.w4best||0)>=75],
+ ['w4e','System Override','Reach wave 100 in World 4',300,()=>(stats.w4best||0)>=100],
+ ['w4k','Scrap Collector','Defeat 1,000 enemies in World 4',120,()=>(stats.w4k||0)>=1000],
+ ['w4bs','Hard Reset','Defeat 10 bosses in World 4',150,()=>(stats.w4b||0)>=10],
+ ['w5a','Into the Mire','Reach wave 5 in World 5',30,()=>(stats.w5best||0)>=5],
+ ['w5b','Bog Walker','Reach wave 25 in World 5',60,()=>(stats.w5best||0)>=25],
+ ['w5c','Fog Cutter','Reach wave 50 in World 5',100,()=>(stats.w5best||0)>=50],
+ ['w5d','Witch Hunter','Reach wave 75 in World 5',150,()=>(stats.w5best||0)>=75],
+ ['w5e','Heart of the Swamp','Reach wave 100 in World 5',300,()=>(stats.w5best||0)>=100],
+ ['w5k','Swamp Thing','Defeat 1,000 enemies in World 5',120,()=>(stats.w5k||0)>=1000],
+ ['w5bs','Hex Breaker','Defeat 10 bosses in World 5',150,()=>(stats.w5b||0)>=10]
+);
+Object.assign(PROG,{w4a:()=>[stats.w4best||0,5],w4b:()=>[stats.w4best||0,25],w4c:()=>[stats.w4best||0,50],w4d:()=>[stats.w4best||0,75],w4e:()=>[stats.w4best||0,100],w4k:()=>[stats.w4k||0,1000],w4bs:()=>[stats.w4b||0,10],
+  w5a:()=>[stats.w5best||0,5],w5b:()=>[stats.w5best||0,25],w5c:()=>[stats.w5best||0,50],w5d:()=>[stats.w5best||0,75],w5e:()=>[stats.w5best||0,100],w5k:()=>[stats.w5k||0,1000],w5bs:()=>[stats.w5b||0,10]});
 /* ================= Final bosses: the vault guardians ================= */
 ACH.push(
  ['slaydragon','Dragonslayer','Defeat The Dragon, the beast guarding the World 1 vault',150,()=>(stats.fin1||0)>=1],
  ['slaygolem','Golem Crusher','Defeat The Golem, the giant that smashes out of the World 2 vault',200,()=>(stats.fin2||0)>=1],
- ['slaysnake','Pharaoh\u2019s End','Defeat The Pharaoh, the undying king of the World 3 vault',250,()=>(stats.fin3||0)>=1]
+ ['slaysnake','Pharaoh\u2019s End','Defeat The Pharaoh, the undying king of the World 3 vault',250,()=>(stats.fin3||0)>=1],
+ ['slayomega','Power Down','Defeat OMEGA, the war machine of the World 4 launch bay',300,()=>(stats.fin4||0)>=1],
+ ['slaylevi','Drained','Defeat The Mire Leviathan, the beast under the World 5 bog',350,()=>(stats.fin5||0)>=1]
 );
 /* v4.1: weapon mastery and no-hit runs. Winning a world means beating its vault final boss; "only" means you never switched weapon during the run */
 const wwin=k=>((stats.wwin||{})[k]||0)>=1;
@@ -3258,7 +3280,7 @@ const ACH_TIER_N=['','Easy','Normal','Tricky','Hard','Brutal','Legendary'],ACH_T
 const ACH_TIER={first:1,w5:1,pet:1,hot1:1,c20:1,gold:1,green:1,dash200:1,vault:1,own5:1,
  k100:2,w10:2,boss1:2,runs10:2,lv5:2,flaw5:2,upg:2,w2a:2,w3a:2,rampage:2,chars5:2,green2:2,own10:2,hot25:2,coins1k:2,lv10:2,vault5:2,
  k1000:3,w25:3,w50:3,boss10:3,c60:3,gold2:3,lv15:3,own20:3,hard:3,dash1000:3,vault10:3,hotfull:3,rmp2:3,lv20:3,runs50:3,w2b:3,w3b:3,flaw25:3,boss25:3,chars10:3,coins5k:3,
- k5000:4,w75:4,w100:4,slaydragon:4,boss50:4,lv30:4,loop:4,w2c:4,w2d:4,w3c:4,k10000:4,gold3:4,own40:4,legend:4,hard25:4,runs100:4,vault25:4,dash5000:4,w2k:4,w3k:4,w2bs:4,w3bs:4,c100:4,
+ k5000:4,w75:4,w100:4,slaydragon:4,boss50:4,lv30:4,loop:4,w2c:4,w2d:4,w3c:4,k10000:4,gold3:4,own40:4,legend:4,hard25:4,runs100:4,vault25:4,dash5000:4,w2k:4,w3k:4,w2bs:4,w3bs:4,w4a:2,w5a:2,w4b:3,w5b:3,w4c:4,w5c:4,w4d:5,w5d:5,w4e:5,w5e:6,w4k:4,w5k:4,w4bs:4,w5bs:5,slayomega:5,slaylevi:6,c100:4,
  slaygolem:5,w2e:5,w3d:5,k25000:5,loop3:5,lv50:5,mythic:5,flaw100:5,c200:5,nowin:5,boss100:5,w2k5:5,w3k5:5,chars15:5,fists1:5,knife1:5,gun1:5,bomb1:5,hwin1:5,
  slaysnake:6,w3e:6,nohit1:6,fists3:6,
  w2k500:3,laststand:6,worldbreaker:6,wmf:3,wmk:3,wmg:4,wmb:4,wmall:5,allw1:5,fists2:5,knife2:5,gun2:5,bomb2:5,knife3:6,gun3:6,bomb3:6,nohit2:6,nohit3:6};
@@ -3785,7 +3807,7 @@ function startRush(){
 }
 function brBegin(){
   setWorld(1);wave=0;clearT=.9;dynS=1;snapMap();
-  banner('BOSS RUSH \u00b7 30 BOSSES \u00b7 NO ABILITIES');
+  banner('BOSS RUSH \u00b7 '+BR_N+' BOSSES \u00b7 NO ABILITIES');
 }
 function brAdvance(){
   brIdx++;
@@ -3800,7 +3822,7 @@ function brWin(){
   state='over';
   for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;
   finalize();
-  showRunPanel('BOSS RUSH <em>CLEARED</em>','All 30 bosses are down, with no abilities.','GO AGAIN','HOME',false);
+  showRunPanel('BOSS RUSH <em>CLEARED</em>','All '+BR_N+' bosses are down, with no abilities.','GO AGAIN','HOME',false);
   sfx(784,.3,'triangle',.08,1.5);setTimeout(()=>sfx(1176,.3,'triangle',.06,1.3),120);
 }
 function enterVault(){
@@ -6556,7 +6578,7 @@ let endHow=null;
 function saveCard(){
   if(tut||devWarp){endHow=null;return}
   try{const fs=skinOf(equip)||DEFSK,base=skinBase(equip),tw=totalWave();
-    const cleared=wave>=100||(brMode&&brIdx>=29),res=endHow||(cleared?'clear':'quit');endHow=null;
+    const cleared=wave>=100||(brMode&&brIdx>=BR_N-1),res=endHow||(cleared?'clear':'quit');endHow=null;
     const pc={v:1,ch:CH().id,eq:equip||'',fi:base&&base.forms?Math.max(0,base.forms.indexOf(fs)):-1,wn:fs.fn||fs.n||'',world,wave:tw,loop,score,kills,t:Math.round(runT),res,br:brMode?1:0,diff:DF().n,mods:modNames(runMods),at:Date.now(),cheat:cheatsOn()?1:0};
     LS.setItem('cinder-postcard',JSON.stringify(pc));stats.mailNew=1;saveMeta();
   }catch(e){}
@@ -6658,7 +6680,7 @@ function gameOver(){
   setTimeout(()=>{if(state==='over')loseJingle()},500);
   setTimeout(()=>{
     if(state!=='over')return;
-    showRunPanel('YOU <em>FELL</em>',brMode?'Boss Rush: you fell on boss '+(brIdx+1)+' of 30.':loop?'You reached loop '+(loop+1)+'.':'','GO AGAIN','HOME',true);
+    showRunPanel('YOU <em>FELL</em>',brMode?'Boss Rush: you fell on boss '+(brIdx+1)+' of '+BR_N+'.':loop?'You reached loop '+(loop+1)+'.':'','GO AGAIN','HOME',true);
   },1100);
 }
 function waveEndFx(bw,xp){
@@ -7030,7 +7052,7 @@ function update(dt){
     if(waveActive){
       waveActive=false;if(!p.hitW)stats.flawless++;const bw=wave%10===0;pickT=(bw||(wave%5&&wave!==1))?0:WAVE_BREAK; /* the break comes before the shop opens */
       gain=Math.round((30+wave*12+(bw?40+60*Math.floor(wave/10):0))*2*DF().coin*(p.coinM||1)*WORLD_COIN()*(1+(dynS-1)*.6));coins+=gain;const xg=Math.round(waveXp()*(brMode?1:WAVE_XP_K));runXp+=xg;waveEndFx(bw,xg);clearT=WAVE_BREAK;if(brMode)clearT=3.2;
-      if(wave>=LOOP_WAVES&&(!brMode||brIdx>=29)){winT=1.8;if(devWarp||brMode){/* test run: no unlocks */}else if(world===1&&!stats.w2){stats.w2=1;w2New=true;saveMeta()}else if(world===2&&!stats.w3){stats.w3=1;w3New=true;saveMeta()}else if(world===3&&!stats.w4){stats.w4=1;w4New=true;saveMeta()}else if(world===4&&!stats.w5){stats.w5=1;w5New=true;saveMeta()}}
+      if(wave>=LOOP_WAVES&&(!brMode||brIdx>=BR_N-1)){winT=1.8;if(devWarp||brMode){/* test run: no unlocks */}else if(world===1&&!stats.w2){stats.w2=1;w2New=true;saveMeta()}else if(world===2&&!stats.w3){stats.w3=1;w3New=true;saveMeta()}else if(world===3&&!stats.w4){stats.w4=1;w4New=true;saveMeta()}else if(world===4&&!stats.w5){stats.w5=1;w5New=true;saveMeta()}}
       if(!modOn('iron')){if(bw)p.hp=p.maxhp;else if(p.hp<p.maxhp)p.hp++;
       if(p.cp.waveHeal)healP(p.cp.waveHeal)}
       banner(bw?'BOSS DOWN':'WAVE CLEAR');
@@ -7121,7 +7143,7 @@ function hud(){
   for(let i=0;i<hp.length;i++){const off=i>=p.hp;if(hudC['h'+i]!==off){hp[i].className=off?'off':'';hudC['h'+i]=off}}
   const lp=loop?'LOOP '+(loop+1)+' · ':'';
   const brk=!waveActive&&!enemies.length&&state==='play'&&room!=='vault'&&!vault.stage&&!winT&&!tut&&wave>0;
-  const w=room==='vault'?'VAULT':brk?'NEXT WAVE IN '+Math.max(1,Math.ceil(pickT>0?pickT:clearT)):wave?(brMode?'BOSS RUSH · '+(brIdx+1)+' / 30':lp+(wave%10===0?'BOSS · WAVE '+wave:'WAVE '+wave+(waveTL>0?' · '+Math.ceil(waveTL)+'s':''))):'';
+  const w=room==='vault'?'VAULT':brk?'NEXT WAVE IN '+Math.max(1,Math.ceil(pickT>0?pickT:clearT)):wave?(brMode?'BOSS RUSH · '+(brIdx+1)+' / '+BR_N:lp+(wave%10===0?'BOSS · WAVE '+wave:'WAVE '+wave+(waveTL>0?' · '+Math.ceil(waveTL)+'s':''))):'';
   if(hudC.w!==w){$('wave').textContent=w;hudC.w=w}
   const bs=enemies.find(e=>e.dkb&&!e.dead)||enemies.find(e=>e.t==='boss'&&!e.dead),bb=$('bossbar');
   if(bs){
