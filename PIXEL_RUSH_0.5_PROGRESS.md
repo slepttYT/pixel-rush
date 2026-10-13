@@ -154,3 +154,9 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - Regression scripts pass: w45, pausecheat, saverun, daily, mods, evo, fin45, mail, saveio, mworld, audio, juke, br50.
 - Release files: releases/Pixel_Rush_0.5.exe (Neutralino, verified via the Linux build of the same package: page v0.5, Neutralino API present, no errors), releases/PixelRushServer_0.5.zip (server exe + config + README + .bat; raw 86 MB exe is gitignored). Windows SmartScreen: More info > Run anyway.
 - Shipped: merged to main; artifact https://claude.ai/artifact/58r36B8qAFcDmcB5x3Berm republished (v13) with the downloads capability so Export Save Data works in the viewer (dlCap in exportSave). Online play needs the downloaded HTML or the EXE (an https page cannot reach a plain ws:// server).
+
+## User requests after the 0.5 release (in order)
+- "Fix coins not picking up and counting same with xp" -> dropped coins/XP must be picked up AND added to the run totals.
+- "fix go again screen remove the start run as blank at the bottom of the character section screen keep it so when you click on a character it opens run config"
+- "make sure world 4 and 5 have their own projectile tiles and boss attacks"
+- "make it so bosses don't have to be normal shapes squares and circles only. Make better pixel art to match real shapes of how the bosses would look"

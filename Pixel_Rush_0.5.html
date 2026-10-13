@@ -913,7 +913,7 @@ summary:hover{color:var(--bone)}
       </div>
       <div id="chgrid"></div>
       <div id="chtip" hidden></div>
-      <div class="row"><button class="btn gold" id="chgo" type="button">START RUN</button><button class="btn ghost" id="chback" type="button">BACK</button></div>
+      <div class="row"><button class="btn ghost" id="chback" type="button">BACK</button></div>
     </div>
   </div>
 
@@ -1492,6 +1492,7 @@ function waveXp(){return (8+wave*.4+(wave%10===0?40*(wave/10):0))*xpMul()*DF().x
 function xpHtml(a,pct){const w=pct===undefined?Math.min(100,a.x/a.need*100):pct;return '<div class="xpl"><span>Account level <b>'+a.L+'</b></span><span>'+a.x+' / '+a.need+' XP</span></div><div class="xpb"><i style="width:'+w.toFixed(1)+'%"></i></div>'}
 const RUN_COIN=6; /* coins per 5 waves cleared in a run */
 function bankXp(cleared){
+  try{collectLoot()}catch(e){}
   if(brMode){runXp=0;runWallet=0;cleared=0}
   {const mr=1+modRew(runMods)/100;runXp*=mr;runWallet*=mr} /* challenge modifier bonus */
   const before=acct(),gained=Math.round(runXp);runXp=0;
@@ -3469,7 +3470,6 @@ function renderChars(){
   $('chgrid').innerHTML=CHARS.map((c,i)=>{const l=!charUnlocked(c),a=c.ach&&ACH.find(x=>x[0]===c.ach);
     return '<button type="button" class="chc'+(l?' lock':'')+(c.id===cur.id?' on':'')+(c.id===chSel?' sel':'')+'" data-i="'+c.id+'" style="--tc:'+c.acc+'"><canvas width="96" height="96"></canvas><b>'+(l?'???':c.n)+'</b><small>'+(l?'Earn “'+a[1]+'”':c.t)+'</small>'+(l?'':'<span class="clv">Lv '+clvl(c.id)+'</span>')+'</button>'}).join('');
   [...$('chgrid').children].forEach((b,i)=>drawPortrait(b.firstChild,CHARS[i],!charUnlocked(CHARS[i]),1.2));
-  $('chgo').textContent=charMode==='play'?'START AS '+cur.n.toUpperCase():'SELECT '+cur.n.toUpperCase();
   $('chback').hidden=false;
 }
 function drawCharPrev(now){
@@ -3826,11 +3826,12 @@ function closeSub(){
   const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('daily').hidden=true;$('online').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
-  if(was==='cfg'&&runFlow&&state==='menu'&&!worldGo){openSub('chars',subOpener);return} /* back from Configure Run goes to the fighters */
+  if(was==='cfg'&&runFlow&&(state==='menu'||state==='over')&&!worldGo){openSub('chars',subOpener);return} /* back from Configure Run goes to the fighters */
   if(was==='chars'&&runFlow&&charMode==='play')runFlow=false;
   if(was==='dsel')runFlow=false;
   if(was==='keys'&&fromSet){fromSet=false;openSub('set',subOpener);return}
   if(was==='cheat'&&fromAch){fromAch=false;openSub('ach',subOpener);return}
+  if(state==='over'&&!worldGo){runFlow=false;$('panel').hidden=false;subOpener=null;setTimeout(()=>$('pbtn').focus(),0);return} /* backing out of GO AGAIN returns to the run panel */
   if(state==='pause'){$('pause').hidden=false;subOpener=null;setTimeout(()=>$('presume').focus(),0);return} /* back to the pause menu, still paused */
   refreshHome();
   if(subOpener&&subOpener.focus&&document.contains(subOpener))subOpener.focus();
@@ -3963,7 +3964,7 @@ function enterVault(){
   sfx(520,.1,'triangle',.06,1.4);setTimeout(()=>sfx(780,.22,'triangle',.06,1.3),110);
   startFade(()=>{
     room='vault';vault.stage='vault';vault.got=false;vault.chest='closed';vault.ct=0;vault.looted=false;vault.doorT=0;
-    enemies=[];bullets=[];drops=[];slashes=[];parts=[];bolts=[];
+    collectLoot();enemies=[];bullets=[];drops=[];slashes=[];parts=[];bolts=[];
     p.x=M+80;p.y=H/2;p.vx=p.vy=p.ix=p.iy=0;p.dx=1;p.dy=0;
     banner('THE VAULT');
   });
@@ -4700,7 +4701,7 @@ function reset(){
   brMode=brWant;brIdx=-1;devWarp=false;wallHole=0;runAch=[];bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   Object.assign(p,{x:W/2,y:H/2,vx:0,vy:0,ix:0,iy:0,hp:DF().hp,maxhp:DF().hp,face:0,cd:0,dashT:0,dashCd:0,dashMax:1.1,dashId:0,vc:0,inv:0,blink:0,sw:0,swMax:.18,swHeavy:false,rec:0,swings:0,dx:1,dy:0,ddx:1,ddy:0,r:11,ka:0,kp:[],hits:0,souls:0,dv:0,revT:0,swiftT:0,infS:0,infT:0,phxCd:0,shT:0,vacc:0});lava=[];pools=[];shadows=[];
   p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});p.rageS=0;p.rageT=0;p.gramp=0;
-  hudC={};pickT=0;coins=0;gain=0;runWallet=0;floats=[];
+  hudC={};pickT=0;coins=0;gain=0;runWallet=0;floats=[];lootAcc.c=lootAcc.x=0;
   enemies=[];parts=[];slashes=[];drops=[];bolts=[];bullets=[];thrown=[];meteors=[];pbul=[];pbomb=[];boomers=[];p.wlv=0;lava=[];pools=[];shadows=[];score=0;kills=0;wave=0;combo=0;comboT=0;toSpawn=0;
   loop=0;dynS=1;runXp=0;winT=0;lastRun=null;runT=0;runSnap=null;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
@@ -6143,7 +6144,8 @@ function startGame(){
   if(state==='menu'&&hasRun()){const r=loadRun();pxAsk({t:'Start a new run?',b:'<p>You have a saved run (World '+r.world+', wave '+(r.loop*LOOP_WAVES+r.resume)+'). Starting a new run deletes it.</p>',ok:'NEW RUN',no:'CANCEL',danger:1},v=>{if(v){try{LS.removeItem(RUN_KEY)}catch(e){}refreshHome();startGame()}});return}
   /* the difficulty is the one this save was made with (picked on the save screen), so NEW RUN goes straight to the fighters */
   if(state==='menu'){runFlow=true;charMode='play';openSub('chars',$('play'));return}
-  openSub('cfg',$('pbtn'));
+  /* GO AGAIN: the run panel steps aside and you pick your fighter again; picking one opens Configure Run */
+  $('panel').hidden=true;runFlow=true;charMode='play';openSub('chars',$('pbtn'));
 }
 let nwGo=false; /* set while the WORLD 2 button on the win screen starts the next run, so it works even on a test run that did not unlock World 2 */
 function beginRun(){
@@ -6635,6 +6637,9 @@ function drawLoot(h){
   for(let y=0;y<5;y++)for(let x=0;x<5;x++){const k=g[y][x];if(k!=='.'){ctx.fillStyle=c[k];ctx.fillRect((x-2.5)*u,(y-2.5)*u,u,u)}}
   ctx.restore();
 }
+const lootAcc={c:0,x:0};
+/* loot still lying around is banked when you leave the arena (vault, run end), so nothing you earned is lost */
+function collectLoot(){for(const h of drops){if(!h.k||h.life<=0)continue;h.life=0;if(h.k==='gold')coins+=Math.max(1,Math.round(h.v));else if(h.k==='coin')runWallet+=Math.max(1,Math.round(h.v));else runXp+=h.v}}
 function spillLoot(x,y,k,total,n){
   if(tut)return;n=Math.max(1,n|0);for(let i=0;i<n;i++){const a=R()*TAU,sp=90+R()*130;
     drops.push({k:k,v:k==='coin'?Math.floor(total/n)+(i<Math.round(total)%n?1:0):total/n,x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,age:0,life:25,sd:R()*TAU})}
@@ -6658,7 +6663,13 @@ function kill(e){
   if(e.el==='g'){stats.green++;spillLoot(e.x,e.y,'xp',(12+wave*.6)*xpMul()*DF().xp*(1+.1*(upg.xp||0)),3);spark(e.x,e.y,'#5dff7a',22,320);sfx(880,.15,'triangle',.06,1.5)}
   /* 0.5: every mob drops its gold and a little XP on the floor to pick up (bosses and the tutorial still pay out directly).
      The per-mob XP comes out of the wave-clear XP, so collecting everything gives about the same total as before */
-  if(tut||e.t==='boss'||e.dkb||brMode)coins+=cg;else{spillLoot(e.x,e.y,'gold',cg,1);const xo=waveXp()*MOB_XP;if(xo>0)spillLoot(e.x,e.y,'xp',xo,1)}}
+  /* 0.5.1: the reroll purse gets its gold straight away. What lands on the floor is what the HUD counts: run coins and XP.
+     Each kill adds to a running share, and a piece drops whenever a whole coin or a whole XP point has built up, so every
+     piece shows at least +1 and moves the counter */
+  coins+=cg;
+  if(!(tut||e.t==='boss'||e.dkb||brMode)){
+    lootAcc.c+=DF().coin*(p.coinM||1)*(cheat.coinx?5:1)*(loop>0?2:1)*WORLD_COIN()*(1+.1*(upg.coin||0));const cv=Math.floor(lootAcc.c);if(cv>=1){lootAcc.c-=cv;spillLoot(e.x,e.y,'coin',cv,1)}
+    lootAcc.x+=waveXp()*MOB_XP;const xv=Math.floor(lootAcc.x);if(xv>=1){lootAcc.x-=xv;spillLoot(e.x,e.y,'xp',xv,1)}}}
   spark(e.x,e.y,e.c,18,300);spark(e.x,e.y,'#f1ead8',5,240);
   {const mb=TYPES[e.t]&&TYPES[e.t].mb;hitstop=Math.max(hitstop,mb?.12:.05);shake=Math.max(shake,mb?12:6)}
   dieSfx(e);
@@ -9792,7 +9803,7 @@ buildHp();buildCodex();refreshHome();labelSound();applySet();
 loadBinds();loadPad();labelKeys();
 $('hchar').addEventListener('click',e=>{charMode='pick';openSub('chars',e.currentTarget)});
 $('chback').addEventListener('click',closeSub);
-$('chgo').addEventListener('click',()=>{if(charMode==='play'){closeSub();openSub('wpn',$('play'))}else closeSub()});
+
 /* 0.5: hovering or focusing a fighter shows its stats; on touch screens the first tap previews and the second tap picks */
 let chPtr='mouse';
 function chPeek(id){if(chHover===id)return;chHover=id;renderChInfo(charById(id||chSel));if(!id)$('chtip').hidden=true}
