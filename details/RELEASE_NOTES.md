@@ -1,3 +1,9 @@
+## Pixel Rush 0.6.1
+
+**Fixes in 0.6.1**
+- Fullscreen works in the Windows game (Settings > FULLSCREEN, or F11). In a browser, if the page blocks fullscreen, Settings says so.
+- The pause menu has SETTINGS and JUKEBOX.
+
 ## Pixel Rush 0.6: The Arsenal Update
 
 **Download**

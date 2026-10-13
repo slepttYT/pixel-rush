@@ -640,6 +640,8 @@ summary:hover{color:var(--bone)}
 .tnbad b{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:#ff8a94}
 .tnbad p{margin:0;font-size:14px;color:var(--bone)}
 #hacct .pname{color:var(--gold);letter-spacing:.06em}
+#set.inrun .sdnote,#set.inrun .sdnote~.row,#set.inrun .sdnote~#sdmsg,#set.inrun .sdh{display:none!important} /* no save import/export in the middle of a run */
+#fsnote{margin:4px 0 0;color:#ffb0b8;font-size:12px}#fsnote:empty{display:none}
 #rskip{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);min-width:220px;z-index:5}
 </style>
 
@@ -721,7 +723,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v0.6</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
+    <div class="hfoot"><span>v0.6.1</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -825,7 +827,7 @@ summary:hover{color:var(--bone)}
   </div>
 
   <div id="flash"></div>
-  <div id="pause" class="ov" hidden><div class="box"><h2>PAUSED</h2><button class="btn gold" id="presume" type="button">RESUME</button><button class="btn ghost" id="psnd" type="button">SOUND: ON</button><button class="btn ghost" id="pcheat" type="button" hidden>CHEATS</button><button class="btn ghost" id="psave" type="button">SAVE &amp; EXIT</button><button class="btn ghost" id="pquit" type="button">END RUN</button><p class="ptime" id="ptime"></p><p class="tiphint pconly">Esc or P resumes</p></div></div>
+  <div id="pause" class="ov" hidden><div class="box"><h2>PAUSED</h2><button class="btn gold" id="presume" type="button">RESUME</button><button class="btn ghost" id="psnd" type="button">SOUND: ON</button><button class="btn ghost" id="pset" type="button">SETTINGS</button><button class="btn ghost" id="pjuke" type="button">JUKEBOX</button><button class="btn ghost" id="pcheat" type="button" hidden>CHEATS</button><button class="btn ghost" id="psave" type="button">SAVE &amp; EXIT</button><button class="btn ghost" id="pquit" type="button">END RUN</button><p class="ptime" id="ptime"></p><p class="tiphint pconly">Esc or P resumes</p></div></div>
   <div id="xh"><i></i></div>
   <div id="cos" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="cosname">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
@@ -858,7 +860,7 @@ summary:hover{color:var(--bone)}
       <h3 class="pdh">Sound and extras</h3>
       <div class="row"><button class="btn ghost" id="hsnd" type="button">SOUND: ON</button><button class="btn ghost" id="hcheat" type="button">CHEATS</button></div>
       <div class="row"><button class="btn ghost" id="skeys" type="button">CONTROLS</button><button class="btn ghost" id="sreset" type="button">RESET</button></div>
-      <h3 class="pdh">Save data management</h3>
+      <h3 class="pdh sdh">Save data management</h3>
       <p class="note sdnote">Back up all three saves (progress, coins, unlocks, settings and any unfinished run) to a file, or load a backup. Files work in both the browser version and the Windows version. Your game still saves automatically.</p>
       <div class="row"><button class="btn ghost" id="sexp" type="button">EXPORT SAVE DATA</button><button class="btn ghost" id="simp" type="button">IMPORT SAVE DATA</button></div>
       <div class="row"><button class="btn ghost" id="sundo" type="button" hidden>RESTORE PRE-IMPORT BACKUP</button></div>
@@ -2952,9 +2954,9 @@ function applySet(){
 }
 function aspectOf(v){const q=v.split('x'),w=+q[0],h=+q[1],g=(a,b)=>b?g(b,a%b):a,d=g(w,h);let a=w/d,b=h/d;if(a===8&&b===5)return'16:10';if(a===683&&b===384)return'16:9';if(a===43&&b===27)return'~16:10';if(a>40||b>40){const r=w/h;return r>2.2?'21:9':r>1.7?'16:9':r>1.5?'16:10':'4:3'}return a+':'+b}
 function renderSet(){
-  const fs=!!document.fullscreenElement,rg=(k,a,b)=>'<input type="range" data-r="'+k+'" min="'+a+'" max="'+b+'" value="'+Math.round(set[k]*100)+'" aria-label="'+k+'">';
+  const fs=isFS(),rg=(k,a,b)=>'<input type="range" data-r="'+k+'" min="'+a+'" max="'+b+'" value="'+Math.round(set[k]*100)+'" aria-label="'+k+'">';
   $('setlist').innerHTML=
-   '<div class="srow"><span>Display mode</span><button type="button" class="btn ghost" data-s="fs">'+(fs?'WINDOWED':'FULLSCREEN')+'</button></div>'+
+   '<div class="srow"><span>Display mode</span><button type="button" class="btn ghost" data-s="fs">'+(fs?'WINDOWED':'FULLSCREEN')+'</button></div><p class="note" id="fsnote" aria-live="polite">'+escN(fsMsg)+'</p>'+
    '<div class="srow"><span>Screen size</span><select data-res aria-label="Screen size">'+RESL.map(v=>'<option value="'+v+'"'+(set.res===v?' selected':'')+'>'+(v==='fill'?'Fill window':v.replace('x',' × ')+' ('+aspectOf(v)+')')+'</option>').join('')+'</select></div>'+
    '<div class="srow"><span>Render quality</span><button type="button" class="btn ghost" data-s="q">'+QL[set.q]+'</button></div>'+
    '<div class="srow"><span>Screen shake</span><button type="button" class="btn ghost" data-s="shake">'+(set.shake?'ON':'OFF')+'</button></div>'+
@@ -2968,7 +2970,7 @@ function renderSet(){
 $('setlist').addEventListener('click',e=>{
   const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;
   if(k==='wpn'){cycleWeapon();renderSet();return}
-  if(k==='fs'){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen()}catch(x){}setTimeout(renderSet,300);return}
+  if(k==='fs'){toggleFS();return}
   if(k==='res'){set.res=RESL[(RESL.indexOf(set.res)+1)%RESL.length];saveSet();applySet();renderSet();setTimeout(fitMenus,0);return}
   if(k==='q')set.q=set.q===1?.75:set.q===.75?.5:1;
   else set[k]=!set[k];
@@ -2984,7 +2986,29 @@ $('setlist').addEventListener('input',e=>{
   const lb=r.closest('.srow').firstChild;lb.textContent=lb.textContent.replace(/\d+%/,r.value+'%');
   applySet();
 });
+/* 0.6.1: fullscreen that works everywhere. The Windows EXE asks its own window to go fullscreen (the page alone cannot);
+   browsers use the Fullscreen API (with the older webkit names for Safari). If the page is not allowed to (inside some embeds),
+   it says so instead of silently doing nothing. F11 also toggles it in the EXE */
+let fsNative=false;
+const isFS=()=>fsNative||!!(document.fullscreenElement||document.webkitFullscreenElement);
+let fsMsg='';
+function fsNote(t){fsMsg=t||'';const n=$('fsnote');if(n)n.textContent=fsMsg}
+async function toggleFS(){
+  fsNote('');
+  const NW=window.Neutralino&&Neutralino.window;
+  if(NW&&NW.setFullScreen&&typeof NL_PORT!=='undefined'){
+    try{const on=await NW.isFullScreen();if(on)await NW.exitFullScreen();else await NW.setFullScreen();fsNative=!on;setTimeout(()=>{try{resize();fitMenus()}catch(e){}if(sub==='set')renderSet()},250);return}catch(e){}
+  }
+  const d=document,de=d.documentElement;
+  try{
+    if(d.fullscreenElement||d.webkitFullscreenElement){await (d.exitFullscreen||d.webkitExitFullscreen).call(d)}
+    else{const rq=de.requestFullscreen||de.webkitRequestFullscreen;if(!rq)throw new Error('none');await rq.call(de)}
+  }catch(e){fsNote(d.fullscreenEnabled===false||!(de.requestFullscreen||de.webkitRequestFullscreen)?'Fullscreen is not allowed on this page. Use your browser’s fullscreen (F11, or the browser menu), or play the downloaded game.':'Fullscreen did not start. Try again, or press F11.')}
+  setTimeout(()=>{if(sub==='set')renderSet()},300);
+}
+addEventListener('keydown',e=>{if(e.key==='F11'&&window.Neutralino&&typeof NL_PORT!=='undefined'){e.preventDefault();toggleFS()}});
 document.addEventListener('fullscreenchange',()=>{if(sub==='set')renderSet();resize()});
+document.addEventListener('webkitfullscreenchange',()=>{if(sub==='set')renderSet();resize()});
 $('skeys').addEventListener('click',e=>{fromSet=true;openSub('keys',e.currentTarget)});
 $('sreset').addEventListener('click',()=>{set=Object.assign({},SETD);saveSet();applySet();renderSet()});
 $('sdone')?.addEventListener('click',closeSub);
@@ -3832,8 +3856,12 @@ $('stl').addEventListener('click',()=>{if(cosBusy||cosTab==='l')return;cosTab='l
 $('sts').addEventListener('click',()=>{if(cosBusy||(cosTab!=='u'&&cosTab!=='l'))return;cosTab=typeOpen(wType)?wType:'f';cosSel=eq[cosTab];pv=[];$('cosres').textContent='';sfx(520,.05,'triangle',.04,1.3);renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='0.6';
+const UPD_VER='0.6.1';
 const UPDATES=[
+ ['v0.6.1','Pixel Rush 0.6.1: Fullscreen and Pause Menu','#8fd3ff',[
+  'Fullscreen works in the Windows game: the FULLSCREEN button in Settings (and F11) now makes the whole window fullscreen. In a browser it uses the browser\u2019s fullscreen, and if a page does not allow it, Settings tells you instead of doing nothing.',
+  'The pause menu has SETTINGS and JUKEBOX. Back from either returns you to the pause menu, still paused. (Save data import and export stay on the main menu\u2019s Settings.)'
+ ]],
  ['v0.6','Pixel Rush 0.6: The Arsenal Update','#ffd36b',[
   'A new opening: the game starts high in the sky with PIXEL RUSH and the credits (made by Sleptt Spyder Crash), then the camera drops down to the title. Click or press any key to skip.',
   'Saves have names. After PLAY you pick a save and type a player name; it shows on the main menu instead of "Account level" and it is your name online. Names with swear words or slurs are refused with a pop-up.',
@@ -4039,7 +4067,7 @@ function openSub(k,opener){
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
   $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('daily').hidden=k!=='daily';$('online').hidden=k!=='online';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
-  else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent=''}
+  else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent='';$('set').classList.toggle('inrun',state==='pause')}
   else if(k==='ach'){renderAch()}
   else if(k==='wpn'){renderWpn();const f=$('wpngrid').querySelector('.on');if(f)f.focus()}
   else if(k==='dsel'){renderDsel()}
@@ -10706,6 +10734,9 @@ $('hcheat').addEventListener('click',e=>{fromAch=false;if(cheatsUnlocked())openS
 /* cheats from the pause menu: the pause menu steps aside (never both on screen), the game stays paused,
    and closing the cheat menu brings the pause menu back. Only RESUME resumes */
 $('pcheat').addEventListener('click',e=>{if(state!=='pause')return;$('pause').hidden=true;openSub('cheat',e.currentTarget)});
+/* 0.6.1: Settings and the Jukebox from the pause menu; BACK returns to the pause menu, still paused */
+$('pset').addEventListener('click',e=>{if(state!=='pause')return;$('pause').hidden=true;openSub('set',e.currentTarget)});
+$('pjuke').addEventListener('click',e=>{if(state!=='pause')return;$('pause').hidden=true;openSub('juke',e.currentTarget)});
 $('cheatdone')?.addEventListener('click',closeSub);
 $('cheatoff').addEventListener('click',()=>{for(const k in cheat)cheat[k]=false;saveCheat();renderCheat()});
 $('cheatlist').addEventListener('click',e=>{const t=e.target.closest('.cht');if(t){cheat[t.dataset.k]=!cheat[t.dataset.k];saveCheat();renderCheat();sfx(520,.08,'triangle',.05,1.4);return}const a=e.target.closest('.cact');if(a)cheatAct(a.dataset.k)});

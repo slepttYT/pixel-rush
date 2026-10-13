@@ -209,3 +209,7 @@ and for the upgrades tab make sub sections for each weapon and make 5 total upgg
 - [x] Online: server setup is 2 questions (players 1-4, optional password); UPnP automatic; busy port -> next port; join code = server name, copied to the clipboard and saved to JOIN-CODE.txt. Lobby: host starts -> PICK (fighter + weapon, lock in, 25 s) -> VOTE (worlds every player has, skipped if only World 1, 15 s, tie random) -> countdown -> race with each player's pick. Protocol 2.
 - Tests (scratchpad/tools): shop6, intro6, bow6, cfg6, skin6, dps, lobby6 (2 browsers + real server: World-1-only friend = no vote; shared 1-2 = vote 1/2), updsz, nb2 (name filter: 0 false positives / 0 misses on the test lists), plus qa.js and the regression set.
 - 0.6: game file renamed to details/Pixel_Rush_0.6.html (git mv); build with details/desktop/build.sh 0.6.
+
+## User request (verbatim)
+"fix full screen not working and add setting and juke box to the pause menu"
+- [x] 0.6.1: fullscreen fixed (EXE uses Neutralino.window.setFullScreen/exitFullScreen + F11; browsers use the Fullscreen API with webkit fallback; blocked pages show a note in Settings). Pause menu has SETTINGS and JUKEBOX (back returns to pause; save import/export hidden mid-run). Tests: tools/fs6.js 12/12, qa.js 42/42.
