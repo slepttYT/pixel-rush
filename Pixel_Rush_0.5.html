@@ -690,7 +690,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
+    <div class="hfoot"><span>v0.5</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -1451,7 +1451,12 @@ const PACE_HRS={easy:1,medium:3,hard:5,nowin:10},PACE_BASE_HRS=1;
 /* every difficulty now plays to the same clock: about 45 minutes to wave 100. Difficulty changes hearts, enemy
    toughness and rewards, not how long a world takes. Normal waves have a timer; a short break follows each wave */
 const paceK=()=>1;
-const bossPace=()=>1;
+/* 0.5: boss pacing. Boss health used to grow in step with every multiplier (difficulty x world x the half damage of the hardest
+   difficulty), so a World 5 boss on the hardest setting had ~18x the health of a World 1 Medium one and runs went far past 45 min.
+   Bosses now grow with the square root of that combined multiplier: still clearly tougher each world and difficulty, but a boss
+   fight stays in the same ballpark of time. Never makes a boss easier than 1x (Easy World 1 keeps its health) */
+let BOSS_PACE_EXP=.5;
+const bossPace=()=>{if(brMode)return 1;const f=DF().eh*WORLD_HP()/(DF().pd||1);return Math.min(1,Math.pow(f,BOSS_PACE_EXP-1))};
 const WAVE_LIMIT=22,WAVE_BREAK=3;
 let waveTL=0,spawn0=0;
 /* ---------- player-scaled progression ----------
@@ -3611,8 +3616,26 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='0.3';
+const UPD_VER='0.5';
 const UPDATES=[
+ ['v0.5','Pixel Rush 0.5: The Expansion and Polish Update','#4dc3ff',[
+  'Two new worlds. World 4, Circuit Citadel: a fortress of robots and machines with 10 new bosses and OMEGA waiting in the vault. World 5, Witch\u2019s Bog: a spooky swamp of poison and graves with 10 new bosses and The Mire Leviathan under the mud. Beat World 3 to open World 4, then World 4 to open World 5.',
+  'Four new weapon families, unlocked one after another after Bombs: Boomerang (flies out and comes back, cutting through everything), Magic (homing bolts), Bow (piercing arrows with a charged power shot) and Mace (slow, heavy smashes that knock enemies back).',
+  'Every weapon now grows along a fixed path. Blade: Knife, Machete, Sword. Gun: Pistol, Shotgun, Rifle. Explosive: Grenade, Cannonball, Bomb. Fist: Bare Fist, Knuckle Wrap, Brass Knuckles. Boomerang: Default, Metal, Three-Prong. Magic: Stick, Magic Wand, Staff. Bow: Bow and Arrow, Compact Bow, Crossbow. Mace: Mace, Two-Headed, Three-Headed. Each step plays an evolution animation.',
+  'Punches are now a quick forward jab that only hits what is in front of you.',
+  'NEW RUN: pick your fighter, then a Configure Run screen shows them holding your weapon. Choose the world and add optional challenge modifiers for bonus rewards.',
+  'Daily Challenge: a new set run every day, refreshed at 7:00 in the morning your time.',
+  'Save & Exit from the pause menu, then Continue Run from the main menu to pick up exactly where you left off.',
+  'Export and import your save data from Settings, with a warning before anything is overwritten.',
+  'A new game over and win screen with your fighter, run time and world. A mailbox on the main menu keeps a postcard of your last run, and your best time for every world is saved.',
+  'ONLINE: race your friends. One person runs the server (a single file), everyone else types its address. First to the target wave wins, and every wave you clear sends extra enemies to your rivals.',
+  'The main menu visits all five worlds, changing every 30 seconds, and the buttons take each world\u2019s colours.',
+  'Sound: every weapon and every stage of it has its own sound, every enemy type has its own spawn call, and a limiter keeps big fights from getting too loud. Each world has quiet background sounds (you can turn them off in Settings).',
+  'Jukebox: six new songs, including a theme for each later world. Sort the list by tempo, and every song plays at the same loudness.',
+  'New achievements for Worlds 4 and 5.',
+  'Bosses on the higher difficulties and later worlds have less extra health, so a world stays close to 45 minutes. Every enemy drops coins and XP to pick up. Hover a fighter to see their stats. Damage numbers and pause-on-focus-loss can be switched in Settings.',
+  'Pausing and opening the cheat menu no longer overlap or resume the game. Picking a save shows a short loading screen instead of bouncing back to the save list.'
+ ]],
  ['v0.3','Pixel Rush 0.3: Content and Polish','#b58cff',[
   'Six new fighters you can only earn past World 1: Ember Knight (beat the Dragon), Frostwalker (clear World 2), Executioner (500 kills in World 2), Void Runner (clear World 3), Last Stand (beat the Pharaoh without dying once) and Worldbreaker (beat each world with a different weapon).',
   'Seven fighters return from the old roster, rebalanced and earned in Worlds 2 and 3: Ashling, Blade Dancer, Druid, Rhythm Monk, Arsenal, Vampire Lord and Stormcaller. Every fighter has its own pixel sprite. 28 fighters in total.',
