@@ -3367,6 +3367,8 @@ function openSub(k,opener){
   else if(k==='upd'){renderUpd()}
   else if(k==='cos'){cosTab=wType;cosSel=eq[wType];pv=[];$('cosres').textContent='';renderCos()}
   else{renderJuke();const f=$('tracks').querySelector('.on')||$('jplay');f.focus()}
+  /* size the screen before it is seen, then fade it in: no small-then-big jump */
+  {const ov=$(k);if(ov){ov.classList.add('opening');try{fitMenus()}catch(e){}requestAnimationFrame(()=>{try{fitMenus()}catch(e){}ov.classList.remove('opening')})}}
 }
 function closeSub(){
   const was=sub;listen=null;plisten=null;sub=null;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
@@ -8060,12 +8062,26 @@ function drawGrass(cx,cy){
   ctx.fillStyle='#1a4720';ctx.beginPath();ctx.arc(cx,cy,R-14*u,0,TAU);ctx.fill();
   for(let i=0;i<24;i++){const a=i*TAU/24,sx=cx+Math.cos(a)*(R+2*u),sy=cy+Math.sin(a)*(R+2*u);ctx.save();ctx.translate(sx,sy);ctx.rotate(a+Math.PI/2);ctx.fillStyle='#8ea6bf';ctx.strokeStyle='#33485e';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,7*u,10*u,0,0,TAU);ctx.fill();ctx.stroke();ctx.restore()}
 }
+const MBG={c:null,k:''};
+function drawGrassPx(cx,cy){
+  const U=PXS,k=W+'x'+H+'@'+Math.round(cx)+','+Math.round(cy);
+  if(MBG.k!==k){const c=document.createElement('canvas');c.width=Math.ceil(W/U);c.height=Math.ceil(H/U);const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.setTransform(1/U,0,0,1/U,0,0);
+    const main=ctx;ctx=g;try{drawGrass(cx,cy)}finally{ctx=main}
+    /* snap soft edges to solid pixels so every shape reads as pixel art */
+    const D=g.getImageData(0,0,c.width,c.height),A=D.data,cw=c.width;for(let i=0;i<A.length;i+=4)A[i+3]=255;
+    /* grass texture like the arena floor: little tufts and speckles, only on open grass */
+    let sd=11;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};const isG=i=>A[i+1]>110&&A[i+1]<160&&A[i]<70&&A[i+2]<80;
+    for(let n=0;n<(cw*c.height)*.035;n++){const x=(rnd()*cw)|0,y=1+((rnd()*(c.height-2))|0),i=(y*cw+x)*4;if(!isG(i))continue;const lt=rnd()<.6,dv=lt?22:-18;
+      for(const j of [i,i-cw*4]){if(isG(j)){A[j]=Math.min(255,A[j]+dv*.5);A[j+1]=Math.min(255,A[j+1]+dv);A[j+2]=Math.min(255,A[j+2]+dv*.4)}}}
+    g.putImageData(D,0,0);MBG.c=c;MBG.k=k}
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(MBG.c,0,0,MBG.c.width*U,MBG.c.height*U);ctx.restore();
+}
 function drawMenu(){
   ctx.setTransform(DPR*S,0,0,DPR*S,0,0);
   const zi=Math.floor(mt/6)%10,ZN=ZONES[zi],zp=ZONES[(zi+9)%10],ph=(mt%6)/6;
   const cx=W>700?W*.74:W*.5,cy=H*.48;
   p.x=cx;p.y=cy;
-  drawGrass(cx,cy);
+  drawGrassPx(cx,cy);
   ctx.strokeStyle='#7fe08a';ctx.lineWidth=1.5;
   for(const rr of[130,168,206]){ctx.globalAlpha=.25;ctx.setLineDash([4,10+rr/20]);ctx.lineDashOffset=-mt*(rr%2?1:-1)*20;ctx.beginPath();ctx.arc(cx,cy,rr,0,TAU);ctx.stroke()}
   ctx.setLineDash([]);ctx.globalAlpha=1;
@@ -8660,6 +8676,20 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
 .sub .chc canvas{background:#0b3315;border-radius:4px}
 #tutbox{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:8;width:min(560px,calc(100% - 32px));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 16px;text-align:center;background:#0d3d18;border:3px solid #1e6b2c;box-shadow:0 0 0 3px #0b3a15,0 0 0 6px #3cb04c,0 12px 40px rgba(0,0,0,.45);border-radius:8px;color:#e9ffe0;font-family:'Silkscreen',monospace;pointer-events:auto}
 #tutbox[hidden]{display:none}
+
+/* ===== v0.3: menus open at their final size with a plain fade, and buttons stay dark: selection shows as a bright border, an accent bar and lit text ===== */
+.ov.sub{transition:opacity .16s ease-out}
+.ov.sub.opening{opacity:0!important;transition:none}
+.sub .btn,#home .menulist .mi,#slots button.sl,#home .hupd{background:#0b100c!important}
+.sub .btn:hover,.sub .btn:focus-visible,.sub .btn.padhov,#home .menulist .mi:hover,#home .menulist .mi:focus-visible,#home .menulist .mi.padhov{background:#0f1811!important;border-color:#b4f7a8!important;color:#fff!important;box-shadow:inset 4px 0 0 #b4f7a8!important}
+.sub .btn.on,.sub .tabs .btn.on{background:#0b100c!important;border-color:#f5c542!important;color:#f5c542!important;box-shadow:inset 0 -3px 0 #f5c542!important}
+.sub .btn.gold,#home #play{background:#0b100c!important;color:#b4f7a8!important;border:3px solid #b4f7a8!important;box-shadow:0 0 0 3px #0b3a15,0 0 14px rgba(180,247,168,.25)!important}
+.sub .btn.gold:hover,#home #play:hover{color:#fff!important;border-color:#e9ffe0!important;box-shadow:0 0 0 3px #0b3a15,0 0 18px rgba(180,247,168,.45)!important;filter:none}
+.sub .item,.sub .chc,.sub .ar,.sub .cx,.sub .tbox,.sub .dbtn,.sub .trk{background:#0c130e!important}
+.sub .item:hover:not([disabled]),.sub .chc:hover,.sub .dbtn:hover,.sub .trk:hover,.sub .trk.sel{background:#101a12!important;border-color:#b4f7a8!important}
+.sub .chc.sel,.sub .chc.on,.sub .dbtn.on,.sub .trk.on{background:#0c130e!important;border-color:#f5c542!important;box-shadow:inset 0 0 0 1px #f5c54255!important}
+.sub .item.maxed{background:#0a0f0b!important}
+.sub .cosrow,.sub .chinfo,.sub #wallet,.sub dl.keys{background:#0c130e!important}
 body:has(.sub:not([hidden])) #home .box,body:has(.sub:not([hidden])) #slots{visibility:hidden} /* only the live menu scene shows behind a menu screen */
 #tutbox small{font-size:10px;letter-spacing:.24em;color:#b4f7a8}
 #tutbox b{font-family:'Press Start 2P',monospace;font-size:16px;color:#fff;text-shadow:3px 3px 0 #0b3a15}
