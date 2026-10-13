@@ -58,17 +58,17 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [x] Easy keeps the name "Easy" (user changed their mind: "change lucky to easy in difficulty select"); description kept. Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
 
 ### 6. Audio overhaul (procedural, no files)
-- [ ] Distinct SFX per weapon family and evolution: gun fire, sword swing, punch, boomerang throw + return, bow, magic, mace, explosive throw, explosive roll, explosion.
-- [ ] Balancing: throw quiet, roll quiet, explosion louder but never painful; master limiter/compressor to stop peaks when many sounds overlap.
+- [x] (MELEE_SFX per stage fist/wrap/knuckle/knife/machete/sword/mace/mace2/mace3 + skin tone on top; gun per stage existed; boomerang throw+return, magic, bow existed; quiet toss + Cannonball roll rumble) Distinct SFX per weapon family and evolution: gun fire, sword swing, punch, boomerang throw + return, bow, magic, mace, explosive throw, explosive roll, explosion.
+- [x] (outBus: every sound incl. music goes through a DynamicsCompressor limiter, threshold -12 dB, ratio 14) Balancing: throw quiet, roll quiet, explosion louder but never painful; master limiter/compressor to stop peaks when many sounds overlap.
 
 ### 7. Enemy spawn sounds
-- [ ] One spawn sound per enemy type, each type with its own 3 s cooldown. Bosses exempt (keep entrance audio).
+- [x] (spawnSfx: two-note call in the type's voice, ok('spawn'+type,3000), bosses return early) One spawn sound per enemy type, each type with its own 3 s cooldown. Bosses exempt (keep entrance audio).
 
 ### 8. World ambience (extremely quiet)
-- [ ] W1 birds + breeze, W2 drips + cave echo, W3 desert wind, W4 electrical/mechanical hum, W5 insects + swamp wildlife. Below music and SFX, varied (not a constant loop), changes with world, respects settings/mute.
+- [x] (ambS / ambSndTick: looping brown-noise bed with slow swell per world + random events every 2-6.5 s; measured 17-23 dB under music; Settings > World ambience ON/OFF; off when muted, paused, in menus or vault) W1 birds + breeze, W2 drips + cave echo, W3 desert wind, W4 electrical/mechanical hum, W5 insects + swamp wildlife. Below music and SFX, varied (not a constant loop), changes with world, respects settings/mute.
 
 ### 9. Jukebox expansion
-- [ ] New original tracks; show BPM for every track; browse sorted by BPM; keep old tracks; even loudness.
+- [x] (6 new: Deep Hollow W2, Sunscorch Caravan W3, Circuit Breaker W4, Bog Lantern W5, Five Roads title, Photo Finish online race; world themes join the wave rotation every 4th wave; #jsort LIST / BPM slow-fast / fast-slow, saved; SONG_NORM measured per song to -37.5 dB, all within ~1.6 dB) New original tracks; show BPM for every track; browse sorted by BPM; keep old tracks; even loudness.
 
 ### 10. Cheat menu / pause fix
 - [x] Pause → Cheats hides pause menu, shows cheat menu, game stays paused. Never overlap. Closing cheats returns to pause. Only Resume resumes.

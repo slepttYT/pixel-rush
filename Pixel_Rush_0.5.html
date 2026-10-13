@@ -940,6 +940,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost sm" id="jnext" type="button">NEXT</button>
         <button class="btn ghost sm" id="jmode" type="button">REPEAT ONE</button>
         <button class="btn ghost sm" id="jauto" type="button">FOLLOW GAME</button>
+        <button class="btn ghost sm" id="jsort" type="button">ORDER: LIST</button>
       </div>
       <div id="tracks"></div>
       
@@ -1008,7 +1009,7 @@ addEventListener('pointerup',function lockLand(e){
 },true);
 
 /* jukebox state lives up here so the music code can see it */
-let homeK=Math.random()<.5?'home':'home2';
+let homeK=['home','home2','home3'][(Math.random()*3)|0];
 const juke={track:null,mode:'one',paused:false};
 try{const jm=LS.getItem('cinder-jukemode');if(jm==='one'||jm==='all'||jm==='shuffle')juke.mode=jm}catch(e){}
 
@@ -1269,7 +1270,38 @@ const SONGS={
     chords:[[48,51,55],[44,48,51],[53,56,60],[43,47,50]],bass:[36,32,41,31],
     melA:[[72,0,75,72,79,0,78,79],[80,0,79,75,72,0,75,80],[77,0,80,84,0,80,77,75],[74,0,79,83,86,0,83,79]],
     melB:[[84,83,84,87,0,84,0,79],[80,79,80,84,0,80,0,75],[77,76,77,80,0,84,0,89],[86,0,83,0,79,0,74,71]],
-    drums:{k:[0,2,3,4,6],kv:.1,s:[2,6],sv:.04,h:[0,1,2,3,4,5,6,7],hv:.008}}
+    drums:{k:[0,2,3,4,6],kv:.1,s:[2,6],sv:.04,h:[0,1,2,3,4,5,6,7],hv:.008}},
+  /* 0.5: new original tracks. A theme for each later world (they join the wave rotation there), a third title song and an online race song */
+  stone:{bpm:96,vol:1,lead:'triangle',lv:.045,len:1.5,arp:'square',av:.01,style:'long',echo:true,
+    chords:[[55,58,62],[51,55,58],[53,57,60],[50,54,57]],bass:[43,39,41,38],
+    melA:[[74,0,70,74,0,77,74,0],[75,0,70,75,0,79,75,0],[77,0,72,77,0,81,77,0],[78,0,74,0,81,0,78,74]],
+    melB:[[0,82,0,79,74,0,79,0],[0,82,0,79,75,0,79,0],[0,84,0,81,77,0,81,0],[0,81,0,78,74,0,69,0]],
+    drums:{k:[0,4],kv:.05,s:[6],sv:.02,h:[2,6],hv:.006}},
+  sands:{bpm:108,vol:1,lead:'p25',lv:.024,len:1.1,arp:'triangle',av:.018,style:'bounce',
+    chords:[[52,55,59],[53,57,60],[52,55,59],[50,53,57]],bass:[40,41,40,38],
+    melA:[[76,77,76,0,71,0,72,71],[77,0,76,74,72,0,74,76],[76,77,79,0,77,76,72,0],[74,0,72,71,69,0,71,0]],
+    melB:[[0,83,0,84,83,0,79,0],[0,84,0,83,81,0,79,77],[0,83,84,83,79,0,76,0],[0,81,0,77,74,0,76,0]],
+    drums:{k:[0,3,4],kv:.06,s:[2,6],sv:.022,h:[1,5],hv:.008}},
+  cyber:{bpm:124,vol:1.05,lead:'square',lv:.024,len:.95,arp:'square',av:.008,style:'drive',echo:true,pad:.01,stab:[0,4],sv:.009,
+    chords:[[57,60,64],[53,57,60],[55,59,62],[52,56,59]],bass:[45,41,43,40],
+    melA:[[81,0,81,84,0,81,79,0],[77,0,77,81,0,77,76,0],[79,0,79,83,0,86,83,0],[80,0,83,0,88,0,83,80]],
+    melB:[[88,0,84,0,81,0,84,88],[89,0,84,0,81,0,77,0],[86,0,83,0,79,0,83,86],[88,0,87,0,83,0,80,0]],
+    drums:{k:[0,2,4,6],kv:.07,s:[2,6],sv:.025,h:[1,3,5,7],hv:.007}},
+  bog:{bpm:84,vol:1,lead:'triangle',lv:.045,len:1.7,arp:'square',av:.01,style:'long',echo:true,
+    chords:[[50,53,57],[46,50,53],[45,49,52],[50,53,57]],bass:[38,34,33,38],
+    melA:[[74,0,0,77,0,76,74,0],[74,0,0,70,0,74,77,0],[76,0,0,73,0,76,79,0],[77,0,76,0,74,0,0,0]],
+    melB:[[0,81,0,77,0,74,0,77],[0,82,0,77,0,74,0,70],[0,81,0,76,0,73,0,76],[0,77,0,81,0,86,0,0]],
+    drums:{k:[0],kv:.04,h:[3,7],hv:.005}},
+  home3:{bpm:100,vol:.9,lead:'triangle',lv:.042,len:1.6,arp:'square',av:.01,style:'long',echo:true,
+    chords:[[53,57,60],[45,48,52],[50,53,57],[48,52,55]],bass:[41,45,38,36],
+    melA:[[77,0,81,0,84,0,81,77],[76,0,81,0,84,0,81,76],[74,0,77,0,81,0,77,74],[72,0,76,0,79,0,84,0]],
+    melB:[[0,84,0,81,0,77,0,81],[0,84,0,81,0,76,0,72],[0,81,0,77,0,74,0,77],[0,79,0,76,0,72,0,76]],
+    drums:{k:[0],kv:.045,h:[4],hv:.005}},
+  race:{bpm:158,vol:1.05,lead:'p25',lv:.026,len:1,arp:'square',av:.014,style:'bounce',
+    chords:[[48,52,55],[53,57,60],[55,59,62],[48,52,55]],bass:[36,41,43,36],
+    melA:[[84,0,79,84,88,0,84,79],[86,0,81,84,89,0,84,81],[86,0,83,86,91,0,86,83],[88,86,84,79,84,0,0,0]],
+    melB:[[0,91,88,0,84,88,91,0],[0,93,89,0,84,89,93,0],[0,91,86,0,83,86,91,0],[0,88,91,96,0,91,88,0]],
+    drums:{k:[0,4],kv:.07,s:[2,6],sv:.028,h:[0,1,2,3,4,5,6,7],hv:.007}}
 };
 function pulseWave(){
   if(mus.pw)return mus.pw;
@@ -1332,11 +1364,14 @@ function musicTick(){
   const sd=60/mus.song.bpm/2;
   while(mus.next<AC.currentTime+.25){schedStep(mus.song,mus.step,mus.next,sd);mus.next+=sd;mus.step++}
 }
+/* 0.5: even loudness. Each song's measured level is brought to the same target (see SONG_NORM) */
+const SONG_NORM={home:1.251,g0:1.161,g1:1.084,g2:1.17,g3:1.278,shop:0.892,boss:0.926,vault:1.063,home2:1.143,g4:1.16,g5:1.169,g6:1.137,g7:1.083,shop2:0.983,boss2:0.833,boss3:0.794,epic1:0.682,epic2:0.745,epic3:0.703,final:0.682,stone:1.01,sands:1.144,cyber:0.894,bog:1.045,home3:1.158,race:1.022}; /* measured RMS of every song, scaled to -37.5 dB */
+function songNorm(){return SONG_NORM[mus.cur]||1}
 function setSong(k){
   mus.cur=k;mus.song=SONGS[k]||SONGS.home;mus.step=0;
   if(AC&&mus.timer){
     mus.next=Math.max(mus.next,AC.currentTime+.05);
-    if(mus.gain)mus.gain.gain.value=mus.song.vol*set.mv;
+    if(mus.gain)mus.gain.gain.value=mus.song.vol*set.mv*songNorm();
   }
   renderJuke();
 }
@@ -1349,7 +1384,10 @@ function musicFor(){
   if(state==='shop'||state==='win')return wave%10===5?'shop2':'shop';
   if(state==='play'){
     if(waveActive&&wave%10===0)return ['epic1','epic2','epic3'][(Math.floor(wave/10)-1)%3];
-    const w=waveActive?wave-1:wave;return 'g'+(((w%8)+8)%8);
+    const w=waveActive?wave-1:wave,wt={2:'stone',3:'sands',4:'cyber',5:'bog'}[world];
+    if(raceMode)return w%2?'race':'g'+(((w%8)+8)%8); /* online race: the race song every other wave */
+    if(wt&&((w%4)+4)%4===3)return wt; /* each later world's own theme joins the rotation */
+    return 'g'+(((w%8)+8)%8);
   }
   return homeK;
 }
@@ -1358,7 +1396,7 @@ function musicStart(){
   try{
     const A=ac();
     mus.song=SONGS[mus.cur||'home']||SONGS.home;
-    mus.gain=A.createGain();mus.gain.gain.value=mus.song.vol*set.mv;mus.gain.connect(outBus());
+    mus.gain=A.createGain();mus.gain.gain.value=mus.song.vol*set.mv*songNorm();mus.gain.connect(outBus());
     mus.step=0;mus.next=A.currentTime+.15;mus.timer=setInterval(musicTick,50);
   }catch(e){}
 }
@@ -2734,7 +2772,7 @@ const QL={1:'High',.75:'Medium',.5:'Low'};
 function applySet(){
   document.documentElement.style.setProperty('--ui',set.ui);
   $('hud').style.zoom=set.ui;
-  if(mus.gain&&mus.song)mus.gain.gain.value=mus.song.vol*set.mv;
+  if(mus.gain&&mus.song)mus.gain.gain.value=mus.song.vol*set.mv*songNorm();
   $('fps').hidden=!set.fps;resize();
 }
 function aspectOf(v){const q=v.split('x'),w=+q[0],h=+q[1],g=(a,b)=>b?g(b,a%b):a,d=g(w,h);let a=w/d,b=h/d;if(a===8&&b===5)return'16:10';if(a===683&&b===384)return'16:9';if(a===43&&b===27)return'~16:10';if(a>40||b>40){const r=w/h;return r>2.2?'21:9':r>1.7?'16:9':r>1.5?'16:10':'4:3'}return a+':'+b}
@@ -3686,24 +3724,34 @@ const TRACKS=[
   ['epic1','Throne of Ash','Boss fight','#ff4d5e'],
   ['epic2','Iron Tempest','Boss fight','#9fd3ff'],
   ['epic3','Crimson Eclipse','Boss fight','#c83a5a'],
-  ['final','Last Stand','Final boss','#ff5a2a']
+  ['final','Last Stand','Final boss','#ff5a2a'],
+  ['stone','Deep Hollow','World 2 waves','#b8c4d8'],
+  ['sands','Sunscorch Caravan','World 3 waves','#ffcc4a'],
+  ['cyber','Circuit Breaker','World 4 waves','#4dc3ff'],
+  ['bog','Bog Lantern','World 5 waves','#9ad84a'],
+  ['home3','Five Roads','Title screen','#7fe08a'],
+  ['race','Photo Finish','Online race','#ff7ac8']
 ];
+/* 0.5: browse the list in its own order or sorted by tempo; PREV, NEXT and PLAY ALL follow the order on screen */
+const SORT_LABEL={list:'ORDER: LIST',bpm:'BPM: SLOW \u2192 FAST',bpmd:'BPM: FAST \u2192 SLOW'};
+try{const js=LS.getItem('cinder-jukesort');if(SORT_LABEL[js])juke.sort=js}catch(e){}
+function jukeList(){const o=juke.sort||'list';if(o==='list')return TRACKS;const L=TRACKS.slice().sort((a,b)=>(SONGS[a[0]].bpm-SONGS[b[0]].bpm)||TRACKS.indexOf(a)-TRACKS.indexOf(b));return o==='bpmd'?L.reverse():L}
 const MODE_LABEL={one:'REPEAT ONE',all:'PLAY ALL',shuffle:'SHUFFLE'};
 function jukeCur(){return juke.track||mus.cur||'home'}
 function jukePick(k,auto){
   if(!auto){if(muted)setMuted(false);juke.paused=false}
   juke.track=k;setSong(k);
   if(!auto)musicStart();
-  jukeSel=Math.max(0,TRACKS.findIndex(t=>t[0]===k));
+  jukeSel=Math.max(0,jukeList().findIndex(t=>t[0]===k));
   renderJuke();
 }
 function jukeStep(d){
-  const i=Math.max(0,TRACKS.findIndex(t=>t[0]===jukeCur()));
-  jukePick(TRACKS[(i+d+TRACKS.length)%TRACKS.length][0]);
+  const L=jukeList(),i=Math.max(0,L.findIndex(t=>t[0]===jukeCur()));
+  jukePick(L[(i+d+L.length)%L.length][0]);
 }
 function jukeNext(){
   if(juke.mode==='shuffle'){let k;do{k=TRACKS[(R()*TRACKS.length)|0][0]}while(k===juke.track);jukePick(k,true)}
-  else{const i=Math.max(0,TRACKS.findIndex(t=>t[0]===juke.track));jukePick(TRACKS[(i+1)%TRACKS.length][0],true)}
+  else{const L=jukeList(),i=Math.max(0,L.findIndex(t=>t[0]===juke.track));jukePick(L[(i+1)%L.length][0],true)}
 }
 function renderJuke(){
   if(sub!=='juke')return;
@@ -3714,7 +3762,8 @@ function renderJuke(){
   $('jmode').textContent=MODE_LABEL[juke.mode];
   $('jauto').disabled=!juke.track;
   const af=document.activeElement,fk=af&&af.dataset&&af.dataset.k;
-  $('tracks').innerHTML=TRACKS.map((t,i)=>'<button type="button" class="trk'+(t[0]===cur?' on':'')+(pad.on&&i===jukeSel?' sel':'')+'" data-k="'+t[0]+'" style="--tc:'+t[3]+'"><span class="eq'+(t[0]===cur&&live?' live':'')+'" aria-hidden="true"><i></i><i></i><i></i></span><span><b>'+t[1]+'</b><small>'+t[2]+' · '+SONGS[t[0]].bpm+' bpm</small></span></button>').join('');
+  $('jsort').textContent=SORT_LABEL[juke.sort||'list'];
+  $('tracks').innerHTML=jukeList().map((t,i)=>'<button type="button" class="trk'+(t[0]===cur?' on':'')+(pad.on&&i===jukeSel?' sel':'')+'" data-k="'+t[0]+'" style="--tc:'+t[3]+'"><span class="eq'+(t[0]===cur&&live?' live':'')+'" aria-hidden="true"><i></i><i></i><i></i></span><span><b>'+t[1]+'</b><small>'+t[2]+' · '+SONGS[t[0]].bpm+' bpm</small></span></button>').join('');
   if(fk){const el=$('tracks').querySelector('[data-k="'+fk+'"]');if(el)el.focus()}
 }
 
@@ -4615,7 +4664,7 @@ function showHome(){
   lowHp=false;stage.classList.remove('lowhp');cine=null;cam.x=0;cam.y=0;
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
   brWant=false;dailyMode=false;raceMode=false;$('racehud').hidden=true;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
-  homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
+  homeK=homeK==='home'?'home2':homeK==='home2'?'home3':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
 }
 
 /* ---------- game setup ---------- */
@@ -9739,6 +9788,7 @@ $('cheatdone')?.addEventListener('click',closeSub);
 $('cheatoff').addEventListener('click',()=>{for(const k in cheat)cheat[k]=false;saveCheat();renderCheat()});
 $('cheatlist').addEventListener('click',e=>{const t=e.target.closest('.cht');if(t){cheat[t.dataset.k]=!cheat[t.dataset.k];saveCheat();renderCheat();sfx(520,.08,'triangle',.05,1.4);return}const a=e.target.closest('.cact');if(a)cheatAct(a.dataset.k)});
 $('hjuke').addEventListener('click',e=>openSub('juke',e.currentTarget));
+$('jsort').addEventListener('click',()=>{const o=['list','bpm','bpmd'];juke.sort=o[(o.indexOf(juke.sort||'list')+1)%3];try{LS.setItem('cinder-jukesort',juke.sort)}catch(e){}sfx(520,.05,'triangle',.04,1.3);renderJuke();const f=$('tracks').firstChild;if(f)f.scrollIntoView({block:'nearest'})});
 $('pz').addEventListener('click',e=>{pauseGame();e.currentTarget.blur()});
 $('presume').addEventListener('click',resumeGame);
 $('pquit').addEventListener('click',quitRun);
