@@ -2461,6 +2461,8 @@ const CHARS=[
  {id:'phantom',n:'Phantom',t:'Never Touched',d:'Earned by clearing World 1 without a scratch. A tiny hitbox, fast feet and a long dodge, but frail.',ach:'nohit1',body:'#dfe8ff',trim:'#202a52',acc:'#8fa8ff',acc2:'#ffffff',eye:'#202a52',glow:1,alpha:.78,sty:'phantom',hp:-1,spd:1.15,r:9,cp:{dashInv:.25}},
  {id:'breaker',n:'Stonebreaker',t:'Golem Slayer',d:'Took down the Golem. Two extra hearts, heavier hits and a ward, but a little slower.',ach:'slaygolem',body:'#9aa1b0',trim:'#14161d',acc:'#7d8396',acc2:'#5b6275',eye:'#ffb347',glow:1,sty:'golem',hp:2,spd:.92,dm:.5,r:13,cp:{ward:1}},
  {id:'sunking',n:'Sun Sovereign',t:'Pharaoh\u2019s Heir',d:'Took the Pharaoh\u2019s throne. Heals over time, crits often and restores a heart after every wave.',ach:'slaysnake',body:'#fff1c4',trim:'#4a2a06',acc:'#ffb02e',acc2:'#ff6a1f',eye:'#4a2a06',glow:1,sty:'sun',dm:.25,cp:{regen:20,crit:.15,waveHeal:1}},
+ {id:'weaponmaster',n:'Weaponmaster',t:'Jack of All Trades',d:'Has won with every weapon. Faster swings and shots, more reach and a little more damage with all of them.',ach:'allw1',body:'#d8c9a8',trim:'#1c1608',acc:'#c9a070',acc2:'#5b3a1a',eye:'#1c1608',sty:'ronin',cd:.88,reach:1.1,dm:.25},
+ {id:'champion',n:'Bare-Knuckle Champion',t:'Fists of Legend',d:'Beat the last world with bare hands. Monstrous Fists: much more damage and speed with them, plus an extra heart.',ach:'fists3',body:'#f0c9a0',trim:'#2b1a0a',acc:'#ffd36b',acc2:'#b3122d',eye:'#2b1a0a',glow:1,sty:'mohawk',hp:1,wb:{w:'f',dm:1,cd:.8,reach:1.1}},
  {id:'legend',n:'Legend',t:'Account Level 30',d:'The reward for sticking with it. Small bonuses everywhere: an extra heart, faster feet and swings, more coins and XP.',ach:'lv30',body:'#fff3c4',trim:'#4a3206',acc:'#ffd36b',acc2:'#ffffff',eye:'#4a3206',glow:1,sty:'ascend',hp:1,spd:1.08,cd:.92,dm:.25,coin:1.15,xp:1.15}
 ];
 const charsPlayed=()=>CHARS.filter(c=>stats.chars&&stats.chars[c.id]).length;
@@ -2744,7 +2746,23 @@ ACH.push(
  ['bomb1','Explosive Personality','Beat World 1 using only Bombs',0,()=>wwin('1b')],
  ['fists3','Bare-Knuckle Legend','Beat World 3 using only Fists',0,()=>wwin('3f')],
  ['nohit1','Untouchable Run','Beat World 1 without taking a single hit',0,()=>!!stats.nohit1],
- ['hwin1','Hard Way Home','Beat World 1 on Hard or harder',0,()=>!!stats.hwin1]
+ ['hwin1','Hard Way Home','Beat World 1 on Hard or harder',0,()=>!!stats.hwin1],
+ /* v4.4 weapon mastery: every weapon through every world, the mastery tracks, and no-hit runs past World 1 */
+ ['fists2','Rock Puncher','Beat World 2 using only Fists',0,()=>wwin('2f')],
+ ['knife2','Stone Cutter','Beat World 2 using only the Knife',0,()=>wwin('2k')],
+ ['gun2','Ricochet','Beat World 2 using only the Gun',0,()=>wwin('2g')],
+ ['bomb2','Quarry Blaster','Beat World 2 using only Bombs',0,()=>wwin('2b')],
+ ['knife3','Desert Duelist','Beat World 3 using only the Knife',0,()=>wwin('3k')],
+ ['gun3','High Noon','Beat World 3 using only the Gun',0,()=>wwin('3g')],
+ ['bomb3','Sandstorm','Beat World 3 using only Bombs',0,()=>wwin('3b')],
+ ['allw1','Jack of All Trades','Beat World 1 once with each weapon: Fists, Knife, Gun and Bombs',0,()=>['1f','1k','1g','1b'].every(wwin)],
+ ['wmf','Iron Fists','Master the Fists (all 10 steps)',0,()=>wmLv('f')>=WM_MAX],
+ ['wmk','Honed Edge','Master the Knife',0,()=>wmLv('k')>=WM_MAX],
+ ['wmg','Sharpshooter','Master the Gun',0,()=>wmLv('g')>=WM_MAX],
+ ['wmb','Big Boom','Master the Bomb',0,()=>wmLv('b')>=WM_MAX],
+ ['wmall','Arsenal Master','Master every weapon',0,()=>EVO_T.every(t=>wmLv(t)>=WM_MAX)],
+ ['nohit2','Stone Ghost','Beat World 2 without taking a single hit',0,()=>!!stats.nohit2],
+ ['nohit3','Mirage','Beat World 3 without taking a single hit',0,()=>!!stats.nohit3]
 );
 /* rewards follow difficulty: an easy one-off pays a little, beating a world without getting hit pays a fortune */
 const ACH_TIER_N=['','Easy','Normal','Tricky','Hard','Brutal','Legendary'],ACH_TIER_C=['','#9aa0b8','#5fd0a2','#4dc3ff','#ffd36b','#ff8a3d','#ff5ac8'],ACH_COIN=[0,10,25,60,150,400,1000];
@@ -2753,7 +2771,8 @@ const ACH_TIER={first:1,w5:1,pet:1,hot1:1,c20:1,gold:1,green:1,dash200:1,vault:1
  k1000:3,w25:3,w50:3,boss10:3,c60:3,gold2:3,lv15:3,own20:3,hard:3,dash1000:3,vault10:3,hotfull:3,rmp2:3,lv20:3,runs50:3,w2b:3,w3b:3,flaw25:3,boss25:3,chars10:3,coins5k:3,
  k5000:4,w75:4,w100:4,slaydragon:4,boss50:4,lv30:4,loop:4,w2c:4,w2d:4,w3c:4,k10000:4,gold3:4,own40:4,legend:4,hard25:4,runs100:4,vault25:4,dash5000:4,w2k:4,w3k:4,w2bs:4,w3bs:4,c100:4,
  slaygolem:5,w2e:5,w3d:5,k25000:5,loop3:5,lv50:5,mythic:5,flaw100:5,c200:5,nowin:5,boss100:5,w2k5:5,w3k5:5,chars15:5,fists1:5,knife1:5,gun1:5,bomb1:5,hwin1:5,
- slaysnake:6,w3e:6,nohit1:6,fists3:6};
+ slaysnake:6,w3e:6,nohit1:6,fists3:6,
+ wmf:3,wmk:3,wmg:4,wmb:4,wmall:5,allw1:5,fists2:5,knife2:5,gun2:5,bomb2:5,knife3:6,gun3:6,bomb3:6,nohit2:6,nohit3:6};
 ACH.forEach(a=>{const t=ACH_TIER[a[0]]||(a[3]<=10?1:a[3]<=30?2:a[3]<=80?3:a[3]<=150?4:a[3]<=300?5:6);a[5]=t;a[3]=ACH_COIN[t]});
 Object.assign(PROG,{slaydragon:()=>[stats.fin1||0,1],slaygolem:()=>[stats.fin2||0,1],slaysnake:()=>[stats.fin3||0,1]});
 const realCheats=()=>ACH.every(a=>ach[a[0]]===2);
@@ -2954,8 +2973,14 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.3';
+const UPD_VER='4.4';
 const UPDATES=[
+ ['v4.4','Pixel Rush 2.0, part 5: weapon challenges','#ff8a3d',[
+  'New weapon challenges: beat World 2 and World 3 using only one weapon (Rock Puncher, Stone Cutter, Ricochet, Quarry Blaster, Desert Duelist, High Noon, Sandstorm, plus Bare-Knuckle Legend).',
+  'Jack of All Trades: win World 1 once with every weapon. Mastery achievements for finishing each weapon\u2019s mastery track, and Arsenal Master for all four.',
+  'Stone Ghost and Mirage: beat World 2 or World 3 without taking a hit.',
+  'Two new fighters: Weaponmaster (Jack of All Trades) is strong with every weapon, and the Bare-Knuckle Champion (Bare-Knuckle Legend) has monstrous Fists.',
+  'Rewards follow difficulty as always: World 3 weapon wins and no-hit runs are Legendary (1,000 coins).']],
  ['v4.3','Pixel Rush 2.0, part 4: weapon mastery','#8fd3ff',[
   'The two big evolution upgrades are gone. Each weapon now has a 10-step mastery track in Shop > Upgrades with small upgrades you can feel: damage, attack speed and reach (range for the gun, blast size for bombs).',
   'Steps 4 and 8 evolve the weapon into its next form. Step 9 gives it a special: Knockout (fists stun), Precision (knife crits), Armor Piercing (gun vs bosses) or Napalm (bombs burn). Step 10 masters it and unlocks the next weapon.',
