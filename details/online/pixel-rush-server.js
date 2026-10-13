@@ -3,7 +3,9 @@
    PIXEL RUSH ONLINE SERVER
    One file, no installs: a dedicated game server + server registry + guest accounts + leaderboards.
    Run it:   double-click Pixel-Rush-Server.exe   or   node pixel-rush-server.js
-   Options:  --port 7777 --name "My Server" --max 8 --password secret --region EU
+   The first time it asks two easy questions (how many players, and an optional password), then prints a JOIN CODE.
+   The join code is the server's name: give it to your friends and they paste it into ONLINE in the game.
+   Options:  --port 7777 --max 4 --password secret --region EU --setup (ask the questions again)
              --registry http://registry-host:7777   (also list this server on another server's browser)
    Settings can also go in online_config.json next to this file (command line wins).
    Based on the "Plug-and-Play Multiplayer Architecture" plan, adapted for a browser game:
@@ -13,12 +15,12 @@
 'use strict';
 const http = require('http'), https = require('https'), crypto = require('crypto'), fs = require('fs'), path = require('path'), os = require('os'), dgram = require('dgram'), readline = require('readline');
 
-const PROTOCOL = 1, GAME_VERSION = '0.5';
+const PROTOCOL = 2, GAME_VERSION = '0.6';
 let isSea = false; try { isSea = require('node:sea').isSea(); } catch (e) {}
 const BASE = isSea ? path.dirname(process.execPath) : __dirname;
 
 /* ---------- configuration ---------- */
-const DEFAULTS = { name: 'Pixel Rush Server', port: 7777, maxPlayers: 8, region: 'Local', password: '', registry: '', publicAddress: '', motd: 'Have fun!', upnp: true, setupDone: false, codeSalt: -1 };
+const DEFAULTS = { name: 'Pixel Rush Server', port: 7777, maxPlayers: 4, region: 'Local', password: '', registry: '', publicAddress: '', motd: 'Have fun!', upnp: true, setupDone: false, codeSalt: -1 };
 const CONFIG_FILE = () => path.join(BASE, 'online_config.json');
 function loadConfig() {
   const cfg = Object.assign({}, DEFAULTS);
@@ -26,13 +28,13 @@ function loadConfig() {
   const a = process.argv.slice(2), map = { '--port': 'port', '--name': 'name', '--max': 'maxPlayers', '--password': 'password', '--registry': 'registry', '--region': 'region', '--public-address': 'publicAddress', '--motd': 'motd' };
   for (let i = 0; i < a.length; i++) if (map[a[i]] && a[i + 1] !== undefined) cfg[map[a[i]]] = a[++i];
   cfg.port = Math.max(1, Math.min(65535, parseInt(cfg.port, 10) || 7777));
-  cfg.maxPlayers = Math.max(1, Math.min(16, parseInt(cfg.maxPlayers, 10) || 8));
+  cfg.maxPlayers = Math.max(1, Math.min(4, parseInt(cfg.maxPlayers, 10) || 4)); /* 0.6: 1 to 4 players */
   cfg.name = String(cfg.name).slice(0, 40); cfg.region = String(cfg.region).slice(0, 20);
   cfg.upnp = cfg.upnp !== false && cfg.upnp !== 'false'; cfg.codeSalt = parseInt(cfg.codeSalt, 10); if (!(cfg.codeSalt >= 0 && cfg.codeSalt < 256)) cfg.codeSalt = crypto.randomInt(256);
   return cfg;
 }
 const CFG = loadConfig();
-const SERVER_ID = crypto.createHash('sha1').update(CFG.name + ':' + CFG.port + ':' + os.hostname()).digest('hex').slice(0, 12);
+const SERVER_ID = crypto.createHash('sha1').update(CFG.codeSalt + ':' + os.hostname()).digest('hex').slice(0, 12);
 
 /* ---------- tiny JSON storage (accounts and leaderboards) ---------- */
 const DATA = path.join(BASE, 'pixel-rush-data');
@@ -172,12 +174,41 @@ setInterval(() => { /* keep-alive: ping everyone, drop silent sockets and slow h
    scores must be possible for the wave reached. Anything odd is flagged and kept off the leaderboards. */
 const allSockets = new Set(), clients = new Map(); /* ws -> player */
 const MIN_WAVE_SEC = 3.5, TARGETS = [10, 20, 30], DIFFS = ['easy', 'medium', 'hard', 'nowin'], MODS = ['glass', 'swarm', 'fast', 'nodash', 'evolved', 'thrifty', 'iron'];
-const room = { state: 'lobby', leader: null, settings: { world: 1, target: 20, diff: 'medium', mods: [] }, startedAt: 0, timer: null, results: null };
+const room = { state: 'lobby', leader: null, settings: { world: 1, target: 20, diff: 'medium', mods: [] }, startedAt: 0, timer: null, results: null, until: 0, options: [1], votes: {} };
+/* 0.6: the lobby. The host (whoever made the lobby, or the next player if they leave) presses START. Then everyone picks a fighter and
+   a weapon (PICK, 25 s), then votes on a world (VOTE, 15 s). Only worlds that EVERY player has unlocked are on the ballot: if someone only
+   has World 1, it is World 1 and there is no vote. Most votes wins; a tie is settled at random. Then a 3 second countdown and the race */
+const PICK_SEC = 25, VOTE_SEC = 15;
+const CHAR_RX = /^[a-z0-9_]{1,24}$/, WEAPONS = ['f', 'r', 'k', 'c', 'a', 'g', 'b', 'm'];
 function players() { return [...clients.values()]; }
 function broadcast(obj, except) { for (const [ws, p] of clients) if (ws !== except) ws.send(obj); }
+function sharedWorld() { return Math.max(1, Math.min(5, ...players().map(p => p.maxWorld || 1))); }
 function roomView() {
-  return { t: 'room', state: room.state, leader: room.leader, settings: room.settings, maxWorld: Math.min(5, ...players().map(p => p.maxWorld || 1)), server: CFG.name, motd: CFG.motd,
-    players: players().map(p => ({ id: p.id, name: p.name, ready: p.ready, wave: p.wave, alive: p.alive, done: p.done, hp: p.hp, maxhp: p.maxhp, score: p.score })) };
+  const left = room.until ? Math.max(0, Math.ceil((room.until - now()) / 1000)) : 0, tally = {};
+  for (const w of Object.values(room.votes)) tally[w] = (tally[w] || 0) + 1;
+  return { t: 'room', state: room.state, leader: room.leader, settings: room.settings, maxWorld: sharedWorld(), server: CFG.name, motd: CFG.motd, max: CFG.maxPlayers, left, options: room.options, tally,
+    players: players().map(p => ({ id: p.id, name: p.name, ready: p.ready, ch: p.ch, wt: p.wt, locked: p.locked, voted: room.votes[p.id] !== undefined, wave: p.wave, alive: p.alive, done: p.done, hp: p.hp, maxhp: p.maxhp, score: p.score })) };
+}
+function startPick() {
+  clearTimeout(room.timer); room.state = 'pick'; room.votes = {}; for (const q of players()) q.locked = false;
+  room.until = now() + PICK_SEC * 1000; room.timer = setTimeout(startVote, PICK_SEC * 1000); sendRoom();
+  log('lobby: picking fighters and weapons');
+}
+function startVote() {
+  clearTimeout(room.timer); if (room.state !== 'pick') return;
+  const mw = sharedWorld(); room.options = []; for (let w = 1; w <= mw; w++) room.options.push(w);
+  if (room.options.length === 1) { room.settings.world = 1; room.until = 0; startCountdown(); return; } /* only one world everyone has: no vote */
+  room.state = 'vote'; room.votes = {}; room.until = now() + VOTE_SEC * 1000; room.timer = setTimeout(endVote, VOTE_SEC * 1000); sendRoom();
+  log('lobby: world vote between', room.options.join(', '));
+}
+function endVote() {
+  clearTimeout(room.timer); if (room.state !== 'vote') return;
+  const tally = {}; for (const w of Object.values(room.votes)) if (room.options.includes(w)) tally[w] = (tally[w] || 0) + 1;
+  const best = Math.max(0, ...Object.values(tally)), top = best ? room.options.filter(w => tally[w] === best) : room.options.slice();
+  room.settings.world = top[crypto.randomInt(top.length)]; room.until = 0;
+  broadcast({ t: 'voted', world: room.settings.world, tally });
+  log('lobby: world', room.settings.world, 'won the vote');
+  startCountdown();
 }
 function sendRoom() { broadcast(roomView()); }
 function pickLeader() { if (!players().some(p => p.id === room.leader)) room.leader = players()[0] ? players()[0].id : null; }
@@ -196,11 +227,11 @@ function onText(ws, txt) {
     const ident = IDS[tok]; ident.name = cleanName(m.name); ident.last = now(); saveJSON('identities.json', IDS);
     if (players().some(p => p.id === ident.id)) { ws.send({ t: 'error', msg: 'You are already connected from another window.' }); ws.close(); return; }
     ws.hello = true; allSockets.add(ws);
-    const p = { id: ident.id, name: ident.name, ready: false, maxWorld: Math.max(1, Math.min(5, +m.maxWorld || 1)), wave: 0, alive: true, done: false, hp: 0, maxhp: 0, score: 0, kills: 0, flagged: false, lastWave: 0, lastWaveAt: 0, sentFor: 0, finishAt: 0 };
+    const p = { id: ident.id, name: ident.name, ready: false, ch: CHAR_RX.test(String(m.ch || '')) ? m.ch : '', wt: WEAPONS.includes(m.wt) ? m.wt : 'f', locked: false, maxWorld: Math.max(1, Math.min(5, +m.maxWorld || 1)), wave: 0, alive: true, done: false, hp: 0, maxhp: 0, score: 0, kills: 0, flagged: false, lastWave: 0, lastWaveAt: 0, sentFor: 0, finishAt: 0 };
     clients.set(ws, p); pickLeader();
     ws.send({ t: 'welcome', id: p.id, token: tok, name: p.name, motd: CFG.motd, server: CFG.name });
     log('+', p.name, 'joined (' + clients.size + '/' + CFG.maxPlayers + ')');
-    if (room.state === 'race') { p.done = true; p.alive = false; ws.send({ t: 'info', msg: 'A race is running. You can join the next one.' }); }
+    if (room.state === 'race' || room.state === 'countdown') { p.done = true; p.alive = false; ws.send({ t: 'info', msg: 'A race is running. You can join the next one.' }); }
     sendRoom(); return;
   }
   const p = clients.get(ws); if (!p) return;
@@ -208,16 +239,26 @@ function onText(ws, txt) {
     case 'ready': if (room.state === 'lobby') { p.ready = !!m.on; sendRoom(); } break;
     case 'settings':
       if (room.state !== 'lobby' || p.id !== room.leader) break;
-      { const s = room.settings, mw = Math.min(5, ...players().map(q => q.maxWorld || 1));
-        if (m.world !== undefined) s.world = Math.max(1, Math.min(mw, +m.world || 1));
+      { const s = room.settings;
         if (TARGETS.includes(+m.target)) s.target = +m.target;
         if (DIFFS.includes(m.diff)) s.diff = m.diff;
         if (Array.isArray(m.mods)) s.mods = m.mods.filter(x => MODS.includes(x)).slice(0, 7); }
       for (const q of players()) q.ready = false; sendRoom(); break;
-    case 'start':
+    case 'start': /* 0.6: only the host starts; no READY needed */
       if (room.state !== 'lobby' || p.id !== room.leader) break;
-      if (!players().every(q => q.ready || q.id === room.leader)) { ws.send({ t: 'info', msg: 'Everyone has to press READY first.' }); break; }
-      startCountdown(); break;
+      startPick(); break;
+    case 'pick': /* fighter and weapon, while picking (or in the lobby) */
+      if (room.state !== 'pick' && room.state !== 'lobby') break;
+      if (m.ch !== undefined && CHAR_RX.test(String(m.ch))) p.ch = String(m.ch);
+      if (WEAPONS.includes(m.wt)) p.wt = m.wt;
+      if (m.lock !== undefined && room.state === 'pick') p.locked = !!m.lock;
+      if (room.state === 'pick' && players().every(q => q.locked)) startVote(); else sendRoom();
+      break;
+    case 'vote':
+      if (room.state !== 'vote' || !room.options.includes(+m.w)) break;
+      room.votes[p.id] = +m.w;
+      if (players().every(q => room.votes[q.id] !== undefined)) endVote(); else sendRoom();
+      break;
     case 'status':
       if (room.state !== 'race' || p.done) break;
       { const w = Math.max(0, Math.floor(+m.wave || 0)), sc = Math.max(0, Math.floor(+m.score || 0)), el = (now() - room.startedAt) / 1000;
@@ -246,24 +287,27 @@ function onText(ws, txt) {
 }
 function onClose(ws) {
   allSockets.delete(ws); const p = clients.get(ws); if (!p) return;
-  clients.delete(ws); log('-', p.name, 'left');
+  clients.delete(ws); delete room.votes[p.id]; log('-', p.name, 'left');
   pickLeader();
-  if (room.state === 'race') checkEnd(); else if (room.state === 'countdown' && clients.size === 0) resetRoom();
+  if (room.state === 'race') checkEnd(); else if (clients.size === 0) resetRoom();
+  else if (room.state === 'pick' && players().every(q => q.locked)) { startVote(); return; }
+  else if (room.state === 'vote' && players().every(q => room.votes[q.id] !== undefined)) { endVote(); return; }
   sendRoom();
 }
 function startCountdown() {
-  room.state = 'countdown'; let n = 3; sendRoom();
+  clearTimeout(room.timer); room.state = 'countdown'; room.until = 0; let n = 3; sendRoom();
   const tick = () => {
     if (!clients.size) { resetRoom(); return; }
     if (n > 0) { broadcast({ t: 'countdown', n }); n--; room.timer = setTimeout(tick, 1000); return; }
     room.state = 'race'; room.startedAt = now();
     for (const q of players()) Object.assign(q, { wave: 0, alive: true, done: false, hp: 0, maxhp: 0, score: 0, kills: 0, flagged: false, lastWave: 0, lastWaveAt: now(), sentFor: 0, finishAt: 0, ready: false });
-    broadcast({ t: 'go', world: room.settings.world, target: room.settings.target, diff: room.settings.diff, mods: room.settings.mods });
+    for (const [ows, q] of clients) ows.send({ t: 'go', world: room.settings.world, target: room.settings.target, diff: room.settings.diff, mods: room.settings.mods, ch: q.ch, wt: q.wt });
     log('race started: world', room.settings.world, 'first to wave', room.settings.target, 'with', clients.size, 'players');
     room.timer = setTimeout(() => endRace('time'), 30 * 60 * 1000); /* a race never lasts more than 30 minutes */
   };
   tick();
 }
+setInterval(() => { if (room.state === 'pick' || room.state === 'vote') sendRoom(); }, 1000);
 setInterval(() => { if (room.state === 'race') broadcast({ t: 'race', players: players().map(p => ({ id: p.id, name: p.name, wave: p.wave, hp: p.hp, maxhp: p.maxhp, alive: p.alive, done: p.done, score: p.score })) }); }, 1000);
 function checkEnd() { if (room.state === 'race' && players().every(p => p.done)) endRace('done'); }
 function endRace(why) {
@@ -277,7 +321,7 @@ function endRace(why) {
   log('race over (' + why + '):', rows.map(r => r.place + '. ' + r.name + ' w' + r.wave).join('  '));
   resetRoom();
 }
-function resetRoom() { clearTimeout(room.timer); room.state = 'lobby'; for (const q of players()) q.ready = false; sendRoom(); }
+function resetRoom() { clearTimeout(room.timer); room.state = 'lobby'; room.until = 0; room.votes = {}; for (const q of players()) { q.ready = false; q.locked = false; } sendRoom(); }
 
 /* ---------- join codes ----------
    Players join with a code like PR-7K2Q-9XMB-4TZ0A instead of an IP address. The code is the address (IPv4 + port) run
@@ -357,40 +401,57 @@ async function setupWizard() {
   rl.on('line', l => { if (waiting.length) waiting.shift()(l); else lines.push(l); });
   rl.on('close', () => { closed = true; while (waiting.length) waiting.shift()(''); });
   const ask = (q, def) => new Promise(r => { process.stdout.write('  ' + q + (def !== '' ? ' [' + def + ']' : '') + ': '); const done = a => { if (!process.stdin.isTTY) process.stdout.write(a + '\n'); a = String(a).trim(); r(a === '' ? def : a); }; if (lines.length) done(lines.shift()); else if (closed) done(''); else waiting.push(done); });
-  console.log('\n  PIXEL RUSH SERVER SETUP  (press Enter to keep the value in brackets)\n');
-  CFG.name = String(await ask('Server name', CFG.name)).slice(0, 40);
-  CFG.password = String(await ask('Password (leave empty for none)', CFG.password || ''));
-  CFG.maxPlayers = Math.max(1, Math.min(16, parseInt(await ask('Max players (1-16)', CFG.maxPlayers), 10) || 8));
-  CFG.port = Math.max(1, Math.min(65535, parseInt(await ask('Port', CFG.port), 10) || 7777));
-  CFG.upnp = !/^n/i.test(String(await ask('Open the port on your router automatically (UPnP)? Y/n', CFG.upnp ? 'Y' : 'n')));
+  console.log('\n  =====================================================');
+  console.log('   PIXEL RUSH SERVER SETUP  (just 2 quick questions)');
+  console.log('   Press Enter to use the answer in [brackets].');
+  console.log('  =====================================================\n');
+  CFG.maxPlayers = Math.max(1, Math.min(4, parseInt(await ask('1) How many players can join? (1-4)', CFG.maxPlayers), 10) || 4));
+  CFG.password = String(await ask('2) Password? (press Enter for no password)', CFG.password || '')).slice(0, 40);
   rl.close(); CFG.setupDone = true;
   try { fs.writeFileSync(CONFIG_FILE(), JSON.stringify({ name: CFG.name, port: CFG.port, maxPlayers: CFG.maxPlayers, region: CFG.region, password: CFG.password, registry: CFG.registry, publicAddress: CFG.publicAddress, motd: CFG.motd, upnp: CFG.upnp, setupDone: true, codeSalt: CFG.codeSalt }, null, 2)); console.log('\n  Saved. Run with  --setup  to change these later.'); } catch (e) { console.log('\n  ! Could not save settings: ' + e.message); }
 }
 
 /* ---------- start ---------- */
-server.on('error', e => { if (e.code === 'EADDRINUSE') console.log('\n! Port ' + CFG.port + ' is already in use. Close the other server, or start with  --port 7778\n'); else console.log('! server error:', e.message); process.exitCode = 1; });
+/* if the port is busy (another program, or a second server), quietly try the next ones */
+let portTries = 0;
+server.on('error', e => {
+  if (e.code === 'EADDRINUSE' && portTries < 10) { portTries++; CFG.port++; setTimeout(() => server.listen(CFG.port), 50); return; }
+  if (e.code === 'EADDRINUSE') console.log('\n! Ports ' + (CFG.port - 10) + '-' + CFG.port + ' are all in use. Close the other servers and try again.\n'); else console.log('! server error:', e.message);
+  process.exitCode = 1;
+});
+function copyToClipboard(t) {
+  try { const cp = require('child_process'); const cmd = process.platform === 'win32' ? 'clip' : process.platform === 'darwin' ? 'pbcopy' : null; if (!cmd) return false;
+    const c = cp.spawn(cmd, [], { stdio: ['pipe', 'ignore', 'ignore'] }); c.on('error', () => {}); c.stdin.on('error', () => {}); c.stdin.end(t); return true; } catch (e) { return false; }
+}
 async function start() {
   await setupWizard();
-  server.listen(CFG.port, async () => {
+  server.once('listening', async () => {
     const ips = lanAddresses(), salt = CFG.codeSalt;
-    console.log('\n  PIXEL RUSH ONLINE SERVER  (game ' + GAME_VERSION + ', protocol ' + PROTOCOL + ')');
-    console.log('  ' + CFG.name + ' | up to ' + CFG.maxPlayers + ' players' + (CFG.password ? ' | password protected' : ''));
-    console.log('\n  Looking for your router and internet address...');
+    console.log('\n  Starting the Pixel Rush server (game ' + GAME_VERSION + ')...  looking for your router and internet address...');
     let up = { ok: false, ip: null };
     if (CFG.upnp && ips[0]) up = await upnpOpen(CFG.port, ips[0]);
     const pub = CFG.publicAddress || up.ip || await publicIp();
-    console.log('\n  =====================================================================');
-    console.log('   Give your friends a JOIN CODE (not your IP). In Pixel Rush: ONLINE -> paste the code -> JOIN');
-    console.log('  =====================================================================');
-    if (pub) console.log('   Over the internet:  ' + makeJoinCode(pub, CFG.port, salt) + (up.ok ? '   (router port opened automatically)' : '   (if friends cannot join, forward TCP port ' + CFG.port + ' on your router)'));
-    if (!pub) console.log('   Over the internet:  (could not find your internet address; put it in online_config.json as "publicAddress")');
-    for (const ip of ips) console.log('   Same Wi-Fi / LAN:   ' + makeJoinCode(ip, CFG.port, salt));
-    console.log('   This PC:            ' + makeJoinCode('127.0.0.1', CFG.port, salt));
-    console.log('  =====================================================================');
-    if (CFG.registry) console.log('\n  Listing this server on: ' + CFG.registry);
-    console.log('\n  Leave this window open while people play. Close it to stop the server.\n');
-    if (CFG.registry) { heartbeatToRegistry(); setInterval(heartbeatToRegistry, 5000); }
+    const net = pub ? makeJoinCode(pub, CFG.port, salt) : null, lan = ips[0] ? makeJoinCode(ips[0], CFG.port, salt) : null, local = makeJoinCode('127.0.0.1', CFG.port, salt);
+    const code = net || lan || local;
+    CFG.name = code; /* 0.6: the server's name is its join code */
+    const copied = copyToClipboard(code);
+    try { fs.writeFileSync(path.join(BASE, 'JOIN-CODE.txt'), 'Pixel Rush join code: ' + code + '\r\n' + (lan && lan !== code ? 'Same Wi-Fi: ' + lan + '\r\n' : '') + '\r\nIn Pixel Rush: ONLINE -> paste the code -> JOIN\r\n'); } catch (e) {}
+    const bar = '  ' + '='.repeat(62);
+    console.log('\n' + bar);
+    console.log('\n      YOUR JOIN CODE:   ' + code + '\n');
+    console.log(bar);
+    console.log('   Send this code to your friends. In Pixel Rush they click ONLINE,');
+    console.log('   paste the code and press JOIN. You can join it yourself too.');
+    console.log('   ' + (copied ? 'The code is already copied: just paste it (Ctrl+V).' : 'The code is also saved in JOIN-CODE.txt next to the server.'));
+    if (lan && lan !== code) console.log('   Friends on the same Wi-Fi can also use: ' + lan);
+    if (net && !up.ok) console.log('   If friends over the internet cannot join, forward TCP port ' + CFG.port + ' on your router.');
+    if (!net) console.log('   (Could not find your internet address: this code works on the same Wi-Fi.)');
+    console.log('   Up to ' + CFG.maxPlayers + ' player' + (CFG.maxPlayers > 1 ? 's' : '') + (CFG.password ? ' | password: ' + CFG.password : '') + ' | the first player to join is the host and starts the game.');
+    console.log(bar);
+    console.log('\n  Keep this window open while you play. Close it to stop the server.\n');
+    if (CFG.registry) { console.log('  Listing this server on: ' + CFG.registry); heartbeatToRegistry(); setInterval(heartbeatToRegistry, 5000); }
   });
+  server.listen(CFG.port);
 }
 const stop = () => { upnpClose().then(() => process.exit(0), () => process.exit(0)); setTimeout(() => process.exit(0), 1500); };
 process.on('SIGINT', stop); process.on('SIGTERM', stop); process.on('SIGHUP', stop);

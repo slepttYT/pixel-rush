@@ -191,3 +191,21 @@ and for the upgrades tab make sub sections for each weapon and make 5 total upgg
 ## User request (difficulty rewards, verbatim)
 "remove the 1.5x coins hard gives you and remove any -coins and xp form your not wining bro but keep easy -1.5 coins"
 -> Hard: coins 1x (XP stays 1.5x). You're Not Winning Bro: no coin/XP bonus (1x/1x). Easy keeps half coins.
+
+## 0.6 status (all requests above)
+- [x] Opening animation: high sky (stars, high clouds) with PIXEL RUSH in the game font (Press Start 2P) and "MADE BY SLEPTT SPYDER CRASH", camera pans down to the title scene, PLAY fades in. Skippable by click/tap/key; skipped with reduced motion; only on a fresh boot (tsIntro/tsIntroTick/tsIntroEnd).
+- [x] PLAY -> pick a save and type a player name (cinder-name per slot). Name = online name (Identity.name uses playerName()). Home shows "NAME · LV n" instead of "Account level"; the account screen title is the name. Name filter (nameBad/nameProblem): leetspeak, spacing and repeated letters; substring list + whole-word list + safe words (therapist, scunthorpe...). Bad names show the pop-up "THAT USERNAME ISN'T APPROPRIATE / try again".
+- [x] Difficulty removed from the title save screen and the home menu; picked in Configure Run (remembered per save). Difficulty achievements back: beat W1/W3/W5 on Easy, Medium, Hard (stats.dwin); none for You're Not Winning Bro.
+- [x] Difficulty rewards: Hard coins 1x (XP 1.5x), Not Winning Bro 1x/1x, Easy half coins.
+- [x] Updates screen same size as Achievements (560 px box, list max 52cqh / 420 px, scrolls).
+- [x] Shop: SKINS / UPGRADES / UNLOCKS tabs. Skins = loot boxes with a sub tab per weapon. Magic renamed Wand everywhere in the UI.
+- [x] Unlocks: f free, r 500, k 1K, c 1.5K, a 2K, g 2.5K, b 3K, m 5K (upg.own). Old saves keep every weapon that was open.
+- [x] Power by price: WPOW per weapon on every hit, tuned from measured DPS (tools/dps.js, one target + crowd of 8, form 0 and final form; ranged x1.3, boomerang x1.15 for safety). Result vs fists: r 1.19, k 1.22, c 1.43, a 1.51, g 1.64, b 1.80, m 2.24 (targets 1.12 ... 2.2).
+- [x] Tiered upgrades (WU): 6 tiers x 5 upgrades x 2 ranks. Tier n+1 shows only after beating World n with that weapon (stats.wwin), and is buyable once tier n is full. Counter shows (n-1)*10+pts / n*10. Evolves at 4 and 8 points; Tier I complete = special. Effects: dmg, spd, reach, crit, boss, burn, pois, slow, heal, kb, stun, ret, charge, pierce, aoe. Old 10-step mastery converted to Tier I points. General (old perma) upgrades tab opens at 4 owned weapons.
+- [x] Wand: AOE magic circles (wcast) at the cursor / nearest enemy, burst after a short charge; Staff casts 2. Abilities: Wider Circle, Toxic Circle, Fire Circle, Frost Circle, Focus Crystal, Lingering Circle, Twin Cast, Arcane Storm. Enemy poison DoT (e.psT).
+- [x] Bow: hold to draw (charge bar above the player), release to shoot; tap = light arrow; full draw 2.6x, faster, +pierce. Abilities: Quick Draw, Heavy Draw, Piercing Arrows, Broadheads, Fire Arrows, Split Shot. Boomerang: Sharpened Edge, Blazing Boomerang, Second Boomerang. Mace: Skull Cracker, Spiked Head, Earthquake.
+- [x] Fixed effects carrying over: reset() clears burn/poison/chill and the new weapon state.
+- [x] Skins: 3 new boxes each for r/m/a/c with new final-form art (chakram, giant shuriken, bladerang, crystal wand, scepter, skull staff, longbow, elven bow, repeater, morning star, war hammer, flanged mace) = 4 boxes per weapon; Prism dev skins for boomerang, wand, bow, mace.
+- [x] Online: server setup is 2 questions (players 1-4, optional password); UPnP automatic; busy port -> next port; join code = server name, copied to the clipboard and saved to JOIN-CODE.txt. Lobby: host starts -> PICK (fighter + weapon, lock in, 25 s) -> VOTE (worlds every player has, skipped if only World 1, 15 s, tie random) -> countdown -> race with each player's pick. Protocol 2.
+- Tests (scratchpad/tools): shop6, intro6, bow6, cfg6, skin6, dps, lobby6 (2 browsers + real server: World-1-only friend = no vote; shared 1-2 = vote 1/2), updsz, nb2 (name filter: 0 false positives / 0 misses on the test lists), plus qa.js and the regression set.
+- 0.6: game file renamed to details/Pixel_Rush_0.6.html (git mv); build with details/desktop/build.sh 0.6.

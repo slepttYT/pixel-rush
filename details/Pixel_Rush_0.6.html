@@ -721,7 +721,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v0.5.1</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
+    <div class="hfoot"><span>v0.6</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -3832,8 +3832,25 @@ $('stl').addEventListener('click',()=>{if(cosBusy||cosTab==='l')return;cosTab='l
 $('sts').addEventListener('click',()=>{if(cosBusy||(cosTab!=='u'&&cosTab!=='l'))return;cosTab=typeOpen(wType)?wType:'f';cosSel=eq[cosTab];pv=[];$('cosres').textContent='';sfx(520,.05,'triangle',.04,1.3);renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='0.5.1';
+const UPD_VER='0.6';
 const UPDATES=[
+ ['v0.6','Pixel Rush 0.6: The Arsenal Update','#ffd36b',[
+  'A new opening: the game starts high in the sky with PIXEL RUSH and the credits (made by Sleptt Spyder Crash), then the camera drops down to the title. Click or press any key to skip.',
+  'Saves have names. After PLAY you pick a save and type a player name; it shows on the main menu instead of "Account level" and it is your name online. Names with swear words or slurs are refused with a pop-up.',
+  'Difficulty is picked in Configure Run, after you choose your fighter. It is no longer on the save screen or the main menu.',
+  'Difficulty rewards: Hard no longer gives extra coins (it still gives 1.5x XP), You\u2019re Not Winning Bro gives no bonus coins or XP, and Easy still gives half coins.',
+  'Difficulty achievements are back for Easy, Medium and Hard: beat Worlds 1, 3 and 5 on each. There are none for the hardest difficulty.',
+  'The shop has three tabs. SKINS: loot boxes, sorted by weapon. UPGRADES: each weapon has its own upgrades. UNLOCKS: buy new weapons.',
+  'Weapons are bought in Unlocks: Fists are free, then Boomerang 500, Knife 1K, Mace 1.5K, Bow 2K, Gun 2.5K, Bomb 3K and Wand 5K. The more a weapon costs, the stronger it is. Weapons you already had stay unlocked.',
+  'Weapon upgrades come in tiers. Tier I is 5 upgrades of 2 ranks (0/10). Beat World 1 with a weapon to open its Tier II (10/20) with new upgrades, World 2 for Tier III (20/30), and so on. The weapon evolves at 4 and 8 points, and finishing Tier I gives it its special. Your old mastery steps carried over.',
+  'Magic is now the Wand, and it plays differently: it casts a magic circle on the ground that bursts and hits everything inside. New wand abilities make the circle bigger, add poison, fire or frost, leave it lingering, cast extra circles and call lightning.',
+  'The Bow charges: hold attack to draw, let go to shoot. A full draw hits up to 2.6x harder, flies faster and pierces more. New bow abilities: Quick Draw, Heavy Draw, Piercing Arrows, Fire Arrows and Split Shot. The Boomerang and Mace have new abilities too.',
+  'New skins: three new loot boxes each for the Boomerang (Chakram, Giant Shuriken, Bladerang), Wand (Crystal Wand, Scepter, Skull Staff), Bow (Longbow, Elven Bow, Repeater) and Mace (Morning Star, War Hammer, Flanged Mace), and Prism dev skins for all four.',
+  'Fixed: burning, poison and chill no longer carry over into your next run.',
+  'The Updates screen is the same size as Achievements and scrolls.',
+  'Online: the server asks just two questions (how many players, and a password if you want one), then shows a join code, which is also the server\u2019s name. It is copied for you and saved in JOIN-CODE.txt. Servers are for 1 to 4 players.',
+  'Online lobby: after joining you wait in the lobby until the host presses START. Everyone picks a fighter and a weapon, then votes on a world. Only worlds that every player has unlocked are on the ballot: if a friend only has World 1, it is World 1.'
+ ]],
  ['v0.5.1','Pixel Rush 0.5.1: Boss Makeover','#c58aff',[
   'Coins and XP you pick up now count straight away on your HUD, and anything still lying on the floor is collected when you enter the vault or the run ends.',
   'GO AGAIN takes you to the fighter screen; click a fighter to open Configure Run. The extra START button under the fighters is gone.',
@@ -6395,7 +6412,7 @@ $('dlygo').addEventListener('click',()=>{
    and every wave you clear sends extra enemies to your rivals.
    ===================================================================================== */
 const Online=(()=>{
-  const PROTOCOL=1;
+  const PROTOCOL=2;
   /* Core */
   const Core={cfg:{name:'',tokens:{},recent:[],registry:'',codes:{}},
     load(){try{const o=JSON.parse(localStorage.getItem('cinder-mp')||'{}');if(o&&typeof o==='object')Object.assign(this.cfg,{name:typeof o.name==='string'?o.name:'',tokens:o.tokens&&typeof o.tokens==='object'?o.tokens:{},recent:Array.isArray(o.recent)?o.recent.filter(x=>typeof x==='string').slice(0,8):[],registry:typeof o.registry==='string'?o.registry:''})}catch(e){}},
@@ -6426,7 +6443,7 @@ const Online=(()=>{
       Network.close(true);st.addr=addr;st.pw=pw||'';st.err='';st.manual=false;st.status='connecting';Events.emit('status');
       let ws;try{ws=new WebSocket('ws://'+addr+'/ws')}catch(e){st.status='idle';st.err='Could not reach that address.';Events.emit('status');return}
       st.ws=ws;const to=setTimeout(()=>{if(ws.readyState!==1){try{ws.close()}catch(e){}}},5000);
-      ws.onopen=()=>{clearTimeout(to);ws.send(JSON.stringify({t:'hello',v:PROTOCOL,game:'0.5',name:Identity.name(),token:Core.cfg.tokens[addr]||'',maxWorld:Identity.maxWorld(),pw:st.pw}))};
+      ws.onopen=()=>{clearTimeout(to);ws.send(JSON.stringify({t:'hello',v:PROTOCOL,game:'0.6',name:Identity.name(),token:Core.cfg.tokens[addr]||'',maxWorld:Identity.maxWorld(),pw:st.pw,ch:CH().id,wt:typeOpen(wType)?wType:'f'}))};
       ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}Network.handle(m)};
       ws.onclose=()=>{clearTimeout(to);if(st.ws!==ws)return;const was=st.status;st.ws=null;
         if(!st.manual&&was==='online'&&st.retry<3){st.retry++;st.status='reconnecting';Events.emit('status');setTimeout(()=>{if(!st.manual&&st.status==='reconnecting')Network.connect(st.addr,st.pw)},800*Math.pow(2,st.retry-1));return}
@@ -6438,6 +6455,7 @@ const Online=(()=>{
       else if(m.t==='error'){st.err=m.msg;st.manual=true;Events.emit('status')}
       else if(m.t==='room'){st.room=m;Events.emit('room')}
       else if(m.t==='countdown'){Events.emit('countdown',m.n)}
+      else if(m.t==='voted'){st.voted=m;Events.emit('voted',m)}
       else if(m.t==='go'){st.results=null;Events.emit('go',m)}
       else if(m.t==='race'){st.race=m.players;Events.emit('race',m.players)}
       else if(m.t==='attack'){Events.emit('attack',m)}
@@ -6450,7 +6468,7 @@ const Online=(()=>{
     online:()=>st.status==='online'
   };
   /* Identity: guest accounts. The server gives each player a token for that server; the name is yours to pick */
-  const Identity={name(){return (Core.cfg.name||('Player'+String(Math.floor(Math.random()*900+100)))).slice(0,16)},set(n){Core.cfg.name=String(n||'').replace(/[^\w \-.!?]/g,'').slice(0,16);Core.save()},maxWorld(){return w5Open()?5:w4Open()?4:w3Open()?3:w2Open()?2:1}};
+  const Identity={name(){return (playerName()||Core.cfg.name||('Player'+String(Math.floor(Math.random()*900+100)))).slice(0,16)}, /* 0.6: your save's player name */set(n){Core.cfg.name=String(n||'').replace(/[^\w \-.!?]/g,'').slice(0,16);Core.save()},maxWorld(){return w5Open()?5:w4Open()?4:w3Open()?3:w2Open()?2:1}};
   if(!Core.cfg.name){Core.cfg.name=Identity.name();Core.save()}
   /* ServerBrowser */
   const fetchJ=async(url,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||3000);try{const r=await fetch(url,{signal:c.signal});return await r.json()}finally{clearTimeout(t)}};
@@ -6470,6 +6488,38 @@ const Online=(()=>{
 let raceGot=0,raceMode=false,raceWant=null,raceTarget=0,raceQ=0,raceSentT=0,raceDone=false,olView='browse',olBoard='wins',olBoardRows=null;
 const escH=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 function olStatusBtn(){const b=$('honst');if(!b)return;const on=Online.Network.online();b.textContent=on?'CONNECTED':'VERSUS';b.className='dlyst'+(on?' claim':'')}
+/* 0.6: the lobby. Waiting for the host, then PICK (fighter + weapon), then VOTE (world), then the countdown */
+let olPick={ch:null,wt:null};
+function renderLobby(r){
+  const st=Online.st,b=$('olbody'),me=st.me||{},lead=r.leader===me.id,S=r.settings,host=r.players.find(p=>p.id===r.leader)||{};
+  const wN=t=>EVO_NAME[t]||'Fists',cN=id=>{try{return charById(id).n}catch(e){return id}};
+  const plist='<div class="olcard"><h3 class="pdh">Players '+r.players.length+' / '+(r.max||4)+'</h3>'+r.players.map(p=>'<div class="olp'+(p.id===me.id?' me':'')+'"><span>'+(p.id===r.leader?'&#9819; ':'')+escH(p.name)+'<small>'+(p.ch?escH(cN(p.ch))+' &middot; ':'')+wN(p.wt)+'</small></span><em>'+(r.state==='pick'?(p.locked?'LOCKED IN':'PICKING'):r.state==='vote'?(p.voted?'VOTED':'VOTING'):r.state==='race'?(p.done?'DONE':'RACING'):p.id===r.leader?'HOST':'IN LOBBY')+'</em></div>').join('')
+    +'<h3 class="pdh">Chat</h3><div class="olchat">'+st.chat.map(c=>'<div><b>'+escH(c.from)+':</b> '+escH(c.text)+'</div>').join('')+'</div><div class="olrow"><input id="olchatin" maxlength="80" placeholder="Say something"><button class="btn ghost sm" type="button" data-ol="chat">SEND</button></div></div>';
+  const head='<div class="olhead"><b>'+escH(r.server||st.server)+'</b><small>'+(r.state==='lobby'?'LOBBY':r.state==='pick'?'PICK YOUR FIGHTER AND WEAPON':r.state==='vote'?'VOTE FOR A WORLD':r.state==='countdown'?'GET READY':'RACE IN PROGRESS')+(r.left?' &middot; <b class="oltime">'+r.left+'s</b>':'')+'</small></div>';
+  let main='';
+  if(r.state==='lobby'){
+    main='<div class="olcard"><h3 class="pdh">'+(lead?'You are the host':'Waiting for the host')+'</h3>'
+      +(lead?'<p class="note">Press START when everyone is here. Then everyone picks a fighter and a weapon and votes on a world.</p>':'<p class="note olwait">Waiting for <b>'+escH(host.name||'the host')+'</b> to start the game<span class="oldots"><i>.</i><i>.</i><i>.</i></span></p>')
+      +'<div class="olrow2"><span>FIRST TO WAVE</span>'+[10,20,30].map(t=>'<button type="button" class="btn ghost sm'+(S.target===t?' on':'')+'" data-owt="'+t+'"'+(lead?'':' disabled')+'>'+t+'</button>').join('')+'</div>'
+      +'<div class="olrow2"><span>DIFFICULTY</span>'+Object.keys(DIFFS).map(k=>'<button type="button" class="btn ghost sm'+(S.diff===k?' on':'')+'" data-owd="'+k+'"'+(lead?'':' disabled')+'>'+(({easy:'EASY',medium:'MEDIUM',hard:'HARD',nowin:'BRUTAL'})[k]||DIFFS[k].n)+'</button>').join('')+'</div>'
+      +'<div class="olrow2 wrap"><span>MODIFIERS</span>'+MODS.map(m=>'<button type="button" class="btn ghost sm'+(S.mods.includes(m[0])?' on':'')+'" data-owm="'+m[0]+'"'+(lead?'':' disabled')+' title="'+escH(m[2])+'">'+m[1]+'</button>').join('')+'</div>'
+      +'<p class="note">Worlds everyone has unlocked: '+(r.maxWorld>1?'1 to '+r.maxWorld+' (you will vote)':'World 1 only')+'.</p></div>';
+  }else if(r.state==='pick'){
+    const meP=r.players.find(p=>p.id===me.id)||{},lk=!!meP.locked;
+    if(!olPick.ch)olPick.ch=CH().id;if(!olPick.wt)olPick.wt=typeOpen(wType)?wType:'f';
+    main='<div class="olcard"><h3 class="pdh">Fighter</h3><div class="olchars">'+CHARS.filter(charUnlocked).map(c=>'<button type="button" class="olch'+(c.id===olPick.ch?' on':'')+'" data-och="'+c.id+'" style="--tc:'+c.acc+'"'+(lk?' disabled':'')+'><canvas width="48" height="48" data-occ="'+c.id+'"></canvas><b>'+escH(c.n)+'</b></button>').join('')+'</div>'
+      +'<h3 class="pdh">Weapon</h3><div class="olwpn">'+UNLOCK_ORD.filter(typeOpen).map(t=>'<button type="button" class="btn ghost sm'+(t===olPick.wt?' on':'')+'" data-owp="'+t+'"'+(lk?' disabled':'')+'>'+wN(t).toUpperCase()+'</button>').join('')+'</div>'
+      +'<div class="row"><button class="btn '+(lk?'ghost':'gold')+'" type="button" data-ol="lock">'+(lk?'CHANGE':'LOCK IN')+'</button></div></div>';
+  }else if(r.state==='vote'){
+    const myV=Online.st.myVote;
+    main='<div class="olcard"><h3 class="pdh">Vote for a world</h3><p class="note">Only worlds every player has unlocked are on the ballot.</p><div class="cfgwd olvote">'+(r.options||[1]).map(w=>'<button type="button" class="cwd'+(myV===w?' on':'')+'" data-ovw="'+w+'"><small>WORLD '+w+' &middot; '+((r.tally||{})[w]||0)+' vote'+(((r.tally||{})[w]||0)===1?'':'s')+'</small><b>'+WNAME[w]+'</b></button>').join('')+'</div></div>';
+  }else if(r.state==='countdown'){
+    main='<div class="olcard"><h3 class="pdh">Get ready</h3><p class="note">'+(st.voted?'World '+st.voted.world+' ('+WNAME[st.voted.world]+') won the vote. ':'')+'The race starts in a moment.</p></div>';
+  }else main='<div class="olcard"><p class="note">A race is running. You can join the next one.</p></div>';
+  b.innerHTML=head+'<div class="olgrid">'+plist+main+'</div>'+(st.info?'<p class="note olinfo">'+escH(st.info)+'</p>':'')
+    +'<div class="row">'+(r.state==='lobby'&&lead?'<button class="btn gold" type="button" data-ol="start">START</button>':'')+'<button class="btn ghost" type="button" data-ol="board">LEADERBOARD</button><button class="btn ghost" type="button" data-ol="leave">LEAVE SERVER</button></div>';
+  b.querySelectorAll('canvas[data-occ]').forEach(cv=>{const g=cv.getContext('2d');g.imageSmoothingEnabled=false;try{drawCharSpr(g,charById(cv.dataset.occ),24,27,2,'w0',false,cSkin(cv.dataset.occ))}catch(e){}});
+}
 function renderOnline(){
   const st=Online.st,b=$('olbody');olStatusBtn();
   if(raceMode&&state!=='menu'&&!st.results){b.innerHTML='<p class="note">A race is running. Finish it, then come back here.</p>';return}
@@ -6483,56 +6533,48 @@ function renderOnline(){
       +'<p class="note">Only the server writes these, from races it watched itself. Impossible results are never counted.</p><div class="row"><button class="btn ghost" type="button" data-ol="back">BACK</button></div>';
     if(olBoardRows===null)Online.Leaderboards.top(olBoard).then(r=>{olBoardRows=r||[];if(sub==='online'&&olView==='board')renderOnline()});
     return}
-  if(st.status==='online'&&st.room){
-    const r=st.room,me=st.me||{},lead=r.leader===me.id,S=r.settings,meP=r.players.find(p=>p.id===me.id)||{};
-    const wbtn=[1,2,3,4,5].map(w=>'<button type="button" class="cwd'+(S.world===w?' on':'')+(w>r.maxWorld?' lock':'')+'" data-ows="'+w+'"'+(lead&&w<=r.maxWorld?'':' disabled')+'><small>WORLD '+w+'</small><b>'+WNAME[w]+'</b></button>').join('');
-    b.innerHTML='<div class="olhead"><b>'+escH(r.server||st.server)+'</b><small>'+escH(Online.Core.label(st.addr))+' &middot; '+escH(r.motd||'')+'</small></div>'
-      +'<div class="olgrid"><div class="olcard"><h3 class="pdh">Players ('+r.players.length+')</h3>'+r.players.map(p=>'<div class="olp'+(p.id===me.id?' me':'')+'"><span>'+(p.id===r.leader?'&#9819; ':'')+escH(p.name)+'</span><em>'+(r.state==='lobby'?(p.ready||p.id===r.leader?'READY':'...'):p.done?'DONE':'RACING')+'</em></div>').join('')
-      +'<h3 class="pdh">Chat</h3><div class="olchat">'+st.chat.map(c=>'<div><b>'+escH(c.from)+':</b> '+escH(c.text)+'</div>').join('')+'</div><div class="olrow"><input id="olchatin" maxlength="80" placeholder="Say something"><button class="btn ghost sm" type="button" data-ol="chat">SEND</button></div></div>'
-      +'<div class="olcard"><h3 class="pdh">Race settings '+(lead?'(you are the leader)':'(the leader picks)')+'</h3>'
-      +'<div class="cfgwd ol5">'+wbtn+'</div>'
-      +'<div class="olrow2"><span>FIRST TO WAVE</span>'+[10,20,30].map(t=>'<button type="button" class="btn ghost sm'+(S.target===t?' on':'')+'" data-owt="'+t+'"'+(lead?'':' disabled')+'>'+t+'</button>').join('')+'</div>'
-      +'<div class="olrow2"><span>DIFFICULTY</span>'+Object.keys(DIFFS).map(k=>'<button type="button" class="btn ghost sm'+(S.diff===k?' on':'')+'" data-owd="'+k+'"'+(lead?'':' disabled')+'>'+({easy:'EASY',medium:'MEDIUM',hard:'HARD',nowin:'BRUTAL'})[k]||DIFFS[k].n+'</button>').join('')+'</div>'
-      +'<div class="olrow2 wrap"><span>MODIFIERS</span>'+MODS.map(m=>'<button type="button" class="btn ghost sm'+(S.mods.includes(m[0])?' on':'')+'" data-owm="'+m[0]+'"'+(lead?'':' disabled')+' title="'+escH(m[2])+'">'+m[1]+'</button>').join('')+'</div>'
-      +'<p class="note">You race as '+escH(CH().n)+' with your '+EVO_NAME[wType].toLowerCase()+'. Clearing a wave sends '+'extra enemies to everyone else.</p></div></div>'
-      +(st.info?'<p class="note olinfo">'+escH(st.info)+'</p>':'')
-      +'<div class="row">'+(lead?'<button class="btn gold" type="button" data-ol="start"'+(r.state!=='lobby'?' disabled':'')+'>START RACE</button>':'<button class="btn '+(meP.ready?'ghost':'gold')+'" type="button" data-ol="ready"'+(r.state!=='lobby'?' disabled':'')+'>'+(meP.ready?'NOT READY':'READY')+'</button>')
-      +'<button class="btn ghost" type="button" data-ol="board">LEADERBOARD</button><button class="btn ghost" type="button" data-ol="leave">LEAVE SERVER</button></div>';
-    return}
+  if(st.status==='online'&&st.room){renderLobby(st.room);return}
   /* server browser */
   const SB=Online.ServerBrowser,busy=st.status==='connecting'||st.status==='reconnecting';
-  b.innerHTML='<div class="olrow"><label for="olname">YOUR NAME</label><input id="olname" maxlength="16" value="'+escH(Online.Core.cfg.name)+'"></div>'
+  b.innerHTML='<p class="note olme">Playing as <b>'+escH(Online.Identity.name())+'</b> (your save\u2019s player name)</p>'
     +'<div class="olcard"><h3 class="pdh">Join a server</h3><div class="olrow"><input id="oladdr" placeholder="join code, e.g. PR-7K2Q-9XMB-4TZ0A" value="'+escH(Online.Core.label(st.addr||Online.Core.cfg.recent[0]||''))+'"><input id="olpw" type="password" placeholder="password (if any)" class="olpw"><button class="btn gold" type="button" data-ol="join"'+(busy?' disabled':'')+'>'+(busy?'CONNECTING...':'JOIN')+'</button></div>'
     +(st.err?'<p class="note bad">'+escH(st.err)+'</p>':'')+'</div>'
     +'<div class="olcard"><h3 class="pdh">Server browser <button class="btn ghost sm" type="button" data-ol="refresh"'+(SB.busy?' disabled':'')+'>'+(SB.busy?'SEARCHING...':'REFRESH')+'</button></h3>'
     +(SB.list.length?'<table class="oltab"><tr><th>SERVER</th><th>PLAYERS</th><th>PING</th><th></th></tr>'+SB.list.map(v=>{const bad=v.protocol!==Online.PROTOCOL;return '<tr><td>'+escH(v.name)+(v.password?' &#128274;':'')+'<small>'+escH(Online.Core.label(v.address))+' &middot; '+escH(v.region||'')+' &middot; '+escH(v.state||'')+(bad?' &middot; <b class="bad">version '+escH(v.version)+'</b>':'')+'</small></td><td>'+v.players+'/'+v.max+'</td><td>'+v.ping+' ms</td><td><button class="btn ghost sm" type="button" data-oj="'+escH(v.address)+'"'+(bad||v.players>=v.max?' disabled':'')+'>JOIN</button></td></tr>'}).join('')+'</table>':'<p class="note">'+(SB.busy?'Searching...':'No servers found yet. Servers you join are remembered here, with every server they list.')+'</p>')+'</div>'
-    +'<div class="olcard olhelp"><h3 class="pdh">How to play online</h3><ol><li>One player runs the server: <b>Pixel-Rush-Server.exe</b> on Windows (or <b>node pixel-rush-server.js</b>). It gives you a join code (your IP stays off the screen).</li><li>Everyone pastes that code above and presses JOIN.</li><li>Press READY. The leader picks the world and target wave and presses START RACE.</li><li>First to clear the target wave wins. Every wave you clear sends extra enemies to your rivals.</li></ol><small>Same Wi-Fi works right away. Over the internet, the host forwards port 7777 (TCP) on their router. Use the downloaded game (HTML file or EXE) for online play.</small></div>';
+    +'<div class="olcard olhelp"><h3 class="pdh">How to play online</h3><ol><li>One player runs the server: <b>Pixel-Rush-Server.exe</b> on Windows (or <b>node pixel-rush-server.js</b>). It gives you a join code (your IP stays off the screen).</li><li>Everyone pastes that code above and presses JOIN.</li><li>You land in the lobby (up to 4 players). The host presses START.</li><li>Everyone picks a fighter and a weapon, then votes on a world. Only worlds that every player has unlocked can be picked.</li><li>First to clear the target wave wins. Every wave you clear sends extra enemies to your rivals.</li></ol><small>Same Wi-Fi works right away. Over the internet the server opens its port by itself on most routers. Use the downloaded game (HTML file or EXE) for online play.</small></div>';
   if(!SB.list.length&&!SB.busy&&!SB.tried){SB.tried=1;SB.refresh()}
 }
 $('olbody').addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t||t.disabled)return;const N=Online.Network,st=Online.st,d=t.dataset;
   if(d.oj){const a=d.oj;$('oladdr').value=a;N.connect(a,$('olpw')?$('olpw').value:'');renderOnline();return}
-  if(d.ows){N.send({t:'settings',world:+d.ows});return}if(d.owt){N.send({t:'settings',target:+d.owt});return}if(d.owd){N.send({t:'settings',diff:d.owd});return}
+  if(d.och){olPick.ch=d.och;sfx(520,.06,'triangle',.04,1.3);N.send({t:'pick',ch:d.och});renderOnline();return}
+  if(d.owp){olPick.wt=d.owp;sfx(520,.06,'triangle',.04,1.3);N.send({t:'pick',wt:d.owp});renderOnline();return}
+  if(d.ovw){st.myVote=+d.ovw;sfx(660,.08,'triangle',.05,1.4);N.send({t:'vote',w:+d.ovw});renderOnline();return}
+  if(d.owt){N.send({t:'settings',target:+d.owt});return}if(d.owd){N.send({t:'settings',diff:d.owd});return}
   if(d.owm){const cur=(st.room&&st.room.settings.mods)||[];N.send({t:'settings',mods:cur.includes(d.owm)?cur.filter(x=>x!==d.owm):cur.concat([d.owm])});return}
   if(d.olb){olBoard=d.olb;olBoardRows=null;renderOnline();return}
   const a=d.ol;
-  if(a==='join'){Online.Identity.set($('olname').value);N.connect($('oladdr').value,$('olpw').value);renderOnline()}
-  else if(a==='refresh'){Online.Identity.set($('olname').value);Online.ServerBrowser.refresh()}
-  else if(a==='ready'){const me=(st.room.players.find(p=>p.id===st.me.id)||{});N.send({t:'ready',on:!me.ready})}
-  else if(a==='start')N.send({t:'start'});
+  if(a==='join'){N.connect($('oladdr').value,$('olpw').value);renderOnline()}
+  else if(a==='refresh'){Online.ServerBrowser.refresh()}
+  else if(a==='lock'){const me=(st.room.players.find(p=>p.id===st.me.id)||{});N.send({t:'pick',ch:olPick.ch||CH().id,wt:olPick.wt||wType,lock:!me.locked})}
+  else if(a==='start'){olPick={ch:CH().id,wt:typeOpen(wType)?wType:'f'};st.myVote=0;st.voted=null;N.send({t:'start'})}
   else if(a==='leave'){N.close();olView='browse';renderOnline()}
   else if(a==='board'){olView='board';olBoardRows=null;renderOnline()}
   else if(a==='back'||a==='lobby'){olView='browse';st.results=null;renderOnline()}
   else if(a==='chat'){const i=$('olchatin');if(i&&i.value.trim()){N.send({t:'chat',text:i.value});i.value=''}}
 });
-$('olbody').addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='olchatin'){e.preventDefault();const i=e.target;if(i.value.trim()){Online.Network.send({t:'chat',text:i.value});i.value=''}}else if(e.target.id==='oladdr'||e.target.id==='olpw'){e.preventDefault();Online.Identity.set($('olname').value);Online.Network.connect($('oladdr').value,$('olpw').value);renderOnline()}}e.stopPropagation()});
-$('olbody').addEventListener('change',e=>{if(e.target.id==='olname')Online.Identity.set(e.target.value)});
+$('olbody').addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='olchatin'){e.preventDefault();const i=e.target;if(i.value.trim()){Online.Network.send({t:'chat',text:i.value});i.value=''}}else if(e.target.id==='oladdr'||e.target.id==='olpw'){e.preventDefault();Online.Network.connect($('oladdr').value,$('olpw').value);renderOnline()}}e.stopPropagation()});
 $('honline').addEventListener('click',e=>{if(state==='menu')openSub('online',e.currentTarget)});
+/* a new pick round starts fresh: your current fighter and weapon are preselected */
+Online.Events.on('room',r=>{if(r&&r.state==='lobby'){olPick={ch:null,wt:null};Online.st.myVote=0}});
+Online.Events.on('voted',m=>{banner('WORLD '+m.world+' WINS THE VOTE');sfx(780,.18,'triangle',.06,1.5)});
 for(const k of ['status','room','browser','chat','info'])Online.Events.on(k,()=>{olStatusBtn();if(sub==='online'){const fo=document.activeElement&&document.activeElement.id,v=fo&&$(fo)?$(fo).value:null;renderOnline();if(fo&&$(fo)){$(fo).focus();if(v!==null&&$(fo).value!==v)$(fo).value=v}}});
 Online.Events.on('countdown',n=>{if(sub==='online'||state==='menu'){banner('RACE STARTS IN '+n);sfx(440,.1,'square',.05,1)}});
 Online.Events.on('go',m=>{
   if(state!=='menu'){Online.Network.send({t:'dead'});return} /* busy in a solo run: sit this one out */
   if(sub)closeSub();
+  {const c=CHARS.find(x=>x.id===m.ch);if(c&&charUnlocked(c)){curChar=c.id;try{LS.setItem('cinder-char',curChar)}catch(x){}}}
+  if(m.wt&&typeOpen(m.wt))wType=m.wt;
   if(!eq[wType]||!typeOpen(wType))wType='f';syncEq();
   diff=DIFFS[m.diff]?m.diff:diff;selWorld=m.world;raceWant=m;
   worldGo=true;nwGo=true;try{beginRun()}finally{nwGo=false;worldGo=false;raceWant=null}
@@ -11728,6 +11770,16 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 #online .box{max-width:min(980px,96vw)}
 .olhead{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}.olhead b{font-family:'Press Start 2P',monospace;font-size:13px;color:#b4f7a8}.olhead small{font-family:'Silkscreen',monospace;font-size:10px;color:#9ec8a0}
 .olcard{background:#0d1a10;box-shadow:inset 0 0 0 3px #1e6b2c;padding:10px 12px;margin-bottom:10px}
+.olp span small{display:block;font-size:9px;color:var(--dim);letter-spacing:.04em;margin-top:2px}
+.oltime{color:var(--gold)}
+.olwait b{color:var(--gold)}.oldots i{font-style:normal;animation:oldot 1.2s infinite}.oldots i:nth-child(2){animation-delay:.2s}.oldots i:nth-child(3){animation-delay:.4s}@keyframes oldot{0%,60%,100%{opacity:.2}30%{opacity:1}}
+.olchars{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:min(30cqh,240px);overflow-y:auto;padding-right:4px}
+.olch{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 3px;background:#1a1e2b;border:2px solid #2b3144;border-bottom:3px solid var(--tc);border-radius:5px;color:var(--bone);cursor:pointer;font:inherit}
+.olch canvas{width:48px;height:48px;image-rendering:pixelated}.olch b{font-size:9px;letter-spacing:.04em;text-align:center;line-height:1.15}
+.olch.on{box-shadow:0 0 0 2px var(--gold);background:#252a3c}.olch:disabled{opacity:.55;cursor:default}
+.olwpn{display:flex;flex-wrap:wrap;gap:6px}
+.olvote{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important}
+.olme b{color:var(--gold)}
 .olgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}
 .olrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.olrow label{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.14em;color:#9ec8a0}
 .olrow input,#olchatin{flex:1;min-width:140px;background:#06090a;color:#e9ffe0;border:0;box-shadow:inset 0 0 0 2px #1e6b2c;padding:8px 10px;font:12px 'Silkscreen',monospace;-webkit-user-select:text;user-select:text}

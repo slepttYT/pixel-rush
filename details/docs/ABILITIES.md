@@ -162,3 +162,29 @@ Bought in the shop during a run. Higher rarities unlock with fighter level.
 | **Carpet Bombing** | Bomb | Each throw drops two extra bombs along its path. |
 | **Blast Echo** | Bomb | Every explosion detonates again 0.6 seconds later at 70% power. |
 
+
+### 0.6: Wand, Bow, Boomerang and Mace abilities (20 new)
+
+| Ability | Weapon | Effect |
+|---|---|---|
+| **Wider Circle** | Wand | Wand circles are 20% bigger per level (max 4). |
+| **Toxic Circle** | Wand | Circles poison everything inside: 1 damage per second for 3 seconds, +1 per level (max 3). |
+| **Fire Circle** | Wand | Circles set everything inside burning: 1 damage per second, +1 per level (max 3). |
+| **Frost Circle** | Wand | Circles slow everything inside for 1.5 seconds. |
+| **Focus Crystal** | Wand | Every circle deals +1 damage (max 3). |
+| **Lingering Circle** | Wand | Circles stay for 1.2 seconds per level and keep hurting what is inside (max 2). |
+| **Twin Cast** | Wand | Cast +1 extra circle per level on another enemy (max 2). |
+| **Arcane Storm** | Wand | Every 6th cast calls lightning on everything inside the circles. |
+| **Quick Draw** | Bow | Draw the bow 18% faster per level (max 3). |
+| **Heavy Draw** | Bow | Charged arrows hit 15% harder per level (max 3). |
+| **Piercing Arrows** | Bow | Arrows pass through +1 enemy per level (max 2). |
+| **Broadheads** | Bow | Every arrow deals +1 damage (max 3). |
+| **Fire Arrows** | Bow | Arrows drawn at least halfway set enemies burning: 1 damage per second, +1 per level (max 3). |
+| **Split Shot** | Bow | A full draw fires three arrows. |
+| **Sharpened Edge** | Boomerang | Every boomerang hit deals +1 damage (max 3). |
+| **Blazing Boomerang** | Boomerang | Boomerangs set enemies burning: 1 damage per second, +1 per level (max 2). |
+| **Second Boomerang** | Boomerang | Keep one more boomerang in the air. |
+| **Skull Cracker** | Mace | Spin smashes stun what they hit for 1 second. Bosses resist. |
+| **Spiked Head** | Mace | Every mace hit deals +1 damage (max 3). |
+| **Earthquake** | Mace | Every 4th smash cracks the ground: 4 damage to everything around you. |
+| **Long Reach** | Knife / Fists / Bomb / Mace | Now also works with the Mace. |

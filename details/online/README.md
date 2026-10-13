@@ -1,24 +1,23 @@
 # Pixel Rush Online (Versus Race)
 
-Plug and play: one person runs the server, everyone else types its address in the game.
+Plug and play for 1 to 4 players: one person runs the server, everyone else pastes its join code into the game.
 
 ## Play in 3 steps
 
-1. **Host:** start the server.
-   - Windows: double-click `Pixel-Rush-Server.exe` (or `Start-Server.bat`).
-     Windows may say the app is unrecognised; click *More info* and then *Run anyway*.
-   - Mac/Linux: run `./start-server.sh` (needs [Node.js](https://nodejs.org) 18 or newer).
+1. **Host:** double-click `Pixel-Rush-Server.exe` (Mac/Linux: `./start-server.sh`, needs [Node.js](https://nodejs.org) 18 or newer).
+   Windows may say the app is unrecognised; click *More info* and then *Run anyway*.
+   - The first time it asks **two questions**: how many players (1-4) and an optional password. Press Enter to accept the suggestion.
+   - It then shows your **JOIN CODE**, for example `PR-7K2Q-9XMB-4TZ0A`. That code is also the server's name. On Windows it is already copied, so just paste it (Ctrl+V) to your friends. It is also saved in `JOIN-CODE.txt`.
+   - It opens the port on your router by itself (UPnP) and uses the next free port if 7777 is busy. Keep the window open while you play.
+2. **Everyone:** open Pixel Rush (the HTML file or `Pixel-Rush-Game.exe`), choose **ONLINE**, paste the code and press **JOIN**. You play under your save's player name.
+3. **Lobby:** the first player in is the **host** (crown). Everyone else waits in the lobby until the host presses **START**.
+   - **Pick:** everyone picks a fighter and a weapon, then presses **LOCK IN** (25 seconds).
+   - **Vote:** everyone votes on a world (15 seconds). Only worlds that **every** player has unlocked are on the ballot. If someone only has World 1, it is World 1 and there is no vote. Most votes wins; a tie is picked at random.
+   - **Race:** the first player to clear the target wave wins. Every wave you clear sends extra enemies to your rivals, and there are twice as many enemies as in a solo run.
 
-   The window shows the address to use, for example `192.168.1.20:7777`. Keep it open while you play.
-2. **Everyone:** open Pixel Rush (the HTML file or `Pixel-Rush-Game.exe`) and choose **ONLINE**.
-   Type your name, type the address, then press **JOIN**.
-   Servers you have joined are remembered, along with every server they list, and appear in the **server browser** with their ping.
-3. **Race:** press **READY**. The leader (crown icon) picks the world, the target wave (10, 20 or 30), the difficulty and the modifiers, then presses **START RACE**.
-   - The first player to clear the target wave wins.
-   - Every wave you clear sends extra enemies to all your rivals.
-   - The left side of the screen shows everyone's wave and hearts live.
+Over the internet, if friends cannot join, forward **TCP port 7777** on the host's router (most routers are opened automatically).
 
-**Same Wi-Fi** works right away. **Over the internet:** the host forwards **TCP port 7777** on their router to the PC running the server, then shares `their-public-IP:7777`.
+The join code hides the IP address from screens and chat. It is not a VPN: the game still connects straight to the host's PC.
 
 Note: the version of the game hosted on a secure `https://` page cannot reach a plain local server. Use the downloaded HTML file or the EXE for online play.
 
@@ -29,14 +28,13 @@ Edit `online_config.json` next to the server, or pass options on the command lin
 | Option | Default | Meaning |
 |---|---|---|
 | `--port` | 7777 | Port to listen on |
-| `--name` | Pixel Rush Server | Name shown in the server browser |
-| `--max` | 8 | Maximum players (up to 16) |
+| `--max` | 4 | Maximum players (1 to 4) |
 | `--password` | (none) | Players must type it to join |
 | `--region` | Local | Shown in the browser |
 | `--registry` | (none) | URL of another Pixel Rush server to be listed on (heartbeat every 5 s) |
 | `--motd` | Have fun! | Message shown in the lobby |
 
-Example: `Pixel-Rush-Server.exe --name "Friday Night" --password pizza --max 4`
+Example: `Pixel-Rush-Server.exe --password pizza --max 2`  (run with `--setup` to answer the two questions again)
 
 Any server can act as a **registry**: start your other servers with `--registry http://main-server:7777`, and every game that knows the main server will see them all in its browser.
 
@@ -49,7 +47,7 @@ This follows the *Plug-and-Play Multiplayer Architecture* plan, adapted for a br
 
 | Plan | Here |
 |---|---|
-| Game.exe | `Pixel_Rush_0.5.html` / `Pixel-Rush-Game.exe` |
+| Game.exe | `Pixel_Rush_0.6.html` / `Pixel-Rush-Game.exe` |
 | Online SDK (Core, Network, ServerBrowser, Identity, Leaderboards, Events) | the `Online` object inside the game |
 | Dedicated GameServer.exe | `pixel-rush-server.js` / `Pixel-Rush-Server.exe`. Runs the match flow and validates every result. |
 | Server registry API | built into every server: `GET /servers`, `POST /heartbeat`, entries expire after 15 s |
@@ -74,10 +72,11 @@ This follows the *Plug-and-Play Multiplayer Architecture* plan, adapted for a br
 ### WebSocket protocol (`/ws`, JSON messages)
 
 **Client to server**
-- `hello{v,game,name,token,maxWorld,pw}`
-- `ready{on}`
-- `settings{world,target,diff,mods}` (leader only)
-- `start` (leader only)
+- `hello{v,game,name,token,maxWorld,pw,ch,wt}`
+- `settings{target,diff,mods}` (host only, in the lobby)
+- `start` (host only): begins the pick phase
+- `pick{ch,wt,lock}`: fighter, weapon, lock in
+- `vote{w}`: world vote
 - `status{wave,hp,maxhp,score,kills}`, sent once a second
 - `clear{wave}`
 - `dead`
@@ -87,9 +86,10 @@ This follows the *Plug-and-Play Multiplayer Architecture* plan, adapted for a br
 
 **Server to client**
 - `welcome{id,token,name,motd,server}`
-- `room{...}`
+- `room{state: lobby|pick|vote|countdown|race, left, options, tally, players[...]}`
+- `voted{world,tally}`
 - `countdown{n}`
-- `go{world,target,diff,mods}`
+- `go{world,target,diff,mods,ch,wt}`
 - `race{players}`, sent once a second
 - `attack{from,n}`
 - `results{rows}`

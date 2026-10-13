@@ -1,21 +1,23 @@
-## Pixel Rush 0.5.1
+## Pixel Rush 0.6: The Arsenal Update
 
 **Download**
 - **Pixel-Rush-Game.exe**: the game. Double-click to play (Windows).
-- **Pixel-Rush-Server.exe**: the online server. Run it only if you are hosting a race.
+- **Pixel-Rush-Server.exe**: the online server. Run it only if you are hosting.
 
 Windows may say the app is unrecognised: click **More info**, then **Run anyway**.
 
-**Hosting an online race**
-1. Run **Pixel-Rush-Server.exe** and answer the few setup questions (name, password, players, port).
-2. It tries to open the port on your router by itself, then shows **join codes** like `PR-7K2Q-9XMB-4TZ0A`.
-3. Send your friends the code. In the game: **ONLINE**, paste the code, **JOIN**.
+**Hosting online (1 to 4 players)**
+1. Run **Pixel-Rush-Server.exe** and answer two questions: how many players, and a password if you want one (press Enter for none).
+2. It shows your **join code** (like `PR-7K2Q-9XMB-4TZ0A`). The code is the server's name, it is copied for you, and it is saved in `JOIN-CODE.txt`.
+3. Friends open the game: **ONLINE**, paste the code, **JOIN**. You wait in the lobby until the host presses **START**, then everyone picks a fighter and a weapon and votes on a world (only worlds every player has unlocked).
 
 The join code keeps your IP address off screens, chats and screenshots. It is not a VPN: players still connect straight to your PC.
 
 **What's new**
-- Worlds 4 and 5, four new weapon families, daily challenges, Save & Exit, online races, a jukebox with six new songs.
-- Every boss in Worlds 3 to 5 redrawn from real shapes, with new World 4 and 5 attacks and projectiles.
-- Archers shoot a cross (up, down, left and right); jesters start with one card and throw more as the world goes on.
-- Online races have twice the enemies. Dropped hearts use the HUD heart.
-- Coins and XP you pick up count on the HUD straight away.
+- New opening animation: high in the sky with the credits, then down to the title.
+- Named saves (your online name too), with a filter that refuses swear words and slurs.
+- Difficulty is picked in Configure Run. Hard no longer gives bonus coins; You're Not Winning Bro gives no bonus coins or XP; Easy keeps half coins. Difficulty achievements are back for Easy, Medium and Hard.
+- Shop tabs: Skins (loot boxes by weapon), Upgrades (tiered per weapon: 0/10, then 10/20 after beating World 1 with it, and so on) and Unlocks (buy weapons: Boomerang 500 up to Wand 5K; pricier means stronger).
+- The Wand (was Magic) casts AOE circles, with abilities for size, poison, fire and frost. The Bow charges while you hold attack.
+- 12 new skin boxes for the Boomerang, Wand, Bow and Mace, plus their Prism dev skins.
+- Fixed: burning and poison carrying over into the next run.
