@@ -8577,9 +8577,11 @@ function tsUpdate(dt){
   /* guns shoot, bombs get thrown: at whatever mob is closest and not already targeted */
   if((kind==='g'||kind==='b')&&S.cd<=0){const tg=S.mobs.find(m=>m.hitT<=0&&!m.tg&&m.x<S.w*.78);
     if(tg){tg.tg=1;S.fireT=.18;
-      if(kind==='g'){S.cd=.55;S.shots.push({x:S.hx+16,y:S.gy-21,m:tg});for(let q=0;q<5;q++)S.fx.push({x:S.hx+17,y:S.gy-21,vx:40+R()*60,vy:(R()-.5)*40,l:.2,c:'#fff3a8'})}
+      if(kind==='g'){S.cd=.8;for(let q=0;q<3;q++)S.shots.push({x:S.hx+18-q*16,y:S.gy-21+(q-1),m:q===0?tg:null,d:q*.07}); /* a 3-round burst */
+        S.flashT=.1;for(let q=0;q<8;q++)S.fx.push({x:S.hx+19,y:S.gy-21,vx:40+R()*90,vy:(R()-.5)*60,l:.25,c:R()<.5?'#fff3a8':(S.sw&&S.sw.tr)||'#ffd36b'})}
       else{S.cd=1.1;const vy=-140,gr=280,h=27,tt=(-vy+Math.sqrt(vy*vy+2*gr*h))/gr,dx=(tg.x-tg.v*tt)-(S.hx+6);S.bombs.push({x:S.hx+6,y:S.gy-30,vx:dx/tt,vy:vy,t:0,m:tg})} /* lead the target by the real flight time */}}
-  for(const b of S.shots){b.x+=420*dt;if(b.m&&b.x>=b.m.x-4){if(b.m.hitT<=0)boom(b.m);b.dead=1}if(b.x>S.w+10)b.dead=1}S.shots=S.shots.filter(b=>!b.dead);
+  S.flashT=Math.max(0,(S.flashT||0)-dt);
+  for(const b of S.shots){if(b.d>0){b.d-=dt;continue}b.x+=460*dt;const tgt=b.m||S.mobs.find(m=>m.hitT<=0&&m.x>b.x-6);if(tgt&&b.x>=tgt.x-4){if(tgt.hitT<=0)boom(tgt);b.dead=1}if(b.x>S.w+10)b.dead=1}S.shots=S.shots.filter(b=>!b.dead);
   for(const q of S.booms)q.t+=dt;S.booms=S.booms.filter(q=>q.t<.7);
   for(const b of S.bombs){b.t+=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vy+=280*dt;if(b.y>=S.gy-3){b.dead=1;S.booms.push({x:b.x,y:S.gy-8,t:0});
       for(let q=0;q<10;q++)S.fx.push({x:b.x,y:S.gy-4,vx:(R()-.5)*160,vy:-120-R()*120,l:.8,c:R()<.5?'#7a4a26':'#5a3818'});
@@ -8617,7 +8619,9 @@ function tsDraw(){
     if(k<.4){g.fillStyle='#fff3a8';tsCircle(g,x,y,Math.max(1,Math.round(5-k*10)))}
     const rr=Math.round(6+k*40);g.globalAlpha=Math.max(0,.8-k);g.fillStyle='#fff3a8';for(let a=0;a<TAU;a+=.12)g.fillRect(Math.round(x+Math.cos(a)*rr),Math.round(y+Math.sin(a)*rr*.45),2,1);
     g.globalAlpha=1}
-  for(const b of S.shots){g.fillStyle=(sw&&sw.tr)||'#fff3a8';g.fillRect(Math.round(b.x)-5,Math.round(b.y),6,2);g.fillStyle='#ffffff';g.fillRect(Math.round(b.x),Math.round(b.y),2,2)}
+  /* bullets: a coloured tracer with a bright head, and a muzzle flash at the barrel */
+  if(S.flashT>0){const fx=S.hx+20,fy=S.gy-22;g.fillStyle='#ffffff';g.fillRect(fx,fy-1,5,3);g.fillStyle='#fff3a8';g.fillRect(fx+5,fy-3,3,7);g.fillRect(fx+2,fy-4,2,9);g.fillStyle=(sw&&sw.tr)||'#ffd36b';g.fillRect(fx+8,fy,3,1)}
+  for(const b of S.shots){if(b.d>0)continue;const x=Math.round(b.x),y=Math.round(b.y);g.globalAlpha=.45;g.fillStyle=(sw&&sw.tr)||'#ffd36b';g.fillRect(x-16,y,12,2);g.globalAlpha=1;g.fillStyle='#0a0a10';g.fillRect(x-7,y-2,9,6);g.fillStyle='#ff8a3d';g.fillRect(x-6,y-1,7,4);g.fillStyle='#fff3a8';g.fillRect(x-2,y,4,2)}
   for(const b of S.bombs){const x=Math.round(b.x),y=Math.round(b.y);
     if(sw&&sw.tab==='b'){g.save();g.translate(x,y);g.rotate(b.t*9);g.scale(.42,.42);g.translate(-14,0);try{weaponShape(g,sw,t)}catch(e){}g.restore();continue} /* the thrown bomb is the equipped bomb skin, spinning */
    g.fillStyle='#0a0a10';g.fillRect(x-3,y-5,6,10);g.fillRect(x-5,y-3,10,6);g.fillStyle='#2e2e3e';g.fillRect(x-2,y-4,4,8);g.fillRect(x-4,y-2,8,4);g.fillStyle='#6a6a80';g.fillRect(x-2,y-2,2,2);g.fillStyle='#8a6a3a';g.fillRect(x+1,y-7,1,3);g.fillStyle=((t*20)|0)%2?'#ffd36b':(sw&&sw.glow)||'#ff5a3a';g.fillRect(x+1,y-9,2,2)}
