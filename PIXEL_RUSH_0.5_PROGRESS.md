@@ -40,12 +40,12 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [ ] Challenge modifiers: clearly described before the run. Decision (recommended set): Glass Cannon (x2 dmg dealt, 1 heart), Swarm (+50% enemies, +25% coins), Fast Forward (enemies +25% speed, +20% XP), No Dash, Elites Only-ish "Evolved" (all mobs evolved), Pacifist Shop (no ability shop, +50% coins), Iron Body (no healing between waves, +30% XP). Modifiers give reward multipliers; shown on HUD; saved with run; runs with modifiers still count for records unless the modifier makes the run easier (none of them do).
 
 ### 2. Weapon evolution overhaul
-- [ ] Rename/redraw lines exactly as the table above. Each form visually distinct; the in-hand sprite matches the evolution.
+- [x] Rename/redraw lines exactly as the table above (WLINES punch/gun/bomb; new art wrap, dbarrel, grenade, cball, bigger bomb, brass bar; weapon-box skins use the exact stage names, their look stays on the final stage). Each form visually distinct; the in-hand sprite matches the evolution.
 - [ ] New families: Boomerang (thrown, returns, pierces), Magic (homing bolt), Bow (charged arrows that pierce), Mace (slow heavy spin smash with knockback). Each with mastery track, unlock chain after Bomb (Bomb → Boomerang → Magic → Bow → Mace), shop/upgrade tabs only when unlocked.
 - [ ] Evolution animation (Pokémon-like): old weapon shown big, flashing silhouette, transform burst, new weapon revealed, evolution jingle. Short, skippable by click.
 
 ### 3. Fist combat fix
-- [ ] Punch = forward jab: arm visibly extends, narrow short hitbox in front only (no sweep). Distinct from slash. Holds through Bare Fist → Knuckle Wrap → Brass Knuckles (each stronger).
+- [x] Punch = forward jab (inJab strip hitbox, tested front/diag/behind on all 3 forms): arm visibly extends, narrow short hitbox in front only (no sweep). Distinct from slash. Holds through Bare Fist → Knuckle Wrap → Brass Knuckles (each stronger).
 
 ### 4. Main menu rotating worlds
 - [ ] Menu background cycles W1 → W2 → W3 → W4 → W5 → W1 every 30 s with a smooth pixel transition. Keep menu animations.
@@ -55,7 +55,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 ### 5. Save select & difficulty screen
 - [x] Pixel-art borders, consistent type, clear slot selection, character preview per slot, better spacing. (desktop + landscape phone checked)
 - [x] Remove "45 minutes per world" text.
-- [x] Easy renamed "Lucky" (keep its description). Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
+- [x] Easy keeps the name "Easy" (user changed their mind: "change lucky to easy in difficulty select"); description kept. Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
 
 ### 6. Audio overhaul (procedural, no files)
 - [ ] Distinct SFX per weapon family and evolution: gun fire, sword swing, punch, boomerang throw + return, bow, magic, mace, explosive throw, explosive roll, explosion.
@@ -123,6 +123,7 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 - Game over redesign; run timer (runT, play+shop only); postcard (cinder-postcard per save) + mailbox; PBs on Account screen and win badge. Helpers: fmtT, WNAME, drawFighter(g,ch,sk,ws,x,gy,U,t,world) for previews.
 - Save & Exit/Continue: checkpoint at wave start + wave clear/shop close (runSnap), stored in cinder-run per save, consumed on continue, validated; not in boss rush/tutorial; difficulty of the run used then restored on showHome. pxAsk() generic confirm popup (Esc/back = cancel, Cancel focused first).
 - Export/import: format 'pixel-rush-save' fv1 {data:{cinder-*}}; backup in pxr-backup-prev + RESTORE button; invalid/oversized files rejected; quota failure restores old data.
+- Shotgun fires pellets (w.pel); Cannonball rolls along the ground (w.roll), bursts on the first enemy it touches, quiet roll rumble.
 
 ## Known bugs
 (append as found)
