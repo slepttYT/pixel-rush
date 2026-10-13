@@ -681,6 +681,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="htut" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6l9-4 9 4-9 4zm3 3.3l6 2.7 6-2.7V14c0 2-2.7 4-6 4s-6-2-6-4z"/></svg>TUTORIAL</button>
         <button class="btn ghost mi" id="hhelp" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M8.2 8.6c0-2.3 1.7-3.9 4-3.9s3.8 1.4 3.8 3.4c0 1.5-.8 2.3-1.9 3.1-1 .7-1.4 1.2-1.4 2.2v.4h-2.4v-.6c0-1.6.7-2.4 1.8-3.2.9-.6 1.3-1 1.3-1.8 0-.8-.6-1.3-1.4-1.3-.9 0-1.5.6-1.5 1.7z"/><circle cx="12" cy="19" r="1.6"/></svg>HELP</button>
         <button class="btn ghost mi" id="hkeys" type="button"><svg class="ic" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10.3 2h3.4l.5 2.6 1.6.7 2.2-1.5 2.4 2.4-1.5 2.2.7 1.6 2.6.5v3.4l-2.6.5-.7 1.6 1.5 2.2-2.4 2.4-2.2-1.5-1.6.7-.5 2.6h-3.4l-.5-2.6-1.6-.7-2.2 1.5-2.4-2.4 1.5-2.2-.7-1.6L2 13.7v-3.4l2.6-.5.7-1.6-1.5-2.2 2.4-2.4 2.2 1.5 1.6-.7zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/></svg>SETTINGS</button>
+        <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
     <div class="hfoot"><span>v2.7</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button></div>
@@ -704,6 +705,14 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="saves" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="savest">
+    <button class="btn ghost backtl" type="button">&#9664; BACK</button>
+    <div class="box">
+      <h2 id="savest">Saves</h2>
+      <p class="note">Three separate save slots. Pick one to switch to it (the game reloads into that save). Settings are shared by every slot.</p>
+      <div id="savelist"></div>
+    </div>
+  </div>
   <div id="upd" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="updt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -3093,6 +3102,7 @@ $('acdone')?.addEventListener('click',closeSub);
 document.addEventListener('click',e=>{if(e.target.closest('.backtl'))closeSub()});
 $('hacct').addEventListener('click',e=>openSub('acct',e.currentTarget));
 $('hhelp').addEventListener('click',e=>openSub('help',e.currentTarget));
+$('hsaves').addEventListener('click',e=>openSub('saves',e.currentTarget));
 $('hpdone')?.addEventListener('click',closeSub);
 
 
@@ -3351,8 +3361,9 @@ function renderJuke(){
 }
 
 /* ---------- home sub-screens (controls, jukebox) ---------- */
+let savesDraw=null;
 function openSub(k,opener){
-  listen=null;sub=k;subOpener=opener||document.activeElement;
+  listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
   $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
   else if(k==='set'){renderSet()}
@@ -3364,6 +3375,7 @@ function openSub(k,opener){
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
   else if(k==='help'){}
+  else if(k==='saves'){if(savesDraw)savesDraw()}
   else if(k==='upd'){renderUpd()}
   else if(k==='cos'){cosTab=wType;cosSel=eq[wType];pv=[];$('cosres').textContent='';renderCos()}
   else{renderJuke();const f=$('tracks').querySelector('.on')||$('jplay');f.focus()}
@@ -3371,7 +3383,7 @@ function openSub(k,opener){
   {const ov=$(k);if(ov){ov.classList.add('opening');try{fitMenus()}catch(e){}requestAnimationFrame(()=>{try{fitMenus()}catch(e){}ov.classList.remove('opening')})}}
 }
 function closeSub(){
-  const was=sub;listen=null;plisten=null;sub=null;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
+  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
   if(was==='chars'&&runFlow&&charMode==='play'){openSub('dsel',subOpener);return}
@@ -8417,15 +8429,16 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
 
   /* ---------- save switcher + manager (very top right of the main menu) ---------- */
   {
-    const panel=document.createElement('div');panel.id='slpanel';panel.hidden=true;$('home').appendChild(panel);
+    const panel=document.createElement('div');panel.id='slpanel';$('savelist').appendChild(panel); /* v0.3: lives on the Saves screen (menu > SAVES) */
     let del=0;
     function goSlot(n){
       if(n===SLOT||state!=='menu')return;
       try{saveMeta();saveOwn();localStorage.setItem('cinder-slot',String(n));sessionStorage.setItem('cinder-boot','home')}catch(x){}
       location.reload();
     }
+    savesDraw=()=>{del=0;drawMgr()};
     function drawMgr(){
-      panel.innerHTML='<div class="slh"><b>SAVE SLOTS</b><small>TAP TO SWITCH</small></div>'+[1,2,3].map(n=>{
+      panel.innerHTML='<div class="slh"><b>SAVE SLOTS</b><small>ACTIVE: SAVE '+SLOT+'</small></div>'+[1,2,3].map(n=>{
         const i=info(n),on=n===SLOT;
         const sub=i?('LV '+i.lv+' \u00b7 BEST WAVE '+i.bw+' \u00b7 '+DIFFS[slotDiff(n)].n):'EMPTY';
         const right=del===n?'<button type="button" class="btn dng sm" data-act="yes">DELETE</button><button type="button" class="btn ghost sm" data-act="no">KEEP</button>'
@@ -8447,7 +8460,6 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
       else if(e.target.closest('#slnext'))goSlot(SLOT===3?1:SLOT+1);
       else if(e.target.closest('#slmgr')){panel.hidden=!panel.hidden;del=0;if(!panel.hidden)drawMgr()}
     });
-    document.addEventListener('click',e=>{if(!panel.hidden&&!e.target.closest('#slpanel')&&!e.target.closest('#slmgr'))panel.hidden=true});
   }
 }
 })();
@@ -8690,6 +8702,11 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
 .sub .chc.sel,.sub .chc.on,.sub .dbtn.on,.sub .trk.on{background:#0c130e!important;border-color:#f5c542!important;box-shadow:inset 0 0 0 1px #f5c54255!important}
 .sub .item.maxed{background:#0a0f0b!important}
 .sub .cosrow,.sub .chinfo,.sub #wallet,.sub dl.keys{background:#0c130e!important}
+#slots{display:none!important}
+#saves #slpanel{position:static;width:100%;max-width:520px;margin:0 auto;box-sizing:border-box;padding:12px;gap:10px;background:#0c130e!important;border:3px solid #1e6b2c!important;box-shadow:none!important}
+#saves #slpanel .slr{background:#0b100c!important;padding:4px 8px 4px 4px}
+#saves #slpanel .slr.on{border-color:#f5c542!important;background:#0b100c!important}
+#saves #slpanel .slsel b{font-size:15px}#saves #slpanel .slsel small{font-size:11px}
 body:has(.sub:not([hidden])) #home .box,body:has(.sub:not([hidden])) #slots{visibility:hidden} /* only the live menu scene shows behind a menu screen */
 #tutbox small{font-size:10px;letter-spacing:.24em;color:#b4f7a8}
 #tutbox b{font-family:'Press Start 2P',monospace;font-size:16px;color:#fff;text-shadow:3px 3px 0 #0b3a15}
