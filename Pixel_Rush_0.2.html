@@ -678,6 +678,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hacct" type="button" aria-label="Account level and rewards"><span class="avatar"><canvas id="havatar" width="88" height="88"></canvas></span><span class="xpw" id="hxp"></span></button>
         <div class="mgap"></div>
         <button class="btn ghost mi" id="hjuke" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M9 3.5l11-2v14.2a3.3 3.3 0 1 1-2-3V6.3L11 7.6v11.1a3.3 3.3 0 1 1-2-3z"/></svg>JUKEBOX</button>
+        <button class="btn ghost mi" id="htut" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6l9-4 9 4-9 4zm3 3.3l6 2.7 6-2.7V14c0 2-2.7 4-6 4s-6-2-6-4z"/></svg>TUTORIAL</button>
         <button class="btn ghost mi" id="hhelp" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M8.2 8.6c0-2.3 1.7-3.9 4-3.9s3.8 1.4 3.8 3.4c0 1.5-.8 2.3-1.9 3.1-1 .7-1.4 1.2-1.4 2.2v.4h-2.4v-.6c0-1.6.7-2.4 1.8-3.2.9-.6 1.3-1 1.3-1.8 0-.8-.6-1.3-1.4-1.3-.9 0-1.5.6-1.5 1.7z"/><circle cx="12" cy="19" r="1.6"/></svg>HELP</button>
         <button class="btn ghost mi" id="hkeys" type="button"><svg class="ic" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10.3 2h3.4l.5 2.6 1.6.7 2.2-1.5 2.4 2.4-1.5 2.2.7 1.6 2.6.5v3.4l-2.6.5-.7 1.6 1.5 2.2-2.4 2.4-2.2-1.5-1.6.7-.5 2.6h-3.4l-.5-2.6-1.6-.7-2.2 1.5-2.4-2.4 1.5-2.2-.7-1.6L2 13.7v-3.4l2.6-.5.7-1.6-1.5-2.2 2.4-2.4 2.2 1.5 1.6-.7zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/></svg>SETTINGS</button>
       </div>
@@ -712,6 +713,7 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="tutbox" hidden><small id="tutstep"></small><b id="tutt"></b><span id="tutd"></span><i id="tutbar"><i></i></i><button type="button" class="btn ghost sm" id="tutskip">SKIP TUTORIAL</button></div>
   <div id="help" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="helpt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -3036,6 +3038,8 @@ const UPDATES=[
   'Every boss is now pixel art. The World 1 and World 2 bosses, the Dragon and the Golem draw on the same pixel grid as the arenas, with an ink outline.',
   'The Sand World bosses finally have real art from the boss sheet: Sand Worm, Scorpion King, Giant Sand Golem, Sand Giant, Sand Lizard, Sand Crab, Sand Griffin, Ancient Snake, Sand Phoenix and the Pharaoh.',
   'Each Sand boss has an idle and an attack pose, and burns hotter in its final phase. The vault Pharaoh is the same king, bigger.',
+  'Shop, Characters, Achievements, Jukebox, Help, Settings and every other menu screen now use the main menu look: pixel fonts and green panels over a faded black view of the menu scene.',
+  'New TUTORIAL: a guided practice run (move, attack, dash, dodge, shop). It starts the first time you press New Run, and you can replay it from the menu.',
   'New version names: this is Pixel Rush 0.2 (Pixel_Rush_0.2.html).']],
  ['v4.8','Boss music, footsteps, win and loss','#ffd36b',[
   'New final boss track, Last Stand: a fast, relentless tune that plays while the Dragon, the Golem or the Pharaoh is awake. It is in the jukebox too.',
@@ -5154,7 +5158,7 @@ function beginRun(){
   $('home').hidden=true;reset();stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
   juke.paused=false;if(!muted)musicStart();
 }
-$('play').addEventListener('click',()=>{if(state==='menu')brWant=false;startGame()});
+$('play').addEventListener('click',()=>{if(state==='menu')brWant=false;if(state==='menu'&&!stats.tutDone&&!(stats.runs>0)&&!(stats.kills>0)){startTutorial();return}startGame()});
 $('pbtn').addEventListener('click',()=>{state==='win'?loopGame():startGame()});
 $('hbtn').addEventListener('click',()=>{state==='win'?endRun():showHome()});
 $('wbtn').addEventListener('click',nextWorld);
@@ -5726,6 +5730,52 @@ function quitRun(){
   showRunPanel('RUN <em>ENDED</em>','','GO AGAIN','HOME',false);
 }
 
+/* ---------- tutorial: a guided practice run in a quiet arena. Move, slash practice goblins, dash, dodge a fireball, visit the shop, then home ---------- */
+let tut=null;
+const TUT_STEPS=[
+ ['MOVE','Move around with WASD or the arrow keys (left stick on a controller, the left side of the screen on touch).'],
+ ['ATTACK','Three practice goblins! Attack with left click or Space. Your weapon hits whatever is in front of you.'],
+ ['DASH','Dash with Shift or right click. While you dash nothing can hurt you. Dash twice.'],
+ ['DODGE','A wizard is casting fireballs. Dash through one to DODGE it, or just step aside until it gives up.'],
+ ['SHOP','Between waves the shop sells abilities that stack up during a run. Here are some coins: buy one, then close the shop.'],
+ ['READY','Every 10th wave is a boss, and bosses drop vault keys. Unlock new weapons with mastery in the Upgrades shop. Good luck!']
+];
+function tutUI(){
+  const b=$('tutbox');if(!tut){b.hidden=true;return}
+  const st=TUT_STEPS[tut.step];b.hidden=false;$('tutstep').textContent='TUTORIAL · '+(tut.step+1)+' / '+TUT_STEPS.length;$('tutt').textContent=st[0];$('tutd').textContent=st[1];
+  $('tutbar').firstChild.style.width=Math.round(Math.min(1,tut.prog||0)*100)+'%';
+}
+function tutGo(n){
+  tut.step=n;tut.t=0;tut.prog=0;sfx(660,.12,'triangle',.06,1.4);
+  const near=(dx,dy)=>[Math.min(Math.max(p.x+dx,M+30),W-M-30),Math.min(Math.max(p.y+dy,M+30),H-M-30)];
+  if(n===1)for(let i=0;i<3;i++){const a=i*TAU/3,q=near(Math.cos(a)*120,Math.sin(a)*120),e=addEnemy('goblin',q[0],q[1]);e.ev=0;e.hp=e.maxhp=2;e.frz=1e9;e.dmg=0}
+  if(n===3){const q=near(W/2>p.x?260:-260,0),e=addEnemy('wizard',q[0],q[1]);e.ev=0;e.dmg=0;e.hp=e.maxhp=999;tut.wiz=e}
+  if(n===4){if(tut.wiz){tut.wiz.dead=true;tut.wiz=null}enemies=enemies.filter(e=>!e.dead);coins+=150;tut.shop=0}
+  tutUI();
+}
+function startTutorial(){
+  if(sub)closeSub();selWorld=1;brWant=false;beginRun();
+  tut={step:0,t:0,prog:0,d:0,lx:p.x,ly:p.y,dash:0,dg:p.dgT||0};enemies=[];toSpawn=0;waveActive=false;wave=0;tutGo(0);banner('TUTORIAL');
+}
+function endTutorial(done){
+  stats.tutDone=1;saveMeta();tut=null;tutUI();
+  if(state!=='menu'){state='menu';$('panel').hidden=true;$('shop').hidden=true;$('pause').hidden=true;enemies=[];bullets=[];showHome()}
+  if(done)setTimeout(()=>sfx(880,.2,'triangle',.06,1.3),50);
+}
+function tutTick(dt){
+  p.hp=p.maxhp;tut.t+=dt;
+  const s=tut.step;
+  if(s===0){tut.d+=Math.hypot(p.x-tut.lx,p.y-tut.ly);tut.lx=p.x;tut.ly=p.y;tut.prog=tut.d/300;if(tut.d>=300)tutGo(1)}
+  else if(s===1){const left=enemies.filter(e=>e.t==='goblin'&&!e.dead).length;tut.prog=(3-left)/3;if(!left)tutGo(2)}
+  else if(s===2){if(p.dashT>0&&!tut.inDash){tut.inDash=1;tut.dash++}if(p.dashT<=0)tut.inDash=0;tut.prog=tut.dash/2;if(tut.dash>=2)tutGo(3)}
+  else if(s===3){tut.prog=Math.max((p.dgT||0)>tut.dg?1:0,tut.t/14);if((p.dgT||0)>tut.dg||tut.t>=14)tutGo(4)}
+  else if(s===4){if(!tut.shop){tut.shop=1;openShop()}else{tut.prog=1;tutGo(5)}}
+  else if(s===5){tut.prog=tut.t/5;if(tut.t>=5)endTutorial(true)}
+  tutUI();
+}
+$('tutskip').addEventListener('click',()=>endTutorial(false));
+$('htut').addEventListener('click',()=>{if(state==='menu')startTutorial()});
+
 /* ---------- update ---------- */
 let mvx=0,mvy=0;
 function update(dt){
@@ -5819,8 +5869,9 @@ function update(dt){
 
   vaultUpdate(dt);mapTick(dt);
 
-  /* waves */
-  if(toSpawn>0){spawnT-=dt;if(spawnT<=0&&enemies.length<14+Math.min(loop*2,8)+(world-1)*3){spawn();spawnT=Math.max(.45,.9-wave*.025)/(1+.08*loop)/(1+(world-1)*.1)}}
+  /* waves (the tutorial runs its own script instead) */
+  if(tut)tutTick(dt);
+  else if(toSpawn>0){spawnT-=dt;if(spawnT<=0&&enemies.length<14+Math.min(loop*2,8)+(world-1)*3){spawn();spawnT=Math.max(.45,.9-wave*.025)/(1+.08*loop)/(1+(world-1)*.1)}}
   else if(enemies.length===0){
     if(waveActive){
       waveActive=false;if(!p.hitW)stats.flawless++;const bw=wave%10===0;pickT=(bw||(wave%5&&wave!==1))?0:.8;
@@ -8445,5 +8496,44 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
 #slpanel .slsel{color:#fff}
 #slpanel .slsel small{color:#b4f7a8}
 #slpanel .slon{background:#b4f7a8;color:#0d3d18}
+
+/* ===== v0.2: every menu screen (shop, characters, achievements, jukebox, help, settings, ...) uses the green main-menu look ===== */
+.sub{--display:'Silkscreen','Press Start 2P',monospace;--bone:#e9ffe0;--dim:#a8dca0;background:rgba(6,8,10,.86)!important;font-family:'Silkscreen',monospace;color:#e9ffe0} /* faded black over the live menu scene */
+.sub::after{content:'';position:fixed;inset:0;border:10px solid #145a24;box-shadow:inset 0 0 0 4px #0b3a15,inset 0 0 0 8px #3cb04c;pointer-events:none;z-index:3}
+.sub h2,.sub .chhead h2,.sub #chart{font-family:'Press Start 2P',monospace!important;color:#fff!important;letter-spacing:.02em;text-shadow:4px 4px 0 #0b3a15,-2px -2px 0 #0b3a15,2px -2px 0 #0b3a15,-2px 2px 0 #0b3a15}
+.sub h3{font-family:'Silkscreen',monospace;letter-spacing:.14em}
+.sub .note,.sub p{color:#d8ffd0}
+.sub small{color:#b4f7a8}
+.sub .btn{background:#0d3d18!important;border:3px solid #1e6b2c!important;border-radius:6px!important;color:#e9ffe0!important;font-family:'Silkscreen',monospace!important;font-weight:700;letter-spacing:.12em;box-shadow:none!important;clip-path:none!important;text-shadow:none}
+.sub .btn:hover,.sub .btn:focus-visible,.sub .btn.on,.sub .btn.padhov{background:#14612a!important;border-color:#b4f7a8!important;color:#fff!important}
+.sub .btn.gold{background:#b4f7a8!important;color:#0d3d18!important;border:4px solid #e9ffe0!important;box-shadow:0 0 0 3px #0b3a15,0 0 0 6px #3cb04c!important}
+.sub .btn.gold:hover{filter:brightness(1.08)}
+.sub .btn[disabled],.sub .btn:disabled{opacity:.5}
+.sub .item,.sub .chc,.sub .ar,.sub .cx,.sub .tbox,.sub .dbtn,.sub #prev,.sub .cosrow,.sub .chinfo,.sub dl.keys,.sub .xpl,.sub #wallet{background:#0d3d18!important;border:3px solid #1e6b2c!important;border-radius:6px!important;color:#e9ffe0!important;box-shadow:none!important}
+.sub .item{border-top:3px solid var(--tc,#1e6b2c)!important}
+.sub .item:hover:not([disabled]),.sub .chc:hover,.sub .chc.sel,.sub .dbtn.on,.sub .dbtn:hover{background:#14612a!important;border-color:#b4f7a8!important}
+.sub .item.maxed{background:#0b3315!important;opacity:.8}
+.sub .ar.on{border-left:4px solid #f5c542!important}
+.sub .ar em,.sub .price,.sub .cnt,.sub .clv{color:#f5c542!important}
+.sub .tabs .btn.on{background:#b4f7a8!important;color:#0d3d18!important}
+.sub input,.sub select{background:#0b3315;border:2px solid #1e6b2c;color:#e9ffe0;border-radius:4px;font-family:'Silkscreen',monospace}
+.sub input[type=range]{accent-color:#b4f7a8}
+.sub .xpb{background:#0b3315!important;border:2px solid #1e6b2c}
+.sub .xpb i{background:#b4f7a8!important}
+.sub .backtl{z-index:4}
+.sub .trk{background:#0d3d18!important;border:3px solid #1e6b2c!important;border-left:5px solid var(--tc)!important;border-radius:6px!important;color:#e9ffe0!important;font-family:'Silkscreen',monospace}
+.sub .trk:hover,.sub .trk.sel{background:#14612a!important;border-color:#b4f7a8!important;border-left-color:var(--tc)!important}
+.sub .trk.on{background:#14612a!important;border-color:#f5c542!important}
+.sub #chprev,.sub canvas#prev{background:radial-gradient(circle at 50% 55%,#1f7a35,#0b3315)!important;border:3px solid #1e6b2c!important}
+.sub .chc canvas{background:#0b3315;border-radius:4px}
+#tutbox{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 54px);transform:translateX(-50%);z-index:8;width:min(560px,calc(100% - 32px));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 16px;text-align:center;background:#0d3d18;border:3px solid #1e6b2c;box-shadow:0 0 0 3px #0b3a15,0 0 0 6px #3cb04c,0 12px 40px rgba(0,0,0,.45);border-radius:8px;color:#e9ffe0;font-family:'Silkscreen',monospace;pointer-events:auto}
+#tutbox[hidden]{display:none}
+body:has(.sub:not([hidden])) #home .box,body:has(.sub:not([hidden])) #slots{visibility:hidden} /* only the live menu scene shows behind a menu screen */
+#tutbox small{font-size:10px;letter-spacing:.24em;color:#b4f7a8}
+#tutbox b{font-family:'Press Start 2P',monospace;font-size:16px;color:#fff;text-shadow:3px 3px 0 #0b3a15}
+#tutbox span{font-size:13px;line-height:1.4;color:#d8ffd0}
+#tutbar{display:block;width:100%;height:6px;background:#0b3315;border:2px solid #1e6b2c;border-radius:3px;overflow:hidden}
+#tutbar i{display:block;height:100%;width:0;background:#b4f7a8;transition:width .2s}
+#tutbox .btn{margin-top:2px;background:#0b3315;border:2px solid #1e6b2c;color:#b4f7a8;font-size:10px;padding:4px 10px}
 </style>
 </body></html>
