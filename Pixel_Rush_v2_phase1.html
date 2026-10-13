@@ -2936,8 +2936,13 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.1';
+const UPD_VER='4.2';
 const UPDATES=[
+ ['v4.2','Pixel Rush 2.0, part 3: enemy evolution','#ff6a1a',[
+  'Mobs now evolve through a run instead of only getting more health. Early waves are basic, the middle of a world brings Evolved mobs (glowing outline) and late waves bring Elites (a crown and a pulsing outline).',
+  'Evolved mobs move and recover faster, hit harder and can inflict their world\u2019s element: burn in World 1, chill in World 2 (slows you), poison in World 3. Elites always do.',
+  'Every mob upgrades in its own way: goblins swing twice, thieves chain dashes, wizards cast three at once, archers fire a second ring, lancers charge twice, golems leave an aftershock, phoenixes dive twice, and more.',
+  'Evolution never adds health. Loops, a strong build and later worlds bring evolved mobs sooner. Evolved and elite mobs are worth more points and coins.']],
  ['v4.1','Pixel Rush 2.0, part 2: new roster and achievements','#ffd36b',[
   'All mobs are redrawn as crisp pixel art on the same grid as the arenas. Each world has its own builds: World 1 regular, Stone World short and armoured with glowing eyes and crystals, Sand World tall and wrapped in scarves. Projectiles match too.',
   'A new roster of 13 fighters, each with a clear job. Brawler, Duelist, Gunslinger and Demolitionist are weapon specialists: beat World 1 using only Fists, the Knife, the Gun or Bombs to earn them, and their bonuses only work with that weapon.',
@@ -3928,6 +3933,8 @@ function buildCodex(){
     ['Worm (mini boss)','#8fb8c8','Worlds 2 and 3. Tunnels under you and cannot be hurt, then bursts out of the red circle.'],
     ['Diamond Golem (mini boss)','#7fe3ff','World 2. Alternates a ring of diamond shards with an aimed rock volley.'],
     ['Sand Phoenix (mini boss)','#ff8a3d','World 3. Circles you, hovers, then dives and bursts into fire.'],
+    ['Evolved','#ff6a1a','Mobs evolve as a world goes on. Evolved mobs have a glowing outline, move and recover faster, attack harder and may inflict their world\u2019s element: burn in World 1, chill (slows you) in World 2, poison in World 3.'],
+    ['Elite','#ffd36b','Late in a world, mobs can spawn as elites: a crown and a pulsing outline. Elites use advanced patterns (double swings, double charges, extra rings) and always inflict their element. Neither stage adds health.'],
     ['Green glow','#5dff7a','Glowing green enemies have extra health and drop bonus XP.'],
     ['Yellow glow','#ffe14d','Glowing yellow enemies have extra health and drop bonus coins.'],
     ['Room bosses','#ff8a3d','Every tenth wave brings the boss of that room, each with its own attacks. Drops a vault key, except the wave 100 boss. Every world ends with a final boss that was waiting in its vault: the dragon flies down in World 1, the stone golem smashes through the wall in World 2 and the Eclipse Serpent tunnels up out of its nest in World 3. The Serpent dives underground, turns see-through and cannot be hurt until it bursts back out, so step out of the ring that bulges under it. Beating it opens the loop choice.']
@@ -3991,10 +3998,13 @@ function nextWave(){
   if(wave%10===0){toSpawn=0;spawnBoss();bossIntroStart()}
   else{toSpawn=Math.max(2,Math.round(Math.min(Math.round((32+loop*6+Math.round((dynS-1)*10))*WORLD_CROWD()),Math.round((3+wave*2.2)*(1+.2*loop)*WORLD_CROWD()*(1+(dynS-1)*.5)))*(DF().cw||1)*paceK()));banner(wave%10===1?zoneOf(wave).n.toUpperCase():loop?'LOOP '+(loop+1)+' · WAVE '+wave:'WAVE '+wave)}
 }
+/* which stage a new mob spawns at: basic early, evolved through the middle of a world, elite late. Loops, a strong build (dynS) and later worlds push it along. Evolving never adds health: it adds speed, faster recovery, better attack patterns and an element */
+function mobEvo(){const s=wave+loop*50+(dynS-1)*20+(world-1)*10,q2=Math.max(0,Math.min(.65,(s-40)/80)),q1=Math.max(0,Math.min(1,(s-10)/30)),r=R();return r<q2?2:r<q1?1:0}
 function addEnemy(t,x,y){
   const T=TYPES[t];
   const e={t,x,y,r:T.r,hp:hpS(T.hp),maxhp:hpS(T.hp),zc:1,sp:T.sp*(1+Math.min(wave,60)*.018+loop*.05),dmg:T.dmg+(loop>=4?1:0)+DF().ed+(world===3&&t!=='boss'?1:0),pts:T.pts,c:T.c,kb:T.kb,kx:0,ky:0,flash:0,spawnT:.75,ph:R()*TAU,chargeT:2+R()*2,charging:0,wind:0,cx:0,cy:0,dead:false,kcd:0,fuse:0,ws:0,wt:1.5+R()*2,ghost:false};
   e.sp*=DF().es*WORLD_SPD();
+  if(t!=='boss'){e.ev=mobEvo();e.sp*=[1,1.1,1.2][e.ev];e.pts=Math.round(e.pts*[1,1.3,1.7][e.ev])}
   if(t==='worm'){e.st='under';e.stT=1.5+R();e.burrowed=true;e.ghost=true}
   if(t!=='boss'&&!T.mb&&wave>=2){const q=R()*paceK();e.el=q<.06?'g':q<.16?'y':null;if(e.el){e.hp=e.maxhp=Math.ceil(e.hp*1.4)}}
   enemies.push(e);spawnSfx(e);return e;
@@ -4274,83 +4284,83 @@ function summon(e,n){
 }
 /* ---------- mob behavior: every role has one readable attack with a wind-up (e.st 'wind'), the hit ('act'), then a cooldown in e.chargeT ---------- */
 function mobAI(e,dt,ux,uy,d,o){
-  const t=e.t,w=world,a0=Math.atan2(uy,ux),sd=e.ph>3.14?1:-1;
+  const t=e.t,w=world,a0=Math.atan2(uy,ux),sd=e.ph>3.14?1:-1,ev=e.ev||0,cdt=dt/[1,.85,.7][ev]; /* evolved and elite mobs recover faster */
   const cx=x=>Math.min(Math.max(x,M+e.r),W-M-e.r),cy=y=>Math.min(Math.max(y,M+e.r),H-M-e.r);
-  const shot=(a,s,ex)=>bullets.push(Object.assign({x:e.x,y:e.y-e.r*.3,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:5,l:5,c:'#ffd36b'},ex));
+  const shot=(a,s,ex)=>bullets.push(Object.assign({x:e.x,y:e.y-e.r*.3,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:5,l:5,c:'#ffd36b',ev:ev&&(ev>=2||R()<.35)?ev:0},ex));
   const ring=(n,s,ex,off)=>{for(let i=0;i<n;i++)shot((off||0)+i*TAU/n,s,ex)};
   const area=(x,y,rr)=>{if(state!=='play'||p.inv>0||p.dashT>0)return;const dx=p.x-x,dy=p.y-y,dd=Math.hypot(dx,dy)||1;if(dd<rr+p.r)hurtP(e,dx/dd,dy/dd)};
   const melee=(rr,arc)=>{if(state!=='play'||p.inv>0||p.dashT>0)return;const dx=p.x-e.x,dy=p.y-e.y,dd=Math.hypot(dx,dy)||1;if(dd<rr+p.r&&angDiff(Math.atan2(dy,dx),e.aa)<arc)hurtP(e,dx/dd,dy/dd)};
   const dust=(x,y,n,c)=>{for(let i=0;i<n;i++){const a=R()*TAU,v=60+R()*160;parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v*.5-30,l:.5+R()*.3,m:.8,c:c||(R()<.5?'#b09468':'#7a6240'),s:3+R()*4})}};
   const keep=(lo,hi,f)=>{if(d<lo){o.mx=-ux;o.my=-uy;o.sp=e.sp*1.1}else if(d<hi){o.mx=-uy*sd;o.my=ux*sd;o.sp=e.sp*(f||.6)}};
   const wind=(s,dur)=>{e.st='wind';e.stT=dur;e.aa=a0;sfx(s,.12,'triangle',.035,1.6)};
-  const tick=()=>(e.stT-=dt)<=0;
+  const tick=()=>(e.stT-=dt*(e.st==='wind'?[1,1.08,1.18][ev]:1))<=0;
   if(e.haste>0){e.haste-=dt;o.sp*=1.5}
   if(t==='goblin'){ /* walks up and swings; World 3 goblins weave so the swing is harder to read */
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.25;melee(e.r+36+(w===2?8:0),1.15);sfx(260,.08,'sawtooth',.04,.6)}}
-    else if(e.st==='act'){o.sp=0;if(tick()){e.st='';e.chargeT=1+R()*.6}}
-    else{e.chargeT-=dt;if(w===3){const s=Math.sin(time*3+e.ph)*.8;o.mx=ux-uy*s;o.my=uy+ux*s}if(e.chargeT<=0&&d<e.r+p.r+42)wind(330,w===3?.22:.32)}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.25;melee(e.r+36+(w===2?8:0)+ev*6,1.15);sfx(260,.08,'sawtooth',.04,.6)}}
+    else if(e.st==='act'){o.sp=0;if(tick()){if(ev>=2&&!e.cmb){e.cmb=1;e.st='wind';e.stT=.14;e.aa=a0}else{e.cmb=0;e.st='';e.chargeT=1+R()*.6}}}
+    else{e.chargeT-=cdt;if(w===3){const s=Math.sin(time*3+e.ph)*.8;o.mx=ux-uy*s;o.my=uy+ux*s}if(e.chargeT<=0&&d<e.r+p.r+42)wind(330,w===3?.22:.32)}
   }
   else if(t==='thief'){ /* sprints in a straight dash; the World 3 thief throws a sand burst if you are still close */
-    if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=430;if(tick()){e.st='';e.chargeT=1.8+R()*.8;if(w===3&&d<150){e.st='act';e.stT=.3;shot(a0,240,{spr:1,r:7,l:1.1,c:'#ffcc4a'})}}}
+    if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=430+ev*60;if(tick()){if(ev>=2&&!e.cmb){e.cmb=1;e.stT=.35;e.cx=ux;e.cy=uy;return}e.cmb=0;e.st='';e.chargeT=1.8+R()*.8;if(w===3&&d<150){e.st='act';e.stT=.3;shot(a0,240,{spr:1,r:7,l:1.1,c:'#ffcc4a'})}}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<320&&d>60){e.st='dash';e.stT=.45;e.cx=ux;e.cy=uy;sfx(140,.2,'sawtooth',.04,1.5)}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<320&&d>60){e.st='dash';e.stT=.45;e.cx=ux;e.cy=uy;sfx(140,.2,'sawtooth',.04,1.5)}}
   }
   else if(t==='wizard'){ /* keeps its distance and casts; Stone and Sand wizards' balls burst into shards */
     keep(200,320);
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;if(w===1)shot(a0,230,{spr:1,r:8,l:4,c:'#ff8a3d'});else shot(a0,200,{spr:1,r:8,l:2.6,c:w===2?'#c9a070':'#ffcc4a',burst:6});sfx(300,.15,'sawtooth',.05,.7)}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;for(const da of ev>=2?[-.25,0,.25]:[0]){if(w===1)shot(a0+da,230*(1+ev*.15),{spr:1,r:8,l:4,c:'#ff8a3d'});else shot(a0+da,200*(1+ev*.15),{spr:1,r:8,l:2.6,c:w===2?'#c9a070':'#ffcc4a',burst:6})}sfx(300,.15,'sawtooth',.05,.7)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<560){wind(520,.45);e.chargeT=2.4+R()*.8}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<560){wind(520,.45);e.chargeT=2.4+R()*.8}}
   }
   else if(t==='jester'){ /* throws a fan of cards; the Sand Jester throws a full circle, then blinks away */
     keep(180,290,.7);
     if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;const cc=w===1?'#f4f4f4':w===2?'#b89a70':'#ffcc4a';
-      if(w===3){ring(8,200,{card:1,c:cc,l:3},R()*TAU);const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}
-      else for(let i=-2;i<=2;i++)shot(a0+i*.24,230,{card:1,c:cc,l:3});sfx(880,.08,'square',.03,.8)}}
+      if(w===3){ring(8+ev*2,200,{card:1,c:cc,l:3},R()*TAU);const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}
+      else{const n=2+ev;for(let i=-n;i<=n;i++)shot(a0+i*.2,230,{card:1,c:cc,l:3});if(ev>=2){const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}}sfx(880,.08,'square',.03,.8)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<480){wind(700,.4);e.chargeT=2.6+R()*.8}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<480){wind(700,.4);e.chargeT=2.6+R()*.8}}
   }
   else if(t==='archer'){ /* stands back, draws, and looses a ring of arrows */
     keep(260,420,.5);
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;ring(12,210,{arrow:1,r:4,l:3.2,c:'#c9a070'},R()*TAU);sfx(420,.1,'triangle',.04,.5)}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;{const o0=R()*TAU;ring(12+ev*4,210,{arrow:1,r:4,l:3.2,c:'#c9a070'},o0);if(ev>=2)ring(16,150,{arrow:1,r:4,l:3.6,c:'#c9a070'},o0+TAU/32)}sfx(420,.1,'triangle',.04,.5)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<600){wind(240,.6);e.chargeT=3.4+R()}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<600){wind(240,.6);e.chargeT=3.4+R()}}
   }
   else if(t==='lizard'){ /* spits acid that leaves a poison pool */
     keep(180,280);
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;shot(a0,220,{acid:1,r:7,l:2.2,pr:40});sfx(200,.12,'sine',.05,.8)}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;for(const da of ev>=2?[-.3,0,.3]:[0])shot(a0+da,220,{acid:1,r:7,l:2.2,pr:40+ev*8});sfx(200,.12,'sine',.05,.8)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<480){wind(260,.4);e.chargeT=3+R()}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<480){wind(260,.4);e.chargeT=3+R()}}
   }
   else if(t==='crab'){ /* slams its claws around itself, throwing sand */
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;area(e.x,e.y,e.r+44);ring(4,160,{r:4,l:.6,c:'#e8c070'},a0+.78);dust(e.x,e.y,10,'#e8c070');shake=Math.max(shake,4);sfx(110,.2,'square',.05,.6)}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;area(e.x,e.y,e.r+44+ev*10);ring(4+ev*2,160,{r:4,l:.6,c:'#e8c070'},a0+.78);dust(e.x,e.y,10,'#e8c070');shake=Math.max(shake,4);sfx(110,.2,'square',.05,.6)}}
     else if(e.st==='act'){o.sp=0;if(tick()){e.st='';e.chargeT=1.6+R()*.6}}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<e.r+p.r+36)wind(160,.45)}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<e.r+p.r+36)wind(160,.45)}
   }
   else if(t==='lancer'){ /* lowers the lance, then charges in a straight line; the Sand Lancer kicks up a sand wave when it stops */
     if(e.st==='wind'){o.sp=0;if(e.stT>.25)e.aa=a0;if(tick()){e.st='dash';e.stT=.65;e.cx=Math.cos(e.aa);e.cy=Math.sin(e.aa);sfx(160,.3,'sawtooth',.05,1.4)}}
-    else if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=560;if(R()<dt*20)dust(e.x,e.y+e.r*.8,1);if(tick()){e.st='';e.chargeT=2.4+R()*1.2;if(w===3)ring(6,170,{r:5,l:1.6,c:'#e8c070'},e.aa)}}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<420){e.st='wind';e.stT=.7;e.aa=a0;sfx(90,.45,'sawtooth',.06,1.7)}}
+    else if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=560+ev*60;if(R()<dt*20)dust(e.x,e.y+e.r*.8,1);if(tick()){if(w===3)ring(6,170,{r:5,l:1.6,c:'#e8c070'},e.aa);if(ev>=2&&!e.cmb){e.cmb=1;e.st='wind';e.stT=.45;e.aa=a0}else{e.cmb=0;e.st='';e.chargeT=2.4+R()*1.2}}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<420){e.st='wind';e.stT=.7;e.aa=a0;sfx(90,.45,'sawtooth',.06,1.7)}}
   }
   else if(t==='golem'){ /* raises the club over the marked spot, then smashes; past World 1 the smash throws rocks */
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.45;area(e.sx,e.sy,95);dust(e.sx,e.sy,18);shake=Math.max(shake,10);sfx(70,.35,'sawtooth',.09,.5);noise(.12,.06);if(w>=2)for(let i=0;i<8;i++){const a=i*TAU/8;bullets.push({x:e.sx,y:e.sy,vx:Math.cos(a)*170,vy:Math.sin(a)*170,r:6,l:2,c:w===2?'#8a8478':'#d8a860',rock:1,spin:4})}}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.45;area(e.sx,e.sy,95+ev*15);if(ev>=2)for(let i=0;i<10;i++){const a=i*TAU/10+.3;bullets.push({x:e.sx,y:e.sy,vx:Math.cos(a)*230,vy:Math.sin(a)*230,r:5,l:1.4,c:'#ffd36b',ev:2})}dust(e.sx,e.sy,18);shake=Math.max(shake,10);sfx(70,.35,'sawtooth',.09,.5);noise(.12,.06);if(w>=2)for(let i=0;i<8;i++){const a=i*TAU/8;bullets.push({x:e.sx,y:e.sy,vx:Math.cos(a)*170,vy:Math.sin(a)*170,r:6,l:2,c:w===2?'#8a8478':'#d8a860',rock:1,spin:4})}}}
     else if(e.st==='act'){o.sp=0;if(tick()){e.st='';e.chargeT=2.2+R()}}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<150){e.st='wind';e.stT=.8;e.aa=a0;e.sx=cx(e.x+ux*50);e.sy=cy(e.y+uy*50);sfx(90,.5,'sawtooth',.06,1.6)}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<150){e.st='wind';e.stT=.8;e.aa=a0;e.sx=cx(e.x+ux*50);e.sy=cy(e.y+uy*50);sfx(90,.5,'sawtooth',.06,1.6)}}
   }
   else if(t==='worm'){ /* tunnels under you (cannot be hurt), bulges up, then bursts out */
-    if(e.st==='under'){o.sp=e.sp*1.6;e.burrowed=true;e.ghost=true;if(R()<dt*12)dust(e.x,e.y+e.r*.5,1);if(tick()||d<30){e.st='rise';e.stT=.7;sfx(80,.6,'sawtooth',.05,1.5)}}
-    else if(e.st==='rise'){o.sp=0;if(R()<dt*30)dust(e.x,e.y,1);if(tick()){e.st='up';e.stT=2.4;e.burrowed=false;e.ghost=false;area(e.x,e.y,70);ring(6,170,{r:5,l:1.8,c:w===2?'#8a8478':'#e8c070',rock:1,spin:3},R()*TAU);dust(e.x,e.y,20);shake=Math.max(shake,9);sfx(60,.4,'sawtooth',.08,.6)}}
+    if(e.st==='under'){o.sp=e.sp*(1.6+ev*.3);e.burrowed=true;e.ghost=true;if(R()<dt*12)dust(e.x,e.y+e.r*.5,1);if(tick()||d<30){e.st='rise';e.stT=.7;sfx(80,.6,'sawtooth',.05,1.5)}}
+    else if(e.st==='rise'){o.sp=0;if(R()<dt*30)dust(e.x,e.y,1);if(tick()){e.st='up';e.stT=2.4;e.burrowed=false;e.ghost=false;area(e.x,e.y,70+ev*12);ring(6+ev*2,170,{r:5,l:1.8,c:w===2?'#8a8478':'#e8c070',rock:1,spin:3},R()*TAU);dust(e.x,e.y,20);shake=Math.max(shake,9);sfx(60,.4,'sawtooth',.08,.6)}}
     else{o.sp=e.sp*.5;if(tick()){e.st='under';e.stT=2.2+R();dust(e.x,e.y,10)}}
   }
   else if(t==='diamond'){ /* alternates a ring of diamond shards with an aimed rock volley */
     if(d<150)o.sp=0;
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.35;e.alt=!e.alt;if(e.alt)ring(10,190,{gem:1,r:5,l:3,c:'#9fe8ff'},R()*TAU);else for(let i=-1;i<=1;i++)shot(a0+i*.2,260,{rock:1,r:7,l:2.5,c:'#8a8478',spin:4});sfx(1200,.12,'triangle',.04,.6)}}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.35;e.alt=!e.alt;if(e.alt||ev>=2)ring(10,190,{gem:1,r:5,l:3,c:'#9fe8ff'},R()*TAU);if(!e.alt||ev>=2)for(let i=-1;i<=1;i++)shot(a0+i*.2,260,{rock:1,r:7,l:2.5,c:'#8a8478',spin:4});sfx(1200,.12,'triangle',.04,.6)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=dt;if(e.chargeT<=0&&d<520){wind(900,.6);e.chargeT=2.8+R()*.8}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<520){wind(900,.6);e.chargeT=2.8+R()*.8}}
   }
   else if(t==='phoenix'){ /* circles you, hovers, then dives and bursts into fire */
     if(e.st==='wind'){o.sp=0;if(tick()){e.st='dash';e.stT=.55;e.cx=ux;e.cy=uy;sfx(500,.3,'sawtooth',.05,.5)}}
-    else if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=620;if(tick()){e.st='';e.chargeT=3.2+R();ring(8,180,{fire:1,r:6,l:2.2,c:'#ff8a3d'},R()*TAU);sfx(200,.3,'sawtooth',.06,.6)}}
-    else{const rad=Math.max(-1,Math.min(1,(d-230)/120));o.mx=-uy*sd+ux*rad;o.my=ux*sd+uy*rad;e.chargeT-=dt;if(e.chargeT<=0&&d<520)wind(380,.5)}
+    else if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=620;if(tick()){if(ev>=2&&!e.cmb){e.cmb=1;e.st='wind';e.stT=.3}else{e.cmb=0;e.st='';e.chargeT=3.2+R()}ring(8+ev*2,180,{fire:1,r:6,l:2.2,c:'#ff8a3d'},R()*TAU);sfx(200,.3,'sawtooth',.06,.6)}}
+    else{const rad=Math.max(-1,Math.min(1,(d-230)/120));o.mx=-uy*sd+ux*rad;o.my=ux*sd+uy*rad;e.chargeT-=cdt;if(e.chargeT<=0&&d<520)wind(380,.5)}
   }
 }
 const WHIP_ARC=1.9; /* how wide a whip lash sweeps, in radians */
@@ -5100,8 +5110,11 @@ function aimAngle(){
   return b?Math.atan2(b.y-p.y,b.x-p.x):Math.atan2(p.dy,p.dx);
 }
 function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=TAU;while(d<-Math.PI)d+=TAU;return Math.abs(d)}
-function poisonP(){if(cheat.god||dev.god)return;if(!(p.poisT>0)){p.poisA=0;floatTxt(p.x,p.y-30,'POISONED','#8aff4d')}p.poisT=4}
-function igniteP(){if(cheat.god||dev.god)return;if(!(p.burnT>0)){p.burnA=0;floatTxt(p.x,p.y-30,'ON FIRE','#ff8a3d')}p.burnT=3}
+function poisonP(t){if(cheat.god||dev.god)return;if(!(p.poisT>0)){p.poisA=0;floatTxt(p.x,p.y-30,'POISONED','#8aff4d')}p.poisT=Math.max(p.poisT>0?p.poisT:0,t||4)}
+function igniteP(t){if(cheat.god||dev.god)return;if(!(p.burnT>0)){p.burnA=0;floatTxt(p.x,p.y-30,'ON FIRE','#ff8a3d')}p.burnT=Math.max(p.burnT>0?p.burnT:0,t||3)}
+function chillP(t){if(cheat.god||dev.god)return;if(!(p.chillT>0))floatTxt(p.x,p.y-30,'CHILLED','#6fe8ff');p.chillT=Math.max(p.chillT>0?p.chillT:0,t)}
+const MOB_ELEM=['','#ff6a1a','#6fe8ff','#9be04a'];
+function applyElem(w,ev){const t=ev>=2?2.1:1.1;if(w===2)chillP(t*1.5);else if(w===3)poisonP(t*1.2);else igniteP(t)}
 function floatTxt(x,y,t,c){floats.push({x,y,t,c,l:1.1})}
 function spark(x,y,c,n,sp){for(let i=0;i<n;i++){const a=R()*TAU,v=(.3+R()*.7)*(sp||200);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.3+R()*.3,m:.6,c,s:2+R()*3})}}
 const SWING={japan:[330,'triangle',.35],viking:[170,'sawtooth',.6],knight:[260,'sawtooth',.45],pirate:[300,'square',.5],cyber:[520,'sine',.3],dragon:[200,'sawtooth',.3],arcane:[420,'sine',.4],ocean:[280,'triangle',.5],shadow:[150,'square',.35],candy:[620,'triangle',.4],punch:[110,'square',.3],knife:[640,'triangle',.25]};
@@ -5437,7 +5450,7 @@ function hurtP(e,ux,uy){
   if(cheat.god||dev.god){p.inv=.4;return}
   if(p.cp.ward&&!p.wardUsed){p.wardUsed=true;p.inv=.9;p.blink=.5;spark(p.x,p.y,'#bfe9ff',16,260);floatTxt(p.x,p.y-22,'WARD','#bfe9ff');sfx(700,.12,'triangle',.06,1.4);return}
   p.hitW=true;p.runHurt=true;
-  p.hp-=Math.max(1,e.dmg-(p.mods.firon?1:0));p.inv=.9+(p.cp.invX||0);p.blink=.9+(p.cp.invX||0);p.ix=ux*360;p.iy=uy*360;rumble(220,.9,.6);
+  p.hp-=Math.max(1,e.dmg-(p.mods.firon?1:0));if(e.ev&&e.t&&e.t!=='boss'&&(e.ev>=2||R()<.35))applyElem(world,e.ev);p.inv=.9+(p.cp.invX||0);p.blink=.9+(p.cp.invX||0);p.ix=ux*360;p.iy=uy*360;rumble(220,.9,.6);
   shake=14;hitstop=.08;combo=0;comboT=0;
   spark(p.x,p.y,'#ff4d5e',14,280);sfx(80,.25,'sawtooth',.09,.5);
   if(p.hp<=0){
@@ -5604,7 +5617,8 @@ function update(dt){
   if(al>.1){p.dx=ax/(al||1);p.dy=ay/(al||1)}
 
   p.cd-=dt;p.dashCd-=dt;p.inv-=dt;p.blink-=dt;tickSwordFx(dt);
-  if(state!=='play'){p.burnT=0;p.poisT=0}
+  if(state!=='play'){p.burnT=0;p.poisT=0;p.chillT=0}
+  if(p.chillT>0){p.chillT-=dt;if(R()<dt*30)parts.push({x:p.x+(R()-.5)*p.r*1.8,y:p.y+(R()-.5)*p.r,vx:(R()-.5)*30,vy:-20-R()*30,l:.5,m:.5,c:R()<.5?'#6fe8ff':'#dff8ff',s:3})}
   if(p.burnT>0){ /* on fire: 1 damage every second until it burns out */
     p.burnT-=dt;p.burnA=(p.burnA||0)+dt;
     if(R()<dt*60)parts.push({x:p.x+(R()-.5)*p.r*1.6,y:p.y+(R()-.5)*p.r,vx:(R()-.5)*40,vy:-50-R()*60,l:.45,m:.45,c:R()<.5?'#ff8a3d':'#ffd36b',s:3+R()*2});
@@ -5623,7 +5637,7 @@ function update(dt){
     p.dashT-=dt;p.vx=p.ddx*640;p.vy=p.ddy*640;
     parts.push({x:p.x,y:p.y,vx:0,vy:0,l:.25,m:.25,c:(p.ch?p.ch.acc:'#f1ead8'),s:8});
   }else{
-    const f=Math.min(1,dt*16),spd=230*(1+.12*p.mods.fleet+.15*(upg.spd||0))*(p.spdM||1)*(cheat.fast?1.6:1);p.vx+=(ax*spd-p.vx)*f;p.vy+=(ay*spd-p.vy)*f;
+    const f=Math.min(1,dt*16),spd=230*(1+.12*p.mods.fleet+.15*(upg.spd||0))*(p.spdM||1)*(p.chillT>0?.65:1)*(cheat.fast?1.6:1);p.vx+=(ax*spd-p.vx)*f;p.vy+=(ay*spd-p.vy)*f;
   }
   if(p.dashT>0&&p.mods.rush){
     for(const e of enemies){
@@ -5728,7 +5742,7 @@ function update(dt){
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.l-=dt;
     if(state==='play'&&p.dashT>0&&Math.hypot(b.x-p.x,b.y-p.y)<b.r+p.r+6){if(!b.boss){b.l=0;dashDodge(b.x,b.y)}}
     else if(state==='play'&&p.inv<=0&&p.dashT<=0&&Math.hypot(b.x-p.x,b.y-p.y)<b.r+p.r){
-      b.l=0;const dd=Math.hypot(p.x-b.x,p.y-b.y)||1;hurtP({dmg:b.dmg||1},(p.x-b.x)/dd,(p.y-b.y)/dd);if(b.fire)igniteP();if(b.acid)poisonP();
+      b.l=0;const dd=Math.hypot(p.x-b.x,p.y-b.y)||1;hurtP({dmg:b.dmg||1},(p.x-b.x)/dd,(p.y-b.y)/dd);if(b.fire)igniteP();if(b.acid)poisonP();if(b.ev)applyElem(world,b.ev);
     }
     if(b.x<M||b.x>W-M||b.y<M||b.y>H-M)b.l=0;
     if(b.fire&&R()<dt*50)parts.push({x:b.x,y:b.y,vx:(R()-.5)*40,vy:-20-R()*40,l:.35,m:.35,c:R()<.5?'#ff8a3d':'#ffd36b',s:3});
@@ -7090,17 +7104,32 @@ function drawMob(e,fl){
   if(t==='worm'&&st==='rise')bob=((time*40)|0)%2;
   const fx=st==='dash'?e.cx:st==='wind'||st==='act'?Math.cos(e.aa||0):e.menu?e.vx:p.x-e.x,flip=fx<0;
   const y=e.y+r*.9+(t==='phoenix'?Math.round(Math.sin(time*4+e.ph)*2)*PXS-6:0),x=e.x+bob*PXS;
+  if(e.ev)drawMobAura(world,t,f,x,y,flip,MOB_ELEM[world]||'#ff6a1a',e.ev);
   drawMobSpr(ctx,world,t,f,x,y,flip,false);
+  if(e.ev>=2)drawMobCrown(world,t,f,x,y,MOB_ELEM[world]||'#ff6a1a');
   if(fl)drawMobSpr(ctx,world,t,f,x,y,flip,true,.85);
+}
+function mobTint(s,col){s.tc=s.tc||{};if(!s.tc[col]){const c=document.createElement('canvas');c.width=s.wc.width;c.height=s.wc.height;const g=c.getContext('2d');g.drawImage(s.wc,0,0);g.globalCompositeOperation='source-in';g.fillStyle=col;g.fillRect(0,0,c.width,c.height);s.tc[col]=c}return s.tc[col]}
+function drawMobAura(w,t,f,x,y,flip,col,ev){
+  const s=mobSpr(w,t,f),U=PXS,tc=mobTint(s,col),off=ev>=2?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]:[[-1,0],[1,0],[0,-1],[0,1]];
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha*=ev>=2?.75+.25*Math.sin(time*8):.85;
+  for(const o of off){ctx.save();ctx.translate(Math.round(x)+o[0]*U,Math.round(y)+o[1]*U);if(flip)ctx.scale(-1,1);ctx.drawImage(tc,-s.ax*U,-s.c.height*U+U,s.c.width*U,s.c.height*U);ctx.restore()}
+  ctx.restore();
+}
+const CROWN_CACHE={};
+function drawMobCrown(w,t,f,x,y,col){
+  const s=mobSpr(w,t,f),U=PXS,cr=CROWN_CACHE[col]||(CROWN_CACHE[col]=mobCanvas(7,4,3,d=>{d.r(0,1,7,3,'#ffd36b');d.p(0,0,'#ffd36b');d.p(3,0,'#ffd36b');d.p(6,0,'#ffd36b');d.r(0,3,7,1,'#c8901c');d.p(3,2,col);d.p(1,2,'#fff3b0')})),top=y-(s.c.height-1)*U;
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(cr.c,Math.round(x)-cr.ax*U,Math.round(top-cr.c.height*U+U*2+Math.sin(time*3)*U*.5),cr.c.width*U,cr.c.height*U);ctx.restore();
 }
 /* wind-up warnings drawn under the mob */
 function drawMobTele(e){
   const st=e.st,t=e.t;
   if(st==='wind'&&(t==='lancer'||t==='phoenix')){ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(e.x,e.y);const a=t==='lancer'?e.aa:Math.atan2(p.y-e.y,p.x-e.x);ctx.lineTo(e.x+Math.cos(a)*(t==='lancer'?330:340),e.y+Math.sin(a)*(t==='lancer'?330:340));ctx.stroke();ctx.restore()}
   const zone=(x,y,rr,k)=>{ctx.save();ctx.globalAlpha=.12+.18*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(x,y,rr,0,TAU);ctx.fill();ctx.globalAlpha=.7;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=2;ctx.stroke();ctx.restore()};
-  if(st==='wind'&&t==='golem')zone(e.sx,e.sy,95,1-e.stT/.8);
-  if(st==='rise'&&t==='worm')zone(e.x,e.y,70,1-e.stT/.7);
-  if(st==='wind'&&t==='crab')zone(e.x,e.y,e.r+44,1-e.stT/.45);
+  const ev=e.ev||0;
+  if(st==='wind'&&t==='golem')zone(e.sx,e.sy,95+ev*15,1-e.stT/.8);
+  if(st==='rise'&&t==='worm')zone(e.x,e.y,70+ev*12,1-e.stT/.7);
+  if(st==='wind'&&t==='crab')zone(e.x,e.y,e.r+44+ev*10,1-e.stT/.45);
 }
 /* ---------- world arena backgrounds: World 1 green, World 2 blue, World 3 sand ---------- */
 const WORLD_BG={};
