@@ -1502,8 +1502,7 @@ SKINS.length=0;
     k:[['axe','Axe Pack','Axe','Knives to axes','#ff8a3d',['Knife','Machete','Axe'],'axe'],
        ['butterfly','Butterfly Pack','Butterfly Knife','Knives to butterfly knives','#4dc3ff',['Knife','Machete','Butterfly Knife'],'butterfly'],
        ['katana','Katana Pack','Katana','Knives to katanas','#ff4d5e',['Knife','Machete','Katana'],'katana'],
-       ['longsword','Long Sword Pack','Long Sword','Knives to long swords','#cfd6df',['Knife','Machete','Long Sword'],'knight'],
-       ['pixel','Pixel Pack','Pixel Sword','Knives to pixel swords','#6fe39a',['Pixel Dagger','Pixel Blade','Pixel Sword'],'pixel',PIXMATS]],
+       ['longsword','Long Sword Pack','Long Sword','Knives to long swords','#cfd6df',['Knife','Machete','Long Sword'],'knight']], /* v4.7: the Pixel Pack is retired; an equipped pixel sword falls back to the starter knife on load */
     g:[['ak','AK Pack','AK-47','Pistol, rifle, AK-47','#ffd36b',['Pistol','Rifle','AK-47'],'ak'],
        ['m16','M16 Pack','M16','Pistol, rifle, M16','#7bd84a',['Pistol','Rifle','M16'],'m16'],
        ['sniper','Sniper Pack','Sniper','Pistol, rifle, sniper','#9a7bff',['Pistol','Rifle','Sniper'],'sniper'],
@@ -1898,7 +1897,28 @@ function vkArt(c,s,t,bc,L,k,grip,ball){
   }
   c.strokeStyle=INK;c.lineWidth=2;
 }
+/* ---------- pixel-art weapons: every weapon (and every skin) is drawn once onto a small grid at 2 screen px per art pixel, outlined in ink like the mobs,
+   then blitted without smoothing. Mythic skins get a coloured pixel ring instead of a blurry glow; animated ones re-render a few frames a second ---------- */
+const WPX_U=2,WPX_CACHE=new WeakMap();
 function weaponShape(c,s,t,nofx){
+  if(!s){return}
+  const L=s.len||36,ri=RI[s.r]||0,anim=ri>=5||s.vfx,fr=anim?((t*6)|0)%12:0,key=fr+(nofx?'n':'f');
+  let m=WPX_CACHE.get(s);if(!m){m=new Map();WPX_CACHE.set(s,m)}
+  let e=m.get(key);
+  if(!e){
+    const x0=-22,y0=-26,ww=Math.ceil((L+50)/WPX_U),hh=Math.ceil(52/WPX_U),cv=document.createElement('canvas');cv.width=ww+4;cv.height=hh+4;
+    const g=cv.getContext('2d');g.save();g.translate(2,2);g.scale(1/WPX_U,1/WPX_U);g.translate(-x0,-y0);weaponVec(g,s,anim?fr/6:1,true);g.restore();
+    /* snap alpha to on/off so edges stay crisp, then ring it with ink (and a colour ring for mythic skins) */
+    const d=g.getImageData(0,0,cv.width,cv.height),A=d.data,Wd=cv.width,Hd=cv.height,on=i=>A[i*4+3]>110;
+    for(let i=0;i<Wd*Hd;i++){if(A[i*4+3]>110)A[i*4+3]=255;else A[i*4+3]=0}
+    const ring=(col)=>{const add=[];for(let y=0;y<Hd;y++)for(let x=0;x<Wd;x++){const i=y*Wd+x;if(on(i))continue;if((x>0&&on(i-1))||(x<Wd-1&&on(i+1))||(y>0&&on(i-Wd))||(y<Hd-1&&on(i+Wd)))add.push(i)}for(const i of add){A[i*4]=col[0];A[i*4+1]=col[1];A[i*4+2]=col[2];A[i*4+3]=255}};
+    ring([10,10,16]);
+    if(ri>=5&&!nofx){const gc=(s.vfx==='sun'?'#ffd36b':(s.glow||'#ffffff')).replace('#','');ring([parseInt(gc.slice(0,2),16),parseInt(gc.slice(2,4),16),parseInt(gc.slice(4,6),16)])}
+    g.putImageData(d,0,0);e={cv,x0:x0-2*WPX_U,y0:y0-2*WPX_U};m.set(key,e);
+  }
+  const sm=c.imageSmoothingEnabled;c.imageSmoothingEnabled=false;c.drawImage(e.cv,e.x0,e.y0,e.cv.width*WPX_U,e.cv.height*WPX_U);c.imageSmoothingEnabled=sm;
+}
+function weaponVec(c,s,t,nofx){
   const ri=RI[s.r],sun=s.vfx==='sun',hue=((t*90)%360)|0,bc=sun?'hsl('+hue+',90%,72%)':s.b,L=s.len,k=s.vk||s.k;
   c.save();
   c.lineJoin='round';c.lineCap='round';
@@ -2975,8 +2995,14 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.6';
+const UPD_VER='4.7';
 const UPDATES=[
+ ['v4.7','Pixel weapons','#6fe39a',[
+  'Every weapon and skin is now pixel art with an ink outline, matching the mobs and arenas. Mythic and admin skins get a coloured pixel ring.',
+  'Slashes no longer drag giant copies of the weapon along the arc, so the fight stays clear.',
+  'You always draw on top of mobs, with a ring at your feet that lights up white whenever a mob overlaps you.',
+  'The Pixel Pack is gone from the loot box shop. If you had a pixel sword equipped, you get the basic knife back.',
+  'The main menu battle now shows random skins from the whole collection.']],
  ['v4.6','Pixel Rush 2.0, part 7: cleaner effects and prices','#ff5ac8',[
   'Mythic weapons and pets are calmer: fewer, smaller particles, a softer glow and lighter slashes, so you can always see the fight. Loot box reveals are toned down too. Admin weapons and admin knives keep their full effects.',
   'Weapon unlock prices: master the fists for 1,000 coins to unlock the knife, the knife for 2,000 to unlock the gun, and the gun for about 3,000 to unlock the bomb.',
@@ -7517,7 +7543,7 @@ function draw(){
       for(const [m,al] of [[1,.16],[.66,.2],[.34,.32]]){crescent(m);ctx.globalAlpha=(1-k)*al*(big?1.4:1);ctx.fill()}
       ctx.globalCompositeOperation='source-over';
       /* ghost copies of the actual weapon art, scaled so the tip rides the crescent edge */
-      const wl=(sk.len||36)+3,gs=Math.max(.5,(ro-(s.rr||13)*.45)/wl),gn=hv?7:4,gstep=(head-tl2)/(hv?10:5),tn=performance.now()/1000;
+      const wl=(sk.len||36)+3,gs=Math.max(.5,(ro-(s.rr||13)*.45)/wl),gn=0,gstep=(head-tl2)/(hv?10:5),tn=performance.now()/1000;
       for(let i=gn-1;i>=0;i--){
         const ga=head-i*gstep;if(ga<start-.01&&!hv)continue;
         ctx.save();ctx.translate(s.x,s.y);ctx.rotate(ga);ctx.translate((s.rr||13)*.45,0);ctx.scale(gs,gs);
@@ -7563,6 +7589,10 @@ function draw(){
     {
       /* hurt flicker dims the player but never hides them, and it pauses during hit-stop */
       drawAura();
+      /* the player always draws over mobs; when a mob overlaps you, a bright outline keeps you easy to find */
+      {let ov=0;for(const e of enemies){if(e.dead||e.spawnT>0)continue;if(Math.hypot(e.x-p.x,e.y-p.y)<e.r+p.r+16){ov=1;break}}
+        ctx.save();ctx.lineWidth=ov?5:3;ctx.strokeStyle='#0a0a10';ctx.globalAlpha=ov?.9:.35;ctx.beginPath();ctx.arc(p.x,p.y,p.r+5,0,TAU);ctx.stroke();
+        ctx.lineWidth=ov?2.5:1.5;ctx.strokeStyle=ov?'#ffffff':'#ffd36b';ctx.globalAlpha=ov?.95:.45;ctx.stroke();ctx.restore()}
       ctx.save();ctx.globalAlpha=(p.blink>0&&hitstop<=0&&((performance.now()/55)|0)%2===0)?.35:1;
       ctx.translate(p.x,p.y);ctx.rotate(p.face);
       {const pc=p.ch||CH();drawChar(ctx,pc,p.r,time,0);{const sp=swordPose();drawSword(sp.a,sp.off)}drawChar(ctx,pc,p.r,time,1)}
@@ -7607,7 +7637,7 @@ const MW_T=['f','k','g','b'],MW_PK={f:'punch',k:'knife',g:'gun',b:'bomb'},MW_NAM
 let mh=null,mshots=[],mfx=[];
 const menuCenter=()=>({cx:W>700?W*.74:W*.5,cy:H*.48,R:Math.min(236,Math.min(W,H)*.23)});
 function menuWeapon(i){
-  const t=MW_T[i%4],pool=SKINS.filter(s=>s.pk===MW_PK[t]&&!isDevId(s.id)).concat(STARTERS.filter(s=>s.pk===MW_PK[t]));
+  const t=MW_T[i%4],pool=SKINS.filter(s=>s.tab===t&&!isDevId(s.id)).concat(STARTERS.filter(s=>s.pk===MW_PK[t]));
   const s=pool[(R()*pool.length)|0];mh.wi=i;mh.wt=t;mh.skin=s?s.id:'';mh.wT=10;mh.lab=2.5;
 }
 function menuSim(dt){
