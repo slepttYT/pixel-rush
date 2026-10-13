@@ -1951,19 +1951,20 @@ function vkArt(c,s,t,bc,L,k,grip,ball){
 const WPX_U=2,WPX_CACHE=new WeakMap();
 function weaponShape(c,s,t,nofx){
   if(!s){return}
-  const L=s.len||36,ri=RI[s.r]||0,anim=ri>=5||s.vfx,fr=anim?((t*6)|0)%12:0,key=fr+(nofx?'n':'f');
+  const K=c===ctx?({f:.7,k:.6,g:.55,b:.5})[s.tab||({punch:'f',knife:'k',gun:'g',bomb:'b'})[s.pk]]||.6:1; /* in the fighter's hands weapons draw smaller (menus and loot previews stay full size); still whole pixels */
+  const L=s.len||36,ri=RI[s.r]||0,anim=ri>=5||s.vfx,fr=anim?((t*6)|0)%12:0,key=fr+(nofx?'n':'f')+K;
   let m=WPX_CACHE.get(s);if(!m){m=new Map();WPX_CACHE.set(s,m)}
   let e=m.get(key);
   if(!e){
     const x0=-22,y0=-26,ww=Math.ceil((L+50)/WPX_U),hh=Math.ceil(52/WPX_U),cv=document.createElement('canvas');cv.width=ww+4;cv.height=hh+4;
-    const g=cv.getContext('2d');g.save();g.translate(2,2);g.scale(1/WPX_U,1/WPX_U);g.translate(-x0,-y0);weaponVec(g,s,anim?fr/6:1,true);g.restore();
+    const g=cv.getContext('2d');g.save();g.translate(2,2);g.scale(K/WPX_U,K/WPX_U);g.translate(-x0,-y0);weaponVec(g,s,anim?fr/6:1,true);g.restore();
     /* snap alpha to on/off so edges stay crisp, then ring it with ink (and a colour ring for mythic skins) */
     const d=g.getImageData(0,0,cv.width,cv.height),A=d.data,Wd=cv.width,Hd=cv.height,on=i=>A[i*4+3]>110;
     for(let i=0;i<Wd*Hd;i++){if(A[i*4+3]>110)A[i*4+3]=255;else A[i*4+3]=0}
     const ring=(col)=>{const add=[];for(let y=0;y<Hd;y++)for(let x=0;x<Wd;x++){const i=y*Wd+x;if(on(i))continue;if((x>0&&on(i-1))||(x<Wd-1&&on(i+1))||(y>0&&on(i-Wd))||(y<Hd-1&&on(i+Wd)))add.push(i)}for(const i of add){A[i*4]=col[0];A[i*4+1]=col[1];A[i*4+2]=col[2];A[i*4+3]=255}};
     ring([10,10,16]);
     if(ri>=5&&!nofx){const gc=(s.vfx==='sun'?'#ffd36b':(s.glow||'#ffffff')).replace('#','');ring([parseInt(gc.slice(0,2),16),parseInt(gc.slice(2,4),16),parseInt(gc.slice(4,6),16)])}
-    g.putImageData(d,0,0);e={cv,x0:x0-2*WPX_U,y0:y0-2*WPX_U};m.set(key,e);
+    g.putImageData(d,0,0);e={cv,x0:x0*K-2*WPX_U,y0:y0*K-2*WPX_U};m.set(key,e);
   }
   const sm=c.imageSmoothingEnabled;c.imageSmoothingEnabled=false;c.drawImage(e.cv,e.x0,e.y0,e.cv.width*WPX_U,e.cv.height*WPX_U);c.imageSmoothingEnabled=sm;
 }
@@ -3164,8 +3165,17 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='0.2';
+const UPD_VER='0.3';
 const UPDATES=[
+ ['v0.3','Pixel Rush 0.3: Content and Polish','#b58cff',[
+  'Six new fighters you can only earn past World 1: Ember Knight (beat the Dragon), Frostwalker (clear World 2), Executioner (500 kills in World 2), Void Runner (clear World 3), Last Stand (beat the Pharaoh without dying once) and Worldbreaker (beat each world with a different weapon).',
+  'Seven fighters return from the old roster, rebalanced and earned in Worlds 2 and 3: Ashling, Blade Dancer, Druid, Rhythm Monk, Arsenal, Vampire Lord and Stormcaller. Every fighter has its own pixel sprite. 28 fighters in total.',
+  'Skins have real character now. Gold shines, Diamond sparkles with facets and glints, and Galaxy is a deep starry night with drifting, twinkling stars inside the body.',
+  'Pets are pixel art with a shadow and calmer, smoother effects: a trail while they move, a few motes while they rest.',
+  'Menus open at full size with a clean fade (no more small-then-big jump), and selected buttons stay dark with a bright border instead of turning solid green.',
+  'The main menu scene is pixel art, like the arenas. Saves moved to their own SAVES screen, under Settings.',
+  'Weapons in your hands are drawn smaller so they fit the new fighters.',
+  'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
   'Every boss is now pixel art. The World 1 and World 2 bosses, the Dragon and the Golem draw on the same pixel grid as the arenas, with an ink outline.',
   'The Sand World bosses finally have real art from the boss sheet: Sand Worm, Scorpion King, Giant Sand Golem, Sand Giant, Sand Lizard, Sand Crab, Sand Griffin, Ancient Snake, Sand Phoenix and the Pharaoh.',
