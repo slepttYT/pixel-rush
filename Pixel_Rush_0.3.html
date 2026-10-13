@@ -8620,9 +8620,9 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
 .tdiffs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
 .td{display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;padding:12px 8px;min-height:64px;border:1px solid #2f3547;border-bottom:3px solid var(--tc);border-radius:10px;background:rgba(255,255,255,.03);color:var(--bone);cursor:pointer;font-family:var(--display);font-size:12px;letter-spacing:.05em;line-height:1.2}
 .td small{font-family:var(--body);font-size:11px;letter-spacing:.06em;color:var(--dim)}
-.td:hover{background:rgba(255,255,255,.07)}
-.td.on{border-color:var(--tc);box-shadow:0 0 16px color-mix(in srgb,var(--tc) 40%,transparent);background:color-mix(in srgb,var(--tc) 14%,transparent)}
-.td.on small{color:var(--bone)}
+.td{transition:border-color .12s,box-shadow .12s,background .12s}
+.td.on,.td:hover,.td:focus-visible{border-color:var(--tc);box-shadow:0 0 16px color-mix(in srgb,var(--tc) 40%,transparent);background:color-mix(in srgb,var(--tc) 14%,transparent)}
+.td.on small,.td:hover small,.td:focus-visible small{color:var(--bone)}
 .tdesc{margin:0;min-height:3.2em;max-width:62ch;font-size:13px;line-height:1.5;color:var(--dim)}
 .trow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .trow .btn{min-width:150px}
