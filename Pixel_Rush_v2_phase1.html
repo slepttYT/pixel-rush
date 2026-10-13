@@ -3474,18 +3474,18 @@ function closeLoot(){
   banner('LOOT TAKEN');sfx(300,.15,'square',.04,1.6);
 }
 const TYPES={
-  goblin:{r:13,hp:2,sp:88,dmg:1,pts:10,c:'#7fbf3f',kb:430},
-  thief:{r:11,hp:1,sp:118,dmg:1,pts:15,c:'#7a7ab0',kb:520},
+  goblin:{r:11,hp:2,sp:88,dmg:1,pts:10,c:'#7fbf3f',kb:430},
+  thief:{r:10,hp:1,sp:118,dmg:1,pts:15,c:'#7a7ab0',kb:520},
   wizard:{r:12,hp:2,sp:66,dmg:1,pts:22,c:'#8a5aff',kb:420},
   jester:{r:12,hp:2,sp:78,dmg:1,pts:22,c:'#e8344a',kb:420},
   archer:{r:12,hp:2,sp:62,dmg:1,pts:28,c:'#5fae3a',kb:420},
-  lizard:{r:14,hp:3,sp:70,dmg:1,pts:26,c:'#9be04a',kb:360},
-  crab:{r:15,hp:4,sp:64,dmg:1,pts:30,c:'#d0703a',kb:260},
-  lancer:{r:18,hp:9,sp:72,dmg:2,pts:70,c:'#4d8cff',kb:140,mb:1},
-  golem:{r:24,hp:14,sp:46,dmg:2,pts:90,c:'#a3a07a',kb:80,mb:1},
-  worm:{r:20,hp:10,sp:80,dmg:2,pts:80,c:'#8fb8c8',kb:120,mb:1},
-  diamond:{r:22,hp:14,sp:50,dmg:2,pts:100,c:'#7fe3ff',kb:80,mb:1},
-  phoenix:{r:20,hp:10,sp:95,dmg:2,pts:90,c:'#ff8a3d',kb:140,mb:1},
+  lizard:{r:12,hp:3,sp:70,dmg:1,pts:26,c:'#9be04a',kb:360},
+  crab:{r:13,hp:4,sp:64,dmg:1,pts:30,c:'#d0703a',kb:260},
+  lancer:{r:15,hp:9,sp:72,dmg:2,pts:70,c:'#4d8cff',kb:140,mb:1},
+  golem:{r:19,hp:14,sp:46,dmg:2,pts:90,c:'#a3a07a',kb:80,mb:1},
+  worm:{r:16,hp:10,sp:80,dmg:2,pts:80,c:'#8fb8c8',kb:120,mb:1},
+  diamond:{r:18,hp:14,sp:50,dmg:2,pts:100,c:'#7fe3ff',kb:80,mb:1},
+  phoenix:{r:16,hp:10,sp:95,dmg:2,pts:90,c:'#ff8a3d',kb:140,mb:1},
   boss:{r:40,hp:70,sp:60,dmg:2,pts:500,c:'#ff8a3d',kb:35}
 };
 /* ---------- mob pixel art: drawn cell by cell on a tiny grid (1 cell = PXS screen px, the same as the arena), then outlined in PXINK. Everything faces right ---------- */
@@ -3729,14 +3729,14 @@ const MOB_ART={
 };
 /* every pose a role needs; drawn once per world the first time it is asked for */
 const MOB_POSES={goblin:['w0','w1','wind','act','dash'],thief:['w0','w1','dash','act'],wizard:['w0','w1','wind','act'],jester:['w0','w1','wind','act'],archer:['w0','w1','wind','act'],lizard:['w0','w1','wind','act'],crab:['w0','w1','wind','act'],lancer:['w0','w1','wind','dash'],golem:['w0','w1','wind','act'],worm:['under','w0','act'],diamond:['w0','w1','wind','act'],phoenix:['w0','w1','wind','dash']};
-const MOB_CACHE={};
+const MOB_CACHE={},MOB_U=2; /* mobs draw at 2 screen px per art pixel: still crisp, about a third smaller than the arena tiles */
 function mobSpr(w,t,f){
   const k=w+t;let s=MOB_CACHE[k];
   if(!s){s=MOB_CACHE[k]={};const P=mobPal(w,t);for(const q of MOB_POSES[t])s[q]=MOB_ART[t](P,q,w)}
   return s[f]||s.w0;
 }
 function drawMobSpr(c,w,t,f,x,y,flip,white,alpha){
-  const s=mobSpr(w,t,f),U=PXS,cw=s.c.width,chh=s.c.height;
+  const s=mobSpr(w,t,f),U=MOB_U,cw=s.c.width,chh=s.c.height;
   c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);if(alpha!==undefined)c.globalAlpha*=alpha;
   c.drawImage(white?s.wc:s.c,-s.ax*U,-chh*U+U,cw*U,chh*U);
   c.restore();
@@ -7103,7 +7103,7 @@ function drawMob(e,fl){
   else if(t==='worm')f=st==='up'?(e.stT>1.95?'act':'w0'):'under';
   if(t==='worm'&&st==='rise')bob=((time*40)|0)%2;
   const fx=st==='dash'?e.cx:st==='wind'||st==='act'?Math.cos(e.aa||0):e.menu?e.vx:p.x-e.x,flip=fx<0;
-  const y=e.y+r*.9+(t==='phoenix'?Math.round(Math.sin(time*4+e.ph)*2)*PXS-6:0),x=e.x+bob*PXS;
+  const y=e.y+r*.9+(t==='phoenix'?Math.round(Math.sin(time*4+e.ph)*2)*MOB_U-4:0),x=e.x+bob*MOB_U;
   if(e.ev)drawMobAura(world,t,f,x,y,flip,MOB_ELEM[world]||'#ff6a1a',e.ev);
   drawMobSpr(ctx,world,t,f,x,y,flip,false);
   if(e.ev>=2)drawMobCrown(world,t,f,x,y,MOB_ELEM[world]||'#ff6a1a');
@@ -7111,14 +7111,14 @@ function drawMob(e,fl){
 }
 function mobTint(s,col){s.tc=s.tc||{};if(!s.tc[col]){const c=document.createElement('canvas');c.width=s.wc.width;c.height=s.wc.height;const g=c.getContext('2d');g.drawImage(s.wc,0,0);g.globalCompositeOperation='source-in';g.fillStyle=col;g.fillRect(0,0,c.width,c.height);s.tc[col]=c}return s.tc[col]}
 function drawMobAura(w,t,f,x,y,flip,col,ev){
-  const s=mobSpr(w,t,f),U=PXS,tc=mobTint(s,col),off=ev>=2?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]:[[-1,0],[1,0],[0,-1],[0,1]];
+  const s=mobSpr(w,t,f),U=MOB_U,tc=mobTint(s,col),off=ev>=2?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]:[[-1,0],[1,0],[0,-1],[0,1]];
   ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha*=ev>=2?.75+.25*Math.sin(time*8):.85;
   for(const o of off){ctx.save();ctx.translate(Math.round(x)+o[0]*U,Math.round(y)+o[1]*U);if(flip)ctx.scale(-1,1);ctx.drawImage(tc,-s.ax*U,-s.c.height*U+U,s.c.width*U,s.c.height*U);ctx.restore()}
   ctx.restore();
 }
 const CROWN_CACHE={};
 function drawMobCrown(w,t,f,x,y,col){
-  const s=mobSpr(w,t,f),U=PXS,cr=CROWN_CACHE[col]||(CROWN_CACHE[col]=mobCanvas(7,4,3,d=>{d.r(0,1,7,3,'#ffd36b');d.p(0,0,'#ffd36b');d.p(3,0,'#ffd36b');d.p(6,0,'#ffd36b');d.r(0,3,7,1,'#c8901c');d.p(3,2,col);d.p(1,2,'#fff3b0')})),top=y-(s.c.height-1)*U;
+  const s=mobSpr(w,t,f),U=MOB_U,cr=CROWN_CACHE[col]||(CROWN_CACHE[col]=mobCanvas(7,4,3,d=>{d.r(0,1,7,3,'#ffd36b');d.p(0,0,'#ffd36b');d.p(3,0,'#ffd36b');d.p(6,0,'#ffd36b');d.r(0,3,7,1,'#c8901c');d.p(3,2,col);d.p(1,2,'#fff3b0')})),top=y-(s.c.height-1)*U;
   ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(cr.c,Math.round(x)-cr.ax*U,Math.round(top-cr.c.height*U+U*2+Math.sin(time*3)*U*.5),cr.c.width*U,cr.c.height*U);ctx.restore();
 }
 /* wind-up warnings drawn under the mob */
