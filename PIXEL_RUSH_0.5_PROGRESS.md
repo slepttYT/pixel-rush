@@ -97,7 +97,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [~] Same format in HTML and EXE (Neutralino native dialogs coded; verify in EXE build) (cross import/export). Autosave stays on.
 
 ### 17. HTML + EXE release
-- [ ] `Pixel_Rush_0.5.html` standalone.
+- [x] `Pixel_Rush_0.5.html` standalone.
 - [~] Windows EXE wrapping the same HTML (shared code). desktop/build.sh <ver> -> releases/Pixel_Rush_<ver>.exe (Neutralino 6.5.0, single exe with embedded resources, ~5 MB). Verified with the Linux build of the same package under Xvfb: game renders, native API works (Neutralino.os/filesystem), localStorage persists across launches.
   - Gotchas found: Neutralino 6.0.0 win binary cannot embed (no .rsrc) -> use 6.5.0; injectGlobals does nothing for our page -> the game HTML loads /js/neutralino.js then /__neutralino_globals.js itself when served from localhost; tokenSecurity must be "none" (one-time token broke the page); FIXED port 47923 is required or saves vanish (localStorage is keyed by port).
   - Rebuild the EXE at release from the final HTML; commit releases/Pixel_Rush_0.5.exe then. Saves work in the EXE (its own storage) and transfer via export/import.
@@ -107,11 +107,11 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 
 ### Worlds 4 and 5 (needed by sections 4, 8, 18)
 (Code map of every world-specific path: scratchpad/world_map.md in the session scratchpad. If lost, re-run an Explore agent: grep world===2/3, w3Open, ZONES3, FIN_CFG, SB_ART, MOB_ART, MAPS, drawWorldBg.)
-- [ ] World 4 "Robot/Cyber" and World 5 "Spooky Swamp" are playable: arena backgrounds, mob looks, 10 bosses each + a final boss each, unlock W4 after beating W3, W5 after W4 (no skipping).
+- [x] World 4 "Robot/Cyber" and World 5 "Spooky Swamp" are playable: arena backgrounds, mob looks, 10 bosses each + a final boss each, unlock W4 after beating W3, W5 after W4 (no skipping).
 
 ## Carried over from 0.3 work (unfinished)
-- [ ] Boss fights push runs past 45 min on harder difficulties/worlds (sim: W1 34–75 min, W2 46–94, W3 55–110 with bare fists). Plan: soften boss HP scaling from difficulty and world so a run to wave 100 is ~45 min (+ breaks) on every difficulty.
-- [ ] Report the progression simulation results to the user (sim tooling: scratchpad/sim/bot.js, tools/simall.js).
+- [x] (bossPace: boss HP grows with sqrt(eh*WORLD_HP/pd), never below 1x; boss-only sim W3 Medium 58/125/200s -> 42/79/113s, W5 Medium 93/248/349 -> 51/120/183) Boss fights push runs past 45 min on harder difficulties/worlds (sim: W1 34–75 min, W2 46–94, W3 55–110 with bare fists). Plan: soften boss HP scaling from difficulty and world so a run to wave 100 is ~45 min (+ breaks) on every difficulty.
+- [x] Report the progression simulation results to the user (sim tooling: scratchpad/sim/bot.js, tools/simall.js).
 - [ ] "Make getting new ability progression good": ability rarities gated by fighter level (Rare L2, Epic L4, Legendary L6, Mythic L8) and wave (4/8/14/20). Re-check with sim XP numbers and smooth it.
 
 ## User requests log (verbatim, newest last). ALWAYS re-check this list after compaction
@@ -147,3 +147,9 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 
 - Stage C: World 4/5 achievements (w4a–e,w4k,w4bs,w5a–e,w5k,w5bs,slayomega,slaylevi) and 50-boss Boss Rush (BR_N) committed and tested through boss 50.
 - Phone menu: ONLINE spans the full row (VERSUS badge no longer overflows).
+
+## Release status (0.5)
+- Full-run sim, bare-fist bot with shop picks (scratchpad/sim/results05.json): W1 Medium 58 min (won), W1 Hard 60 (won), W3 Medium 69 (won), W3 Hard 77, W5 Medium 77, W5 Hard 84. Normal waves alone take 47-53 min for the bot (22 s timer + 3 s break + hit-stop); bosses 9-26 min. A real player with evolved weapons clears faster. Possible follow-up if still too long: WAVE_LIMIT 22 -> 18.
+- QA (scratchpad/tools/qa.js, 42 checks, all pass): keyboard (Enter through NEW RUN, WASD/arrows, Space/J attack, Shift dash, Esc/P pause), mouse (click attack, right-click dash, pause > cheats > back > resume, Save & Exit > Continue), controller (Start, stick cursor + A through menus, stick move, RT/LT, Start pause/resume), touch phone (tap flow, joystick, SLASH/DASH, pause). Fixed during QA: a SLASH tap shorter than one frame was lost (btnTap latch); setPointerCapture wrapped in try.
+- Regression scripts pass: w45, pausecheat, saverun, daily, mods, evo, fin45, mail, saveio, mworld, audio, juke, br50.
+- Release files: releases/Pixel_Rush_0.5.exe (Neutralino, verified via the Linux build of the same package: page v0.5, Neutralino API present, no errors), releases/PixelRushServer_0.5.zip (server exe + config + README + .bat; raw 86 MB exe is gitignored). Windows SmartScreen: More info > Run anyway.

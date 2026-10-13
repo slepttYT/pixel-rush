@@ -1419,7 +1419,7 @@ $('snd').addEventListener('click',()=>setMuted(!muted));
 $('hsnd').addEventListener('click',()=>setMuted(!muted));
 
 /* ---------- state ---------- */
-const keys={},mdown={};let mouse={x:0,y:0},aimMode='auto',btnAtk=false;
+const keys={},mdown={};let mouse={x:0,y:0},aimMode='auto',btnAtk=false,btnTap=false; /* btnTap: a quick tap on SLASH always lands one attack, even when it is shorter than a frame */
 const joy={x:0,y:0,id:null};
 let runT=0; /* 0.5: seconds of real play in this run (pauses and menus do not count) */
 let state='menu',time=0,hitstop=0,shake=0,score=0,best=0,bestWave=0,kills=0,wave=0,toSpawn=0,spawnT=0,clearT=.6,waveActive=false,combo=0,comboT=0;
@@ -5821,7 +5821,7 @@ addEventListener('pointerdown',e=>{
 },true);
 addEventListener('auxclick',e=>{if(listen)e.preventDefault()},true);
 stage.addEventListener('contextmenu',e=>e.preventDefault());
-$('bAtk').addEventListener('pointerdown',e=>{e.preventDefault();aimMode='auto';btnAtk=true;$('bAtk').setPointerCapture(e.pointerId)});
+$('bAtk').addEventListener('pointerdown',e=>{e.preventDefault();aimMode='auto';btnAtk=true;btnTap=true;try{$('bAtk').setPointerCapture(e.pointerId)}catch(x){}});
 $('bAtk').addEventListener('pointerup',()=>{btnAtk=false});
 $('bAtk').addEventListener('pointercancel',()=>{btnAtk=false});
 $('bDash').addEventListener('pointerdown',e=>{e.preventDefault();dash()});
@@ -5832,7 +5832,7 @@ function joyMove(e){
   if(l>1){dx/=l;dy/=l}
   joy.x=dx;joy.y=dy;knob.style.transform='translate('+dx*rad+'px,'+dy*rad+'px)';
 }
-jz.addEventListener('pointerdown',e=>{e.preventDefault();joy.id=e.pointerId;jz.setPointerCapture(e.pointerId);joyMove(e)});
+jz.addEventListener('pointerdown',e=>{e.preventDefault();joy.id=e.pointerId;try{jz.setPointerCapture(e.pointerId)}catch(x){}joyMove(e)});
 jz.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)joyMove(e)});
 function joyEnd(e){if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;knob.style.transform=''}}
 jz.addEventListener('pointerup',joyEnd);jz.addEventListener('pointercancel',joyEnd);
@@ -6999,7 +6999,7 @@ function continueRun(){
 }
 function pauseGame(){
   if(state!=='play'||sub)return;
-  state='pause';for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;joy.x=joy.y=0;
+  state='pause';for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;btnTap=false;joy.x=joy.y=0;
   $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode||dailyMode||raceMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
 }
 function resumeGame(){if(state!=='pause')return;state='play';$('pause').hidden=true;$('bossintro').classList.remove('paused')}
@@ -7137,7 +7137,7 @@ function update(dt){
   if(p.cp.regen){p.rgT+=dt;if(p.rgT>=p.cp.regen){p.rgT=0;healP(1)}}
   if(p.sw>0){p.sw-=dt;if(p.sw<=0&&!p.swHeavy)p.rec=.16}else if(p.rec>0)p.rec-=dt;
   if(pa('dash'))dash();
-  if(isDown('attack')||btnAtk||pd('attack'))attack();
+  if(isDown('attack')||btnAtk||btnTap||pd('attack')){const s0=p.swings;attack();if(p.swings!==s0)btnTap=false}
   if(p.dashT>0){
     p.dashT-=dt;p.vx=p.ddx*640;p.vy=p.ddy*640;
     parts.push({x:p.x,y:p.y,vx:0,vy:0,l:.25,m:.25,c:(p.ch?p.ch.acc:'#f1ead8'),s:8});
