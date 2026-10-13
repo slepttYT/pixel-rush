@@ -2557,8 +2557,6 @@ const ACH=[
  ['own5','Collector','Own 5 weapons or pets',20,()=>own.size>=5],
  ['own20','Hoarder','Own 20 weapons or pets',60,()=>own.size>=20],
  ['loop','Round Two','Start a second loop',50,()=>bestLoop>=1],
- ['hard','Hard Knock','Reach wave 10 on Hard or above',30,()=>ach.hardw===1],
- ['nowin','Not Winning, Huh','Reach wave 5 on the hardest mode',60,()=>ach.nowinw===1],
  ['upg','Investor','Buy 5 permanent upgrades',25,()=>Object.keys(UPG).reduce((n,k)=>n+(upg[k]||0),0)>=5]
 ];
 /* ================= characters, extra achievements, cheat menu ================= */
@@ -2935,7 +2933,6 @@ ACH.push(
  ['hot25','Quick Draw','Use hotbar abilities 50 times',50,()=>stats.hotuse>=50],
  ['hotfull','Full Kit','Fill all 4 hotbar slots in one run',60,()=>ach.hf===1],
  ['rmp2','Slaughterhouse','Defeat 300 enemies in a single run',80,()=>ach.rmp300===1],
- ['hard25','Hard Hitter','Reach wave 25 on Hard',60,()=>ach.hardw25===1],
  ['coins1k','Piggy Bank','Hold 1,000 coins at once',40,()=>wallet>=1000],
  ['coins5k','Dragon Hoard','Hold 5,000 coins at once',100,()=>wallet>=5000],
  ['chars10','Roster','Play a run with 10 different characters',60,()=>charsPlayed()>=10],
@@ -2981,7 +2978,6 @@ ACH.push(
  ['bomb1','Explosive Personality','Beat World 1 using only Bombs',0,()=>wwin('1b')],
  ['fists3','Bare-Knuckle Legend','Beat World 3 using only Fists',0,()=>wwin('3f')],
  ['nohit1','Untouchable Run','Beat World 1 without taking a single hit',0,()=>!!stats.nohit1],
- ['hwin1','Hard Way Home','Beat World 1 on Hard or harder',0,()=>!!stats.hwin1],
  /* v4.4 weapon mastery: every weapon through every world, the mastery tracks, and no-hit runs past World 1 */
  ['fists2','Rock Puncher','Beat World 2 using only Fists',0,()=>wwin('2f')],
  ['knife2','Stone Cutter','Beat World 2 using only the Knife',0,()=>wwin('2k')],
@@ -3117,14 +3113,14 @@ function checkAch(){
   }
   let got=false;
   for(const a of ACH){
-    if(off||(diff==='nowin'&&a[0]!=='nowin'))continue;
+    if(off||diff==='nowin')continue; /* no difficulty has its own achievements; the hardest mode earns none */
     if(ach[a[0]]!==2&&a[4]()){ach[a[0]]=2;runAch.push(a);wallet+=a[3];got=true;achToast(a)}
   }
   if(got){saveMeta();try{LS.setItem('cinder-wallet',String(wallet))}catch(e){}if(sub==='ach')renderAch();if(state==='menu')refreshHome()}
 }
 function renderAch(){
   const n=ACH.filter(a=>ach[a[0]]===2).length;
-  $('achsum').textContent=n+' of '+ACH.length+' unlocked. Each one pays coins'+(CHARS.some(c=>c.ach)?', and '+CHARS.filter(c=>c.ach).length+' of them unlock a character':'')+'. On the hardest difficulty only Not Winning, Huh can be earned, and its runs do not count toward other achievements.';
+  $('achsum').textContent=n+' of '+ACH.length+' unlocked. Each one pays coins'+(CHARS.some(c=>c.ach)?', and '+CHARS.filter(c=>c.ach).length+' of them unlock a character':'')+'. Runs on the hardest difficulty, in the tutorial or with cheats on do not earn achievements.';
   $('achlist').innerHTML=[...ACH].sort((x,y)=>(x[5]||0)-(y[5]||0)).map(a=>{const d=ach[a[0]]===2,ch=CHARS.find(c=>c.ach===a[0]);return '<div class="ar '+(d?'on':'off')+'"><span>'+(d?'★':'☆')+'</span><div><b>'+a[1]+(a[5]?' <small style="display:inline;color:'+ACH_TIER_C[a[5]]+';font-weight:700;letter-spacing:.08em">'+ACH_TIER_N[a[5]].toUpperCase()+'</small>':'')+'</b><small>'+a[2]+'</small>'+(ch?'<small class="unl">Unlocks character: '+ch.n+'</small>':'')+'</div><em>'+(d?'DONE':'+'+a[3]+' coins')+'</em></div>'}).join('');
 }
 $('adone')?.addEventListener('click',closeSub);
@@ -3235,6 +3231,7 @@ const UPDATES=[
   'The tutorial now brings out every World 1 enemy one at a time and says what to watch for. Thieves crouch and show a red line before they dash, like Lancers. Quitting the tutorial early takes you straight home. Finishing it shows its own win screen. The tutorial no longer has a shop step and earns no coins or XP.',
   'Achievements are off during the tutorial and while any cheat is on.',
   'A new title screen: a blue sky with drifting clouds, and your fighter cutting down mobs that walk in over the grass.',
+  'The difficulty achievements (Hard Knock, Hard Hitter, Not Winning Huh and Hard Way Home) are gone. The cheat menu scrolls.',
   'Touching an enemy or a boss no longer hurts. Only their attacks do, including a dash or charge that runs into you.',
   'Three new boss themes: Throne of Ash, Iron Tempest and Crimson Eclipse. A heartbeat plays and your hearts pulse when you are low.',
   'Slashes no longer break enemy shots for free. Pick up the new Shot Breaker ability (knife and fists) to break them; level 2 breaks boss shots too.',
@@ -8352,7 +8349,7 @@ requestAnimationFrame(frame);
 /* ---------- menu fit: shrink any open menu so it never needs scrolling ---------- */
 function fitMenus(){
   document.querySelectorAll('.ov').forEach(ov=>{
-    if(ov.hidden||!ov.offsetHeight||ov.id==='cos'||ov.id==='chars')return;
+    if(ov.hidden||!ov.offsetHeight||ov.id==='cos'||ov.id==='chars'||ov.id==='cheat')return;
     const box=ov.querySelector(':scope>.box');if(!box)return;
     box.style.zoom='';
     const cs=getComputedStyle(ov),avail=ov.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom),h=box.offsetHeight;
@@ -8388,7 +8385,7 @@ function tsCircle(g,cx,cy,r){for(let y=-r;y<=r;y++){const hw=Math.floor(Math.sqr
 function tsSize(){
   const T=$('title'),cv=$('tcv'),W0=T.clientWidth||stage.clientWidth,H0=T.clientHeight||stage.clientHeight;
   const k=H0<500?1:Math.max(2,Math.round(H0/360)),w=Math.ceil(W0/k),h=Math.ceil(H0/k);
-  Object.assign(tScene,{k:k,w:w,h:h,gy:h-Math.max(24,Math.round(h*.15))});cv.width=w;cv.height=h;tScene.g=cv.getContext('2d');tScene.g.imageSmoothingEnabled=false;
+  Object.assign(tScene,{k:k,w:w,h:h,gy:h-Math.max(18,Math.round(h*.105))});cv.width=w;cv.height=h;tScene.g=cv.getContext('2d');tScene.g.imageSmoothingEnabled=false;
   /* the still part, built once per size: banded sky, then a strip of grass over dirt */
   const bg=document.createElement('canvas');bg.width=w;bg.height=h;const g=bg.getContext('2d'),gy=tScene.gy;
   const SKY=['#2a6fd0','#3780d8','#4a92de','#5ea5e4','#74b8ea','#8ccaf0','#a5daf4'],bh=gy/SKY.length;
@@ -8396,9 +8393,15 @@ function tsSize(){
   g.fillStyle='#7a4a26';g.fillRect(0,gy,w,h-gy);
   for(let i=0;i<w*(h-gy)/14;i++){const x=(hsh(i*1.7)*w)|0,y=gy+5+((hsh(i*2.9+4)*(h-gy-5))|0);g.fillStyle=hsh(i*5.3)<.7?'#5e3818':'#9a6a42';g.fillRect(x,y,hsh(i*7.1)<.2?2:1,1)}
   for(let i=0;i<w/18;i++){const x=(hsh(i*3.3+9)*w)|0,y=gy+8+((hsh(i*4.1)*(h-gy-10))|0);g.fillStyle='#a08a72';g.fillRect(x,y,3,2);g.fillStyle='#6e5a46';g.fillRect(x,y+2,3,1)}
-  g.fillStyle='#3f9a32';g.fillRect(0,gy,w,5);g.fillStyle='#5fbf3a';g.fillRect(0,gy,w,3);g.fillStyle='#8ee05a';g.fillRect(0,gy,w,1);
-  g.fillStyle='#2f7a28';g.fillRect(0,gy+5,w,1);
-  for(let x=0;x<w;x++){const r=hsh(x*1.31);if(r<.42){const t=r<.12?3:r<.27?2:1;g.fillStyle=r<.2?'#5fbf3a':'#4fae3a';g.fillRect(x,gy-t,1,t)}if(hsh(x*2.7)<.02){g.fillStyle=hsh(x)<.5?'#fff3a8':'#ff9ab0';g.fillRect(x,gy-2,1,1)}}
+  /* grass: a thick turf strip with a scalloped top, chunky 2-pixel blades and a dark lip over the dirt, like the arena grass */
+  g.fillStyle='#2d6e2a';g.fillRect(0,gy-1,w,10);
+  g.fillStyle='#3f9a32';g.fillRect(0,gy-2,w,9);
+  g.fillStyle='#5fbf3a';g.fillRect(0,gy-2,w,4);
+  for(let x=0;x<w;x+=6){const hh=1+((hsh(x*.73)*3)|0);g.fillStyle='#3f9a32';g.fillRect(x,gy-2-hh,6,hh);g.fillStyle='#5fbf3a';g.fillRect(x+1,gy-2-hh,4,hh);g.fillStyle='#8ee05a';g.fillRect(x+1,gy-2-hh,3,1)}
+  for(let x=0;x<w;x+=2){const r=hsh(x*1.31+7);if(r<.5){const t=2+((r*8)|0)%4;g.fillStyle='#1f5a22';g.fillRect(x,gy-3-t,2,t+1);g.fillStyle=r<.25?'#78d24a':'#4fae3a';g.fillRect(x,gy-3-t,2,t)}}
+  for(let x=3;x<w;x+=5)if(hsh(x*4.1)<.35){g.fillStyle='#2f7a28';g.fillRect(x,gy+2+((hsh(x)*4)|0),2,1)}
+  for(let x=0;x<w;x++)if(hsh(x*2.7)<.025){const c=hsh(x)<.5?'#fff3a8':'#ff9ab0';g.fillStyle='#1f5a22';g.fillRect(x-1,gy-6,3,3);g.fillStyle=c;g.fillRect(x-1,gy-5,3,1);g.fillRect(x,gy-6,1,3);g.fillStyle='#ffd36b';g.fillRect(x,gy-5,1,1)}
+  g.fillStyle='#4a2c16';g.fillRect(0,gy+8,w,2);
   tScene.bg=bg;tScene.hx=Math.round(w*.2);
   if(!tScene.cl.length)for(let i=0;i<7;i++)tScene.cl.push({x:hsh(i*9.1)*w,y:6+hsh(i*4.7)*gy*.42,s:.7+hsh(i*2.3)*.9,v:2+hsh(i*6.1)*4});
 }
@@ -8943,5 +8946,29 @@ body.ontitle #home{visibility:hidden}
   #chars #chprev{width:150px!important;height:110px!important}
   #chars #chgrid{flex:none!important;overflow:visible!important;max-height:none!important}
 }
+
+/* title: perfectly centred logo, a livelier PLAY button */
+#title #tscr1{text-align:center;align-items:center}
+#title .logo{display:flex!important;flex-direction:column;align-items:center;text-align:center;width:100%;margin:0 auto;padding:0!important}
+#title .logo em{display:block!important}
+#title .logo br{display:none}
+#title .logo em{padding:0!important;letter-spacing:0!important;transform:none!important}
+#title #tplay{background:linear-gradient(105deg,#b4f7a8 0%,#b4f7a8 40%,#f2ffe8 50%,#b4f7a8 60%,#b4f7a8 100%)!important;background-size:260% 100%!important;
+  animation:tpulse 1.6s ease-in-out infinite,tshine 2.6s linear infinite,tglow 1.6s ease-in-out infinite!important;position:relative;overflow:visible}
+@keyframes tshine{0%{background-position:130% 0}60%,100%{background-position:-30% 0}}
+@keyframes tglow{0%,100%{filter:drop-shadow(0 0 0 rgba(180,247,168,0))}50%{filter:drop-shadow(0 0 14px rgba(180,247,168,.85))}}
+#title #tscr1 #tplay::after{content:'';display:block!important;position:absolute;left:50%;top:50%;width:6px;height:6px;pointer-events:none;background:transparent;
+  box-shadow:-118px -38px 0 #fff,124px -30px 0 #fff3a8,-130px 26px 0 #fff3a8,118px 34px 0 #fff,0 -50px 0 #fff,-60px 44px 0 #b4f7a8,66px -46px 0 #b4f7a8;animation:tspark 1.2s steps(2) infinite}
+@keyframes tspark{0%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+#title #tplay:hover{transform:translateY(-3px) scale(1.05)}
+@media (prefers-reduced-motion:reduce){#title #tplay,#title #tscr1 #tplay::after{animation:none!important}}
+
+/* cheat menu: the list scrolls inside the screen */
+#cheat{overflow:hidden!important}
+#cheat .box{height:100%;max-height:100%;box-sizing:border-box;display:flex;flex-direction:column;min-height:0;padding-top:56px}
+#cheat #cheatlist{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:6px;scrollbar-width:thin;scrollbar-color:#3cb04c transparent}
+#cheat .row{flex:none}
+#cheat h2,#cheat .note{flex:none}
+@container (max-height:480px){#cheat .box{padding-top:40px;gap:6px}#cheat h2{font-size:20px!important;margin:0}#cheat .note{font-size:9px!important;line-height:1.4;margin:0}#cheat .row .btn{padding:6px 14px}}
 </style>
 </body></html>
