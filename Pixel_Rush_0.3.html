@@ -2243,7 +2243,14 @@ function showSel(){
   $('cosname').innerHTML=(ow?'<span style="color:'+r[2]+'">'+r[1]+'</span> '+s.n:'<span style="color:'+r[2]+'">'+r[1]+'</span> ???')+(ow&&s.wl?' <small style="opacity:.75;font-weight:600">· '+s.wl.join(' → ')+'</small>':'');
 }
 const ownFlt={};
+/* shop tabs: knives, guns and bombs only show once that weapon is unlocked. The PETS tab is removed from the shop (its code stays: set SHOP_PETS to true to bring it back) */
+const SHOP_PETS=false;
+function shopTabs(){
+  ['k','g','b'].forEach(t=>{$('t'+t).style.display=typeOpen(t)?'':'none'});$('tp').style.display=SHOP_PETS?'':'none';
+  if((cosTab==='p'&&!SHOP_PETS)||(cosTab!=='u'&&cosTab!=='p'&&!typeOpen(cosTab))){cosTab='f';cosSel=eq.f}
+}
 function renderCos(){
+  shopTabs();
   if(cosTab==='u'){renderUpg();return}
   $('tu').classList.remove('on');
   const P=cosTab==='p',eqId=P?petEq:eq[cosTab];
@@ -3154,13 +3161,13 @@ function buyEvo(t,n){
   checkAch();
 }
 function renderUpg(){
-  $('qtybar').hidden=true;
+  $('qtybar').hidden=true;{const on=$('oddsnote');if(on)on.style.display='none'}
   TABS.forEach(t=>$('t'+t).classList.remove('on'));$('tu').classList.add('on');
   $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
   $('cosname').textContent='Upgrades';
   const NM=[['f','FISTS'],['k','KNIFE'],['g','GUN'],['b','BOMB'],['p','PERMA']];
   if(upgTab!=='p'&&!typeOpen(upgTab))upgTab='f';
-  let h='<div class="tabs" style="grid-column:1/-1">'+NM.map(n=>{const lk=n[0]==='p'?!permaOpen():!typeOpen(n[0]);return '<button type="button" class="btn ghost sm'+(upgTab===n[0]?' on':'')+'" data-ut="'+n[0]+'">'+(lk?'&#128274; ':'')+n[1]+'</button>'}).join('')+'</div>';
+  let h='<div class="tabs" style="grid-column:1/-1">'+NM.filter(n=>n[0]==='p'||typeOpen(n[0])).map(n=>{const lk=n[0]==='p'?!permaOpen():!typeOpen(n[0]);return '<button type="button" class="btn ghost sm'+(upgTab===n[0]?' on':'')+'" data-ut="'+n[0]+'">'+(lk?'&#128274; ':'')+n[1]+'</button>'}).join('')+'</div>';
   if(upgTab==='p'&&!permaOpen()){
     const have=EVO_T.filter(typeOpen).length,nxt=EVO_T.find(x=>!typeOpen(x));
     h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked · '+have+' / '+EVO_T.length+' weapons unlocked</small><b>Perma upgrades are locked</b><span>Unlock every weapon first.'+(nxt?' Next up is the '+EVO_NAME[nxt].toLowerCase()+': master the '+EVO_NAME[EVO_T[EVO_T.indexOf(nxt)-1]].toLowerCase()+' in Upgrades.':'')+'</span></div>';
@@ -3172,9 +3179,11 @@ function renderUpg(){
     h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[upgTab]+' upgrades are locked</b><span>Master the '+EVO_NAME[pt].toLowerCase()+' (all 10 steps) first.</span></div>';
   }else{
     const t=upgTab,lv=wmLv(t),nx=EVO_T[EVO_T.indexOf(t)+1];
-    h+='<p class="note" style="grid-column:1/-1;margin:0 0 2px">'+EVO_NAME[t]+' mastery <b style="color:var(--gold)">'+lv+' / '+WM_MAX+'</b> · now: '+[Math.round(wmSum(t,'dmg')*100)+'% damage',Math.round(wmSum(t,'spd')*100)+'% speed',Math.round(wmSum(t,'reach')*100)+'% '+(t==='b'?'blast':t==='g'?'range':'reach')].map(x=>'+'+x).join(' · ')+(wmSpec(t)?' · '+WM_SPEC[t][0]:'')+'</p>';
-    for(let n=1;n<=WM_MAX;n++){const c=wmCost(t,n),own=lv>=n,next=n===lv+1,tx=wmText(t,n-1),big=WM_STEPS[t][n-1][0]==='form'||n>=9;
-      h+='<button type="button" class="item'+(own?' maxed':'')+'" data-evo="'+t+n+'" style="--tc:'+(big?'#ffd36b':'#8fd3ff')+(own||next?'':';opacity:.55')+'"'+(!own&&(!next||wallet<c)?' disabled':'')+'><small>'+(own?'Owned':next?'Step '+n:'Locked · step '+n)+'</small><b>'+tx[0]+'</b><span>'+tx[1]+'</span><em class="price">'+(own?'Owned':'<i class="coin"></i>'+c)+'</em></button>'}
+    h+='<p class="note" style="grid-column:1/-1;margin:0 0 2px">'+EVO_NAME[t]+' mastery <b style="color:var(--gold)">Step '+lv+' / '+WM_MAX+'</b> · now: '+[Math.round(wmSum(t,'dmg')*100)+'% damage',Math.round(wmSum(t,'spd')*100)+'% speed',Math.round(wmSum(t,'reach')*100)+'% '+(t==='b'?'blast':t==='g'?'range':'reach')].map(x=>'+'+x).join(' · ')+(wmSpec(t)?' · '+WM_SPEC[t][0]:'')+'</p>';
+    /* one step at a time: only the next step's box shows; buying it reveals the one after */
+    if(lv>=WM_MAX)h+='<div class="item maxed" style="--tc:#ffd36b;grid-column:1/-1;cursor:default"><small>Step '+WM_MAX+' / '+WM_MAX+'</small><b>'+EVO_NAME[t]+' mastered</b><span>Every step is bought.</span><em class="price">Mastered</em></div>';
+    else{const n=lv+1,c=wmCost(t,n),tx=wmText(t,n-1),big=WM_STEPS[t][n-1][0]==='form'||n>=9;
+      h+='<button type="button" class="item" data-evo="'+t+n+'" style="--tc:'+(big?'#ffd36b':'#8fd3ff')+';grid-column:1/-1"'+(wallet<c?' disabled':'')+'><small>Step '+n+' / '+WM_MAX+'</small><b>'+tx[0]+'</b><span>'+tx[1]+'</span><em class="price"><i class="coin"></i>'+c+'</em></button>'}
     h+='<p class="note" style="grid-column:1/-1;margin:2px 0 0">Forms: '+WLINES[WM_LINE[t]].map(x=>x[1]).join(' → ')+' (steps 4 and 8).'+(nx?(evoDone(t)?' Mastered, so the '+EVO_NAME[nx].toLowerCase()+' is unlocked.':' Master it (step 10) to unlock the '+EVO_NAME[nx].toLowerCase()+'.'):' This is the last weapon.')+'</p>';
   }
   $('packs').innerHTML=h;
@@ -3196,6 +3205,7 @@ const UPDATES=[
   'New players are asked if they want the tutorial before their first run (say no to skip it). Finishing the tutorial now gives you one account level.',
   'Phones: the game always plays sideways. Hold your phone upright and the game turns itself to fill the screen; on Android it locks to landscape after your first tap. The main menu fits on short screens.',
   'Difficulty buttons glow when you hover over them.',
+  'Shop: the Knives, Guns and Bombs tabs only appear once you unlock that weapon, and the Pets tab is gone. Upgrades show one step at a time (Step 1 / 10, then the box for step 2).',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
