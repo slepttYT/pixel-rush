@@ -2830,6 +2830,8 @@ function saveCheck(o){
   return o.data;
 }
 function sdMsg(t,bad){const m=$('sdmsg');m.textContent=t;m.classList.toggle('bad',!!bad)}
+/* inside the claude.ai artifact viewer, files can only be offered through its downloads capability (resolved once, early) */
+const dlCap=(window.claude&&typeof window.claude.use==='function')?window.claude.use('downloads').catch(()=>null):Promise.resolve(null);
 async function exportSave(){
   saveMeta();saveOwn();saveSet();
   const txt=JSON.stringify(saveDump(),null,1),d=new Date(),fn='pixel-rush-save-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
@@ -2839,6 +2841,8 @@ async function exportSave(){
       if(!path){sdMsg('Export cancelled.');return}
       await Neutralino.filesystem.writeFile(path,txt);sdMsg('Saved to '+path);return;
     }
+    const dl=await dlCap;
+    if(dl){try{await dl.save({filename:fn,data:txt});sdMsg('Exported '+fn+'.')}catch(x){sdMsg(x&&x.code==='declined'?'Export cancelled.':'Export is not available here.',x&&x.code!=='declined')}return}
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=fn;document.body.appendChild(a);a.click();
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);sdMsg('Exported '+fn+'.');
   }catch(e){sdMsg('Export failed: '+(e&&e.message||e),true)}
