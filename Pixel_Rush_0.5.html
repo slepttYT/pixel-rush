@@ -618,7 +618,7 @@ summary:hover{color:var(--bone)}
     <div id="bossbar" hidden><span id="bossname"></span><div class="bb"><i id="bossfill"></i></div></div>
     <div class="hrow">
       <div class="hl"><div id="hp"></div><div id="owned"></div></div>
-      <div class="hc"><div id="wave"></div><div id="goal"></div><div id="modhud"></div></div>
+      <div class="hc"><div id="wave"></div><div id="goal"></div><div id="modhud"></div></div><div id="racehud" hidden></div>
       <div class="hr"><span id="score">0</span><span id="coins"></span><span id="xphud"></span><span id="combo"></span><span id="keyhud" hidden>VAULT KEY</span><button id="snd" type="button">SOUND ON</button><button id="pz" type="button">PAUSE</button></div>
     </div>
   </div>
@@ -677,6 +677,7 @@ summary:hover{color:var(--bone)}
         <button class="btn gold big cont" id="pcont" type="button" hidden><span>CONTINUE RUN</span><small id="pcontsub"></small></button>
         <button class="btn gold big" id="play" type="button">NEW RUN</button>
         <button class="btn ghost mi" id="hdiff" type="button" aria-label="Change difficulty"><span class="ddot"></span><span class="dtxt"><small>DIFFICULTY</small><b id="hdname"></b></span><span class="dsub" id="hdsub"></span><span class="dchg">&#9654;</span></button>
+        <button class="btn ghost mi" id="honline" type="button"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="2"/></svg>ONLINE<span class="dlyst" id="honst">VERSUS</span></button>
         <button class="btn ghost mi" id="hdaily" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16v15H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 6h16v4H4z"/><path d="M8 3v5M16 3v5" stroke="currentColor" stroke-width="2"/><path d="M8 14h3v3H8z"/></svg>DAILY CHALLENGE<span class="dlyst" id="hdlyst"></span></button>
         <button class="btn ghost mi" id="hchar" type="button"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4.2"/><path d="M3.5 21c.6-5 4-7.6 8.5-7.6s7.9 2.6 8.5 7.6z"/></svg>CHARACTERS</button>
         <button class="btn ghost mi" id="hcos" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h16l-1.4 12.2a1.5 1.5 0 0 1-1.5 1.3H6.9a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>SHOP</button>
@@ -862,6 +863,13 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="online" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="olt">
+    <button class="btn ghost backtl" type="button">&#9664; BACK</button>
+    <div class="box">
+      <h2 id="olt">Online &middot; Versus Race</h2>
+      <div id="olbody"></div>
+    </div>
+  </div>
   <div id="daily" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="dlyt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -947,7 +955,7 @@ summary:hover{color:var(--bone)}
 <script>
 (()=>{
 /* ---- save slots: slot 1 keeps the original storage keys, slots 2 and 3 get their own prefix. Settings stay shared between slots ---- */
-const SLOT_G=['cinder-set','cinder-jukemode','cinder-muted','cinder-binds','cinder-padbinds','cinder-slot'];
+const SLOT_G=['cinder-set','cinder-jukemode','cinder-muted','cinder-binds','cinder-padbinds','cinder-slot','cinder-mp'];
 let SLOT=1;try{SLOT=Math.max(1,Math.min(3,+localStorage.getItem('cinder-slot')||1))}catch(e){}
 const fmtK=n=>{n=Math.round(n||0);const a=Math.abs(n),f=(v,s)=>(v>=100?Math.round(v):Math.round(v*10)/10)+s;return a<1000?String(n):a<999500?f(n/1000,'k'):f(n/1e6,'M')}; /* 999,999 rounds up to 1M, never 1000k */
 const slotKey=(k,n)=>{n=n||SLOT;return n>1&&SLOT_G.indexOf(k)<0?k.replace('cinder-','cinder-s'+n+'-'):k};
@@ -3635,7 +3643,7 @@ let savesDraw=null;
 function openSub(k,opener){
   document.body.classList.add('insub');
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
-  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('daily').hidden=k!=='daily';$('help').hidden=k!=='help';plisten=null;
+  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('daily').hidden=k!=='daily';$('online').hidden=k!=='online';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
   else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent=''}
   else if(k==='ach'){renderAch()}
@@ -3645,6 +3653,7 @@ function openSub(k,opener){
   else if(k==='chars'){skinView=null;chHover=null;$('chtip').hidden=true;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
+  else if(k==='online'){renderOnline()}
   else if(k==='daily'){renderDaily();setTimeout(()=>$('dlygo').focus(),0)}
   else if(k==='cfg'){renderCfg();setTimeout(()=>$('cfggo').focus(),0)}
   else if(k==='mail'){renderMail()}
@@ -3658,7 +3667,7 @@ function openSub(k,opener){
 }
 function closeSub(){
   document.body.classList.remove('insub');
-  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('daily').hidden=true;$('help').hidden=true;
+  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('daily').hidden=true;$('online').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
   if(was==='cfg'&&runFlow&&state==='menu'&&!worldGo){openSub('chars',subOpener);return} /* back from Configure Run goes to the fighters */
@@ -4525,7 +4534,7 @@ $('slots').addEventListener('click',e=>{
 function showHome(){
   lowHp=false;stage.classList.remove('lowhp');cine=null;cam.x=0;cam.y=0;
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
-  brWant=false;dailyMode=false;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
+  brWant=false;dailyMode=false;raceMode=false;$('racehud').hidden=true;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
 }
 
@@ -5802,6 +5811,161 @@ $('dlygo').addEventListener('click',()=>{
   if(hasRun()){const r=loadRun();pxAsk({t:'Start the daily challenge?',b:'<p>You have a saved run (World '+r.world+', wave '+(r.loop*LOOP_WAVES+r.resume)+'). Starting a new run deletes it.</p>',ok:'START',no:'CANCEL',danger:1},v=>{if(v){try{LS.removeItem(RUN_KEY)}catch(e){}go()}});return}
   go();
 });
+/* =====================================================================================
+   0.5: ONLINE (plug and play). The in-game Online SDK, built on the "Plug-and-Play Multiplayer Architecture" plan:
+   Core (config, lifecycle), Network (connect, send, reconnects, timeouts), ServerBrowser (list, refresh, ping, join),
+   Identity (guest accounts: the server hands out a token, kept per server), Leaderboards (read only; only the server
+   writes them, from races it watched), Events (status, room, race, attack, results, errors).
+   Transport is WebSocket (browsers cannot use UDP/ENet). The server is online/pixel-rush-server.js (or PixelRushServer.exe).
+   Mode: Versus Race. Everyone plays the same world, difficulty and modifiers; first to the target wave wins,
+   and every wave you clear sends extra enemies to your rivals.
+   ===================================================================================== */
+const Online=(()=>{
+  const PROTOCOL=1;
+  /* Core */
+  const Core={cfg:{name:'',tokens:{},recent:[],registry:''},
+    load(){try{const o=JSON.parse(localStorage.getItem('cinder-mp')||'{}');if(o&&typeof o==='object')Object.assign(this.cfg,{name:typeof o.name==='string'?o.name:'',tokens:o.tokens&&typeof o.tokens==='object'?o.tokens:{},recent:Array.isArray(o.recent)?o.recent.filter(x=>typeof x==='string').slice(0,8):[],registry:typeof o.registry==='string'?o.registry:''})}catch(e){}},
+    save(){try{localStorage.setItem('cinder-mp',JSON.stringify(this.cfg))}catch(e){}},
+    norm(a){a=String(a||'').trim().replace(/^(wss?|https?):\/\//i,'').replace(/\/.*$/,'');if(!a)return '';if(!/:\d+$/.test(a))a+=':7777';return a}};
+  Core.load();
+  /* Events */
+  const H={};const Events={on(k,f){(H[k]=H[k]||[]).push(f)},emit(k,d){(H[k]||[]).forEach(f=>{try{f(d)}catch(e){console.error(e)}})}};
+  /* Network */
+  const st={ws:null,addr:'',pw:'',status:'idle',me:null,room:null,race:null,results:null,chat:[],err:'',retry:0,manual:false};
+  const Network={
+    connect(addr,pw){
+      addr=Core.norm(addr);if(!addr)return;
+      Network.close(true);st.addr=addr;st.pw=pw||'';st.err='';st.manual=false;st.status='connecting';Events.emit('status');
+      let ws;try{ws=new WebSocket('ws://'+addr+'/ws')}catch(e){st.status='idle';st.err='Could not reach that address.';Events.emit('status');return}
+      st.ws=ws;const to=setTimeout(()=>{if(ws.readyState!==1){try{ws.close()}catch(e){}}},5000);
+      ws.onopen=()=>{clearTimeout(to);ws.send(JSON.stringify({t:'hello',v:PROTOCOL,game:'0.5',name:Identity.name(),token:Core.cfg.tokens[addr]||'',maxWorld:Identity.maxWorld(),pw:st.pw}))};
+      ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}Network.handle(m)};
+      ws.onclose=()=>{clearTimeout(to);if(st.ws!==ws)return;const was=st.status;st.ws=null;
+        if(!st.manual&&was==='online'&&st.retry<3){st.retry++;st.status='reconnecting';Events.emit('status');setTimeout(()=>{if(!st.manual&&st.status==='reconnecting')Network.connect(st.addr,st.pw)},800*Math.pow(2,st.retry-1));return}
+        if(was==='connecting'&&!st.err)st.err='Could not connect. Check the address, that the server is running, and that you are on the same network (or the port is forwarded).';
+        st.status='idle';st.room=null;Events.emit('status')};
+    },
+    handle(m){
+      if(m.t==='welcome'){st.status='online';st.retry=0;st.me={id:m.id,name:m.name};st.server=m.server;st.motd=m.motd;Core.cfg.tokens[st.addr]=m.token;Core.cfg.recent=[st.addr].concat(Core.cfg.recent.filter(a=>a!==st.addr)).slice(0,8);Core.save();Events.emit('status')}
+      else if(m.t==='error'){st.err=m.msg;st.manual=true;Events.emit('status')}
+      else if(m.t==='room'){st.room=m;Events.emit('room')}
+      else if(m.t==='countdown'){Events.emit('countdown',m.n)}
+      else if(m.t==='go'){st.results=null;Events.emit('go',m)}
+      else if(m.t==='race'){st.race=m.players;Events.emit('race',m.players)}
+      else if(m.t==='attack'){Events.emit('attack',m)}
+      else if(m.t==='results'){st.results=m.rows;Events.emit('results',m.rows)}
+      else if(m.t==='chat'){st.chat.push(m);st.chat=st.chat.slice(-6);Events.emit('chat',m)}
+      else if(m.t==='info'){st.info=m.msg;Events.emit('info',m.msg)}
+    },
+    send(o){if(st.ws&&st.ws.readyState===1)try{st.ws.send(JSON.stringify(o))}catch(e){}},
+    close(silent){st.manual=true;if(st.ws){try{st.ws.send(JSON.stringify({t:'leave'}))}catch(e){}try{st.ws.close()}catch(e){}}st.ws=null;st.status='idle';st.room=null;st.race=null;if(!silent)Events.emit('status')},
+    online:()=>st.status==='online'
+  };
+  /* Identity: guest accounts. The server gives each player a token for that server; the name is yours to pick */
+  const Identity={name(){return (Core.cfg.name||('Player'+String(Math.floor(Math.random()*900+100)))).slice(0,16)},set(n){Core.cfg.name=String(n||'').replace(/[^\w \-.!?]/g,'').slice(0,16);Core.save()},maxWorld(){return w5Open()?5:w4Open()?4:w3Open()?3:w2Open()?2:1}};
+  if(!Core.cfg.name){Core.cfg.name=Identity.name();Core.save()}
+  /* ServerBrowser */
+  const fetchJ=async(url,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||3000);try{const r=await fetch(url,{signal:c.signal});return await r.json()}finally{clearTimeout(t)}};
+  const ServerBrowser={list:[],busy:false,
+    async info(a){const t0=performance.now();try{const j=await fetchJ('http://'+a+'/info',3000);j.ping=Math.round(performance.now()-t0);j.address=a;return j}catch(e){return null}},
+    async refresh(){
+      if(this.busy)return this.list;this.busy=true;Events.emit('browser');
+      const addrs=new Set(Core.cfg.recent),regs=[...new Set([Core.cfg.registry,...Core.cfg.recent].filter(Boolean).map(Core.norm))];
+      await Promise.all(regs.map(async a=>{try{const j=await fetchJ('http://'+a+'/servers',3000);for(const sv of (j.servers||[]))addrs.add((sv.addr||a.split(':')[0])+':'+sv.port)}catch(e){}}));
+      this.list=(await Promise.all([...addrs].map(a=>this.info(a)))).filter(Boolean).sort((a,b)=>a.ping-b.ping);
+      this.busy=false;Events.emit('browser');return this.list},
+    join(a,pw){Network.connect(a,pw)}};
+  /* Leaderboards: read only */
+  const Leaderboards={async top(board){if(!st.addr)return null;try{return (await fetchJ('http://'+st.addr+'/leaderboard?board='+encodeURIComponent(board),3000)).top}catch(e){return null}}};
+  return {PROTOCOL,Core,Events,Network,Identity,ServerBrowser,Leaderboards,st};
+})();
+let raceMode=false,raceWant=null,raceTarget=0,raceQ=0,raceSentT=0,raceDone=false,olView='browse',olBoard='wins',olBoardRows=null;
+const escH=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+function olStatusBtn(){const b=$('honst');if(!b)return;const on=Online.Network.online();b.textContent=on?'CONNECTED':'VERSUS';b.className='dlyst'+(on?' claim':'')}
+function renderOnline(){
+  const st=Online.st,b=$('olbody');olStatusBtn();
+  if(raceMode&&state!=='menu'&&!st.results){b.innerHTML='<p class="note">A race is running. Finish it, then come back here.</p>';return}
+  if(st.results&&olView!=='board'){
+    b.innerHTML='<div class="olcard"><h3 class="pdh">Race results</h3><table class="oltab"><tr><th>#</th><th>PLAYER</th><th>WAVE</th><th>TIME</th></tr>'+st.results.map(r=>'<tr'+(st.me&&r.id===st.me.id?' class="me"':'')+'><td>'+r.place+'</td><td>'+escH(r.name)+(r.flagged?' <small title="Result looked impossible, not counted">(not counted)</small>':'')+'</td><td>'+r.wave+'</td><td>'+(r.finished?fmtT(r.time):r.wave?'fell':'-')+'</td></tr>').join('')+'</table></div>'
+      +'<div class="row"><button class="btn gold" type="button" data-ol="lobby">BACK TO LOBBY</button><button class="btn ghost" type="button" data-ol="board">LEADERBOARD</button></div>';return}
+  if(olView==='board'){
+    const tabs=[['wins','RACE WINS'],['best_wave','BEST WAVE'],['races','RACES PLAYED']];
+    b.innerHTML='<div class="row oltabs">'+tabs.map(t=>'<button type="button" class="btn ghost sm'+(olBoard===t[0]?' on':'')+'" data-olb="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'
+      +'<div class="olcard">'+(olBoardRows===null?'<p class="note">Loading...</p>':!olBoardRows.length?'<p class="note">No results yet. Leaderboards fill up from races played on this server.</p>':'<table class="oltab"><tr><th>#</th><th>PLAYER</th><th>'+(olBoard==='best_wave'?'WAVE':olBoard==='wins'?'WINS':'RACES')+'</th></tr>'+olBoardRows.map((r,i)=>'<tr'+(st.me&&r.id===st.me.id?' class="me"':'')+'><td>'+(i+1)+'</td><td>'+escH(r.name)+'</td><td>'+r.score+'</td></tr>').join('')+'</table>')+'</div>'
+      +'<p class="note">Only the server writes these, from races it watched itself. Impossible results are never counted.</p><div class="row"><button class="btn ghost" type="button" data-ol="back">BACK</button></div>';
+    if(olBoardRows===null)Online.Leaderboards.top(olBoard).then(r=>{olBoardRows=r||[];if(sub==='online'&&olView==='board')renderOnline()});
+    return}
+  if(st.status==='online'&&st.room){
+    const r=st.room,me=st.me||{},lead=r.leader===me.id,S=r.settings,meP=r.players.find(p=>p.id===me.id)||{};
+    const wbtn=[1,2,3,4,5].map(w=>'<button type="button" class="cwd'+(S.world===w?' on':'')+(w>r.maxWorld?' lock':'')+'" data-ows="'+w+'"'+(lead&&w<=r.maxWorld?'':' disabled')+'><small>WORLD '+w+'</small><b>'+WNAME[w]+'</b></button>').join('');
+    b.innerHTML='<div class="olhead"><b>'+escH(r.server||st.server)+'</b><small>'+escH(st.addr)+' &middot; '+escH(r.motd||'')+'</small></div>'
+      +'<div class="olgrid"><div class="olcard"><h3 class="pdh">Players ('+r.players.length+')</h3>'+r.players.map(p=>'<div class="olp'+(p.id===me.id?' me':'')+'"><span>'+(p.id===r.leader?'&#9819; ':'')+escH(p.name)+'</span><em>'+(r.state==='lobby'?(p.ready||p.id===r.leader?'READY':'...'):p.done?'DONE':'RACING')+'</em></div>').join('')
+      +'<h3 class="pdh">Chat</h3><div class="olchat">'+st.chat.map(c=>'<div><b>'+escH(c.from)+':</b> '+escH(c.text)+'</div>').join('')+'</div><div class="olrow"><input id="olchatin" maxlength="80" placeholder="Say something"><button class="btn ghost sm" type="button" data-ol="chat">SEND</button></div></div>'
+      +'<div class="olcard"><h3 class="pdh">Race settings '+(lead?'(you are the leader)':'(the leader picks)')+'</h3>'
+      +'<div class="cfgwd ol5">'+wbtn+'</div>'
+      +'<div class="olrow2"><span>FIRST TO WAVE</span>'+[10,20,30].map(t=>'<button type="button" class="btn ghost sm'+(S.target===t?' on':'')+'" data-owt="'+t+'"'+(lead?'':' disabled')+'>'+t+'</button>').join('')+'</div>'
+      +'<div class="olrow2"><span>DIFFICULTY</span>'+Object.keys(DIFFS).map(k=>'<button type="button" class="btn ghost sm'+(S.diff===k?' on':'')+'" data-owd="'+k+'"'+(lead?'':' disabled')+'>'+DIFFS[k].n.split(' ')[0]+'</button>').join('')+'</div>'
+      +'<div class="olrow2 wrap"><span>MODIFIERS</span>'+MODS.map(m=>'<button type="button" class="btn ghost sm'+(S.mods.includes(m[0])?' on':'')+'" data-owm="'+m[0]+'"'+(lead?'':' disabled')+' title="'+escH(m[2])+'">'+m[1]+'</button>').join('')+'</div>'
+      +'<p class="note">You race as '+escH(CH().n)+' with your '+EVO_NAME[wType].toLowerCase()+'. Clearing a wave sends '+'extra enemies to everyone else.</p></div></div>'
+      +(st.info?'<p class="note olinfo">'+escH(st.info)+'</p>':'')
+      +'<div class="row">'+(lead?'<button class="btn gold" type="button" data-ol="start"'+(r.state!=='lobby'?' disabled':'')+'>START RACE</button>':'<button class="btn '+(meP.ready?'ghost':'gold')+'" type="button" data-ol="ready"'+(r.state!=='lobby'?' disabled':'')+'>'+(meP.ready?'NOT READY':'READY')+'</button>')
+      +'<button class="btn ghost" type="button" data-ol="board">LEADERBOARD</button><button class="btn ghost" type="button" data-ol="leave">LEAVE SERVER</button></div>';
+    return}
+  /* server browser */
+  const SB=Online.ServerBrowser,busy=st.status==='connecting'||st.status==='reconnecting';
+  b.innerHTML='<div class="olrow"><label for="olname">YOUR NAME</label><input id="olname" maxlength="16" value="'+escH(Online.Core.cfg.name)+'"></div>'
+    +'<div class="olcard"><h3 class="pdh">Join a server</h3><div class="olrow"><input id="oladdr" placeholder="address, e.g. 192.168.1.20:7777" value="'+escH(st.addr||Online.Core.cfg.recent[0]||'')+'"><input id="olpw" type="password" placeholder="password (if any)" class="olpw"><button class="btn gold" type="button" data-ol="join"'+(busy?' disabled':'')+'>'+(busy?'CONNECTING...':'JOIN')+'</button></div>'
+    +(st.err?'<p class="note bad">'+escH(st.err)+'</p>':'')+'</div>'
+    +'<div class="olcard"><h3 class="pdh">Server browser <button class="btn ghost sm" type="button" data-ol="refresh"'+(SB.busy?' disabled':'')+'>'+(SB.busy?'SEARCHING...':'REFRESH')+'</button></h3>'
+    +(SB.list.length?'<table class="oltab"><tr><th>SERVER</th><th>PLAYERS</th><th>PING</th><th></th></tr>'+SB.list.map(v=>{const bad=v.protocol!==Online.PROTOCOL;return '<tr><td>'+escH(v.name)+(v.password?' &#128274;':'')+'<small>'+escH(v.address)+' &middot; '+escH(v.region||'')+' &middot; '+escH(v.state||'')+(bad?' &middot; <b class="bad">version '+escH(v.version)+'</b>':'')+'</small></td><td>'+v.players+'/'+v.max+'</td><td>'+v.ping+' ms</td><td><button class="btn ghost sm" type="button" data-oj="'+escH(v.address)+'"'+(bad||v.players>=v.max?' disabled':'')+'>JOIN</button></td></tr>'}).join('')+'</table>':'<p class="note">'+(SB.busy?'Searching...':'No servers found yet. Servers you join are remembered here, with every server they list.')+'</p>')+'</div>'
+    +'<div class="olcard olhelp"><h3 class="pdh">How to play online</h3><ol><li>One player runs the server: <b>PixelRushServer.exe</b> on Windows (or <b>node pixel-rush-server.js</b>). It shows the address to type.</li><li>Everyone types that address above and presses JOIN.</li><li>Press READY. The leader picks the world and target wave and presses START RACE.</li><li>First to clear the target wave wins. Every wave you clear sends extra enemies to your rivals.</li></ol><small>Same Wi-Fi works right away. Over the internet, the host forwards port 7777 (TCP) on their router. Use the downloaded game (HTML file or EXE) for online play.</small></div>';
+  if(!SB.list.length&&!SB.busy&&!SB.tried){SB.tried=1;SB.refresh()}
+}
+$('olbody').addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t||t.disabled)return;const N=Online.Network,st=Online.st,d=t.dataset;
+  if(d.oj){const a=d.oj;$('oladdr').value=a;N.connect(a,$('olpw')?$('olpw').value:'');renderOnline();return}
+  if(d.ows){N.send({t:'settings',world:+d.ows});return}if(d.owt){N.send({t:'settings',target:+d.owt});return}if(d.owd){N.send({t:'settings',diff:d.owd});return}
+  if(d.owm){const cur=(st.room&&st.room.settings.mods)||[];N.send({t:'settings',mods:cur.includes(d.owm)?cur.filter(x=>x!==d.owm):cur.concat([d.owm])});return}
+  if(d.olb){olBoard=d.olb;olBoardRows=null;renderOnline();return}
+  const a=d.ol;
+  if(a==='join'){Online.Identity.set($('olname').value);N.connect($('oladdr').value,$('olpw').value);renderOnline()}
+  else if(a==='refresh'){Online.Identity.set($('olname').value);Online.ServerBrowser.refresh()}
+  else if(a==='ready'){const me=(st.room.players.find(p=>p.id===st.me.id)||{});N.send({t:'ready',on:!me.ready})}
+  else if(a==='start')N.send({t:'start'});
+  else if(a==='leave'){N.close();olView='browse';renderOnline()}
+  else if(a==='board'){olView='board';olBoardRows=null;renderOnline()}
+  else if(a==='back'||a==='lobby'){olView='browse';st.results=null;renderOnline()}
+  else if(a==='chat'){const i=$('olchatin');if(i&&i.value.trim()){N.send({t:'chat',text:i.value});i.value=''}}
+});
+$('olbody').addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='olchatin'){e.preventDefault();const i=e.target;if(i.value.trim()){Online.Network.send({t:'chat',text:i.value});i.value=''}}else if(e.target.id==='oladdr'||e.target.id==='olpw'){e.preventDefault();Online.Identity.set($('olname').value);Online.Network.connect($('oladdr').value,$('olpw').value);renderOnline()}}e.stopPropagation()});
+$('olbody').addEventListener('change',e=>{if(e.target.id==='olname')Online.Identity.set(e.target.value)});
+$('honline').addEventListener('click',e=>{if(state==='menu'||state==='over')openSub('online',e.currentTarget)});
+for(const k of ['status','room','browser','chat','info'])Online.Events.on(k,()=>{olStatusBtn();if(sub==='online'){const fo=document.activeElement&&document.activeElement.id,v=fo&&$(fo)?$(fo).value:null;renderOnline();if(fo&&$(fo)){$(fo).focus();if(v!==null&&$(fo).value!==v)$(fo).value=v}}});
+Online.Events.on('countdown',n=>{if(sub==='online'||state==='menu'){banner('RACE STARTS IN '+n);sfx(440,.1,'square',.05,1)}});
+Online.Events.on('go',m=>{
+  if(state!=='menu'){Online.Network.send({t:'dead'});return} /* busy in a solo run: sit this one out */
+  if(sub)closeSub();
+  if(!eq[wType]||!typeOpen(wType))wType='f';syncEq();
+  diff=DIFFS[m.diff]?m.diff:diff;selWorld=m.world;raceWant=m;
+  worldGo=true;nwGo=true;try{beginRun()}finally{nwGo=false;worldGo=false;raceWant=null}
+});
+Online.Events.on('attack',m=>{if(!raceMode||raceDone)return;raceQ+=Math.max(1,Math.min(6,m.n|0));banner(String(m.from).toUpperCase()+' SENT '+m.n+' ENEMIES!');sfx(160,.2,'sawtooth',.05,.6)});
+Online.Events.on('race',ps=>{if(!raceMode)return;renderRaceHud(ps)});
+Online.Events.on('results',()=>{if(sub==='online')renderOnline();else if(state==='over'||state==='menu'){olView='browse';openSub('online',$('honline'))}});
+function renderRaceHud(ps){
+  const h=$('racehud');if(!h)return;h.hidden=!raceMode;if(!raceMode)return;const me=Online.st.me||{};
+  h.innerHTML='<b>FIRST TO WAVE '+raceTarget+'</b>'+(ps||[]).slice().sort((a,c)=>c.wave-a.wave).map(p=>'<div class="'+(p.id===me.id?'me':'')+(p.alive?'':' out')+'"><span>'+escH(p.name)+'</span><em>W'+p.wave+(p.done&&p.alive?' &#10003;':!p.alive?' &#10005;':' &middot; '+p.hp+'&#9829;')+'</em></div>').join('')+(Online.Network.online()?'':'<div class="out"><span>connection lost</span></div>');
+}
+function raceTick(dt){ /* called from update(): status once a second, and enemies sent by rivals arrive during waves */
+  if(!raceMode||raceDone)return;
+  raceSentT-=dt;if(raceSentT<=0){raceSentT=1;Online.Network.send({t:'status',wave:totalWave(),hp:p.hp,maxhp:p.maxhp,score,kills})}
+  if(raceQ>0&&waveActive&&state==='play'){raceQ--;toSpawn++;spawn()}
+}
+function raceFinish(){
+  if(!raceMode||raceDone)return;raceDone=true;Online.Network.send({t:'status',wave:totalWave(),hp:p.hp,maxhp:p.maxhp,score,kills});Online.Network.send({t:'finish'});
+  state='over';finalize();
+  showRunPanel('RACE <em>FINISHED</em>','You cleared wave '+raceTarget+'! Waiting for the others to finish.','LOBBY','HOME',false);
+}
 function startGame(){
   if(sub||(state!=='menu'&&state!=='over'))return;
   if(state==='menu'&&!$('ask').hidden)return;
@@ -5814,8 +5978,10 @@ let nwGo=false; /* set while the WORLD 2 button on the win screen starts the nex
 function beginRun(){
   runFlow=false;
   setWorld(selWorld>=2&&selWorld<=5&&(worldOpen(selWorld)||nwGo)?selWorld:1);
-  $('home').hidden=true;reset();dailyMode=!brMode&&dailyWant;runMods=brMode?{}:Object.assign({},dailyMode?dailyNow().mods:cfgMods);if(modOn('glass')){p.maxhp=1;p.hp=1;buildHp()}
-  {const mn=modNames(runMods);$('modhud').textContent=(dailyMode?'DAILY \u00b7 GOAL WAVE '+dailyNow().target+(mn.length?' \u00b7 ':''):'')+(mn.length?mn.join(' \u00b7 ').toUpperCase():'')}
+  $('home').hidden=true;reset();dailyMode=!brMode&&dailyWant;raceMode=!brMode&&!!raceWant;raceDone=false;raceQ=0;raceSentT=0;raceTarget=raceMode?raceWant.target:0;
+  runMods=brMode?{}:raceMode?Object.fromEntries((raceWant.mods||[]).map(k=>[k,1])):Object.assign({},dailyMode?dailyNow().mods:cfgMods);
+  $('racehud').hidden=!raceMode;if(raceMode)renderRaceHud(Online.st.race||[]);if(modOn('glass')){p.maxhp=1;p.hp=1;buildHp()}
+  {const mn=modNames(runMods);$('modhud').textContent=(raceMode?'ONLINE RACE \u00b7 ':'')+(dailyMode?'DAILY \u00b7 GOAL WAVE '+dailyNow().target+(mn.length?' \u00b7 ':''):'')+(mn.length?mn.join(' \u00b7 ').toUpperCase():'')}
   stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
   juke.paused=false;if(!muted)musicStart();
 }
@@ -5825,7 +5991,7 @@ function tutAsk(on){$('tutask').hidden=!on;if(on)setTimeout(()=>$('tutyes').focu
 $('tutyes').addEventListener('click',()=>{tutAsk(false);stats.tutAsk=1;saveMeta();startTutorial()});
 $('tutno').addEventListener('click',()=>{tutAsk(false);stats.tutAsk=1;saveMeta();sfx(330,.08,'triangle',.05,1);startGame()});
 addEventListener('keydown',e=>{if($('tutask').hidden)return;if(e.key==='Escape'){e.preventDefault();$('tutno').click()}else if(e.key!=='Tab'&&e.key!=='Enter'&&e.key!==' ')e.preventDefault();e.stopPropagation()},true);
-$('pbtn').addEventListener('click',()=>{state==='win'?loopGame():startGame()});
+$('pbtn').addEventListener('click',()=>{if(raceMode&&state==='over'){showHome();olView='browse';openSub('online',$('honline'));return}state==='win'?loopGame():startGame()});
 $('hbtn').addEventListener('click',()=>{state==='win'?endRun():showHome()});
 $('wbtn').addEventListener('click',nextWorld);
 
@@ -6364,9 +6530,9 @@ function hurtP(e,ux,uy){
 const clearedWaves=()=>loop*LOOP_WAVES+Math.max(0,wave-(waveActive?1:0));
 function finalize(){
   checkAch();saveMeta();
-  if(!cheatsOn()&&!brMode&&!dailyMode&&score>best){best=score;try{LS.setItem('cinder-best',String(best))}catch(e){}}
+  if(!cheatsOn()&&!brMode&&!dailyMode&&!raceMode&&score>best){best=score;try{LS.setItem('cinder-best',String(best))}catch(e){}}
   const tw=totalWave();
-  if(!cheatsOn()&&!brMode&&!dailyMode&&tw>bestWave){bestWave=tw;try{LS.setItem('cinder-bestwave',String(bestWave))}catch(e){}}
+  if(!cheatsOn()&&!brMode&&!dailyMode&&!raceMode&&tw>bestWave){bestWave=tw;try{LS.setItem('cinder-bestwave',String(bestWave))}catch(e){}}
   lastRun=bankXp(clearedWaves());
   saveCard();
 }
@@ -6468,6 +6634,7 @@ function showRunPanel(title,note,btnA,btnB,lose){
   [...pa.children].forEach((el,i)=>setTimeout(()=>{if($('panel').hidden)return;el.classList.add('in');if(i>0)sfx(700+i*60,.08,'triangle',.04,1.3)},950+i*170));
 }
 function gameOver(){
+  if(raceMode&&!raceDone){raceDone=true;Online.Network.send({t:'status',wave:totalWave(),hp:0,maxhp:p.maxhp,score,kills});Online.Network.send({t:'dead'})}
   state='over';endHow='fell';finalize();
   stage.classList.add('dead');
   spark(p.x,p.y,'#f1ead8',40,460);spark(p.x,p.y,'#ff4d5e',30,380);
@@ -6500,7 +6667,7 @@ function openWin(){
   $('pstats').innerHTML='<div><dt>Score</dt><dd>'+score+'</dd></div><div><dt>Loop</dt><dd>'+(loop+1)+'</dd></div><div><dt>Kills</dt><dd>'+kills+'</dd></div><div><dt>Time</dt><dd>'+fmtT(runT)+'</dd></div><div><dt>XP this run</dt><dd>+'+pend+'</dd></div>';$('prew').innerHTML='';$('pach').innerHTML='';
   $('pxp').innerHTML=xpHtml(L);
   $('pnote').textContent='End the run to bank your XP and coins, or loop back to wave 1. Enemies get tougher, your build carries over, and XP gets ×'+xpMul(loop+1).toFixed(2)+' (stacks every loop).';
-  if(!brMode&&!dailyMode&&loop===0&&!cheatsOn()&&!devWarp&&!tut){stats.pbt=stats.pbt||{};const old=stats.pbt[world],tt=Math.round(runT);
+  if(!brMode&&!dailyMode&&!raceMode&&loop===0&&!cheatsOn()&&!devWarp&&!tut){stats.pbt=stats.pbt||{};const old=stats.pbt[world],tt=Math.round(runT);
     if(!old||tt<old){stats.pbt[world]=tt;saveMeta();$('prew').innerHTML='<div class="pbnew">&#9733; NEW BEST TIME &middot; WORLD '+world+' &middot; '+fmtT(tt)+(old?' <small>(was '+fmtT(old)+')</small>':'')+'</div>';sfx(1046,.2,'triangle',.06,1.2)}
     else $('prew').innerHTML='<div class="pbnew old">TIME '+fmtT(tt)+' <small>&middot; BEST '+fmtT(old)+'</small></div>'}
   if(w2New){$('pnote').textContent+=' World 2: Golem\u2019s Hideout is now unlocked.';w2New=false}
@@ -6603,7 +6770,7 @@ addEventListener('keydown',e=>{if($('ask').hidden)return;if(e.key==='Escape'){e.
 let runSnap=null;
 const RUN_KEY='cinder-run';
 function snapRun(resume){
-  if(tut||brMode||devWarp||dailyMode)return;
+  if(tut||brMode||devWarp||dailyMode||raceMode)return;
   try{runSnap={v:1,ch:CH().id,wt:wType,eq:equip||'',diff,world,loop,resume,score,kills,coins,runWallet,runXp,dynS,runAch:runAch.slice(),mods:Object.assign({},runMods),
     p:JSON.parse(JSON.stringify(p,(k,v)=>k==='ch'?undefined:v))}}catch(e){runSnap=null}
 }
@@ -6651,7 +6818,7 @@ function continueRun(){
 function pauseGame(){
   if(state!=='play'||sub)return;
   state='pause';for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;joy.x=joy.y=0;
-  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode||dailyMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
+  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode||dailyMode||raceMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
 }
 function resumeGame(){if(state!=='pause')return;state='play';$('pause').hidden=true;$('bossintro').classList.remove('paused')}
 function quitRun(){
@@ -6660,6 +6827,7 @@ function quitRun(){
 }
 function quitNow(){
   if(state!=='pause')return;
+  if(raceMode&&!raceDone){raceDone=true;Online.Network.send({t:'dead'})}
   if(tut){$('pause').hidden=true;endTutorial(false);return} /* quitting the tutorial goes straight home: not a run, nothing banked */
   $('pause').hidden=true;state='over';finalize();
   showRunPanel('RUN <em>ENDED</em>','','GO AGAIN','HOME',false);
@@ -6744,6 +6912,7 @@ let hbT=0,lowHp=false;
 function update(dt){
   if(state==='menu'||state==='pause'||state==='evo')return;
   if(state==='play'||state==='shop')runT+=dt;
+  if(raceMode)raceTick(dt);
   if(hitstop>0){hitstop-=dt;return}
   time+=dt;
   shake*=Math.exp(-dt*12);
@@ -6852,6 +7021,7 @@ function update(dt){
       banner(bw?'BOSS DOWN':'WAVE CLEAR');
       if(wave<LOOP_WAVES)snapRun(wave+1);
       if(dailyMode&&!cheatsOn()&&totalWave()>=dailyNow().target)dailyMark();
+      if(raceMode&&!raceDone){Online.Network.send({t:'status',wave:totalWave(),hp:p.hp,maxhp:p.maxhp,score,kills});Online.Network.send({t:'clear',wave:totalWave()});if(totalWave()>=raceTarget)setTimeout(raceFinish,600)}
     }
     else if(winT>0){winT-=dt;if(winT<=0)openWin()}
     else if(vault.stage){/* the vault comes first on boss waves; the shop opens when you walk back out */}
@@ -10131,6 +10301,26 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 .dlymods{display:flex;flex-direction:column;gap:2px;padding-left:8px;border-left:3px solid #ff8a3d}.dlymods small{font-family:'Silkscreen',monospace;font-size:10px;color:#ffb36b}
 .dlyst{margin-left:auto;font-family:'Silkscreen',monospace;font-size:9px;letter-spacing:.12em;padding:2px 6px;background:#1e6b2c;color:#e9ffe0}.dlyst.claim{background:#ffd36b;color:#1a1204}.dlyst.done{background:#2a2f3a;color:#9aa0b8}
 #home .menulist #hdaily{grid-column:1/-1} /* its own row so the two-column phone menu keeps its pairs */
+/* ===== 0.5: online ===== */
+#online .box{max-width:min(980px,96vw)}
+.olhead{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}.olhead b{font-family:'Press Start 2P',monospace;font-size:13px;color:#b4f7a8}.olhead small{font-family:'Silkscreen',monospace;font-size:10px;color:#9ec8a0}
+.olcard{background:#0d1a10;box-shadow:inset 0 0 0 3px #1e6b2c;padding:10px 12px;margin-bottom:10px}
+.olgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}
+.olrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.olrow label{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.14em;color:#9ec8a0}
+.olrow input,#olchatin{flex:1;min-width:140px;background:#06090a;color:#e9ffe0;border:0;box-shadow:inset 0 0 0 2px #1e6b2c;padding:8px 10px;font:12px 'Silkscreen',monospace;-webkit-user-select:text;user-select:text}
+.olrow input:focus,#olchatin:focus{outline:none;box-shadow:inset 0 0 0 2px #ffd36b}
+.olrow .olpw{flex:.5;min-width:110px}
+.oltab{width:100%;border-collapse:collapse;font-family:'Silkscreen',monospace;font-size:11px}.oltab th{text-align:left;color:#9ec8a0;font-size:9px;letter-spacing:.14em;padding:4px}.oltab td{padding:5px 4px;border-top:1px solid #1e3a24;vertical-align:middle}.oltab td small{display:block;color:#7a9a80;font-size:9px}.oltab tr.me td{color:#ffd36b}.oltab .bad,.note.bad{color:#ff8a9a}
+.olp{display:flex;justify-content:space-between;font-family:'Silkscreen',monospace;font-size:11px;padding:4px 0;border-bottom:1px solid #1e3a24}.olp.me span{color:#ffd36b}.olp em{font-style:normal;color:#9ec8a0;font-size:9px;letter-spacing:.12em}
+.olchat{min-height:40px;max-height:90px;overflow:auto;font-size:11px;color:#c8d8c8;margin-bottom:6px}.olchat b{color:#b4f7a8}
+.olrow2{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:6px 0}.olrow2 span{font-family:'Silkscreen',monospace;font-size:9px;letter-spacing:.14em;color:#9ec8a0;min-width:96px}.olrow2 .btn.on{box-shadow:inset 0 0 0 2px #ffd36b;color:#ffd36b}
+.ol5{grid-template-columns:repeat(5,minmax(0,1fr))!important}.ol5 .cwd b{font-size:9px}
+.olhelp ol{margin:4px 0 6px 18px;padding:0;font-size:12px;line-height:1.5}.olhelp small{color:#9ec8a0;font-size:10px}
+.oltabs .btn.on{box-shadow:inset 0 0 0 2px #ffd36b;color:#ffd36b}
+.olinfo{color:#ffd36b}
+#racehud{position:absolute;left:12px;top:64px;min-width:150px;background:rgba(8,12,10,.72);box-shadow:inset 0 0 0 2px #1e6b2c;padding:6px 8px;font-family:'Silkscreen',monospace;font-size:10px;z-index:5;pointer-events:none}
+#racehud b{display:block;color:#ffd36b;font-size:9px;letter-spacing:.12em;margin-bottom:3px}#racehud div{display:flex;justify-content:space-between;gap:10px;color:#e9ffe0}#racehud div.me span{color:#ffd36b}#racehud div.out{opacity:.5}#racehud em{font-style:normal}
+@media (max-width:760px),(max-height:480px){.olgrid{grid-template-columns:1fr}.ol5 .cwd small{display:none}}
 </style>
 <script>/* 0.5: in the Windows EXE (Neutralino serves the game from localhost) load its native bridge, so Export/Import Save Data use real file dialogs. In a browser this does nothing */
 (function(){try{if(!/^https?:$/.test(location.protocol)||!/^(localhost|127\.0\.0\.1)$/.test(location.hostname))return;
