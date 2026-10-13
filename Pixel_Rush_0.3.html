@@ -8529,7 +8529,7 @@ renderDiffs();
 
 /* ---------- title scene: a side view under a blue sky. Clouds drift, and your fighter cuts down World 1 mobs
    that walk in from the right; every mob falls in one hit. Drawn on a small canvas and scaled up with hard pixels ---------- */
-const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0,wi:-1,wT:0,shots:[],bombs:[],cd:0,fireT:0};
+const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0,wi:-1,wT:0,shots:[],bombs:[],booms:[],cd:0,fireT:0};
 /* the title fighter shows off a different mythic weapon every 10 seconds */
 const tsMyth=()=>SKINS.filter(x=>x.r==='mythic');
 function tsCircle(g,cx,cy,r){for(let y=-r;y<=r;y++){const hw=Math.floor(Math.sqrt(r*r-y*y+.5));g.fillRect(Math.round(cx-hw),Math.round(cy+y),hw*2+1,1)}}
@@ -8567,7 +8567,7 @@ function tsUpdate(dt){
   for(const c of S.cl){c.x-=c.v*dt;if(c.x<-50*c.s)c.x=S.w+10}
   S.spT-=dt;if(S.spT<=0&&S.mobs.length<3){S.spT=1.4+R()*1.4;S.mobs.push({t:TY[(R()*TY.length)|0],x:S.w+16,v:46+R()*16,ph:R()*9,hitT:0})}
   S.atk=Math.max(0,S.atk-dt);
-  S.wT-=dt;if(S.wT<=0||S.wi<0){const L=tsMyth();S.wi=L.length?(S.wi+1+((R()*(L.length-1))|0))%L.length:-1;S.wT=10;S.sw=S.wi>=0?L[S.wi]:null;
+  S.wT-=dt;if(S.wT<=0||S.wi<0){const L=tsMyth();S.wi=L.length?(S.wi+1+((R()*(L.length-1))|0))%L.length:-1;S.wT=10;S.sw=S.wi>=0?L[S.wi]:null;if(S.sw)try{S.sw=maxF(S.sw)||S.sw}catch(e){} /* always the fully evolved form */
     if(S.sw)for(let q=0;q<14;q++)S.fx.push({x:S.hx+8,y:S.gy-24,vx:(R()-.5)*120,vy:-30-R()*90,l:.7+R()*.4,c:R()<.5?(S.sw.glow||'#fff'):(S.sw.tr||'#fff')})}
   if(S.sw&&R()<dt*10)S.fx.push({x:S.hx+10+R()*16,y:S.gy-30-R()*14,vx:(R()-.5)*20,vy:-20-R()*20,l:.5+R()*.4,c:S.sw.tr||'#fff'});
   S.mobs.sort((a,b)=>a.x-b.x);
@@ -8579,7 +8579,9 @@ function tsUpdate(dt){
       if(kind==='g'){S.cd=.55;S.shots.push({x:S.hx+16,y:S.gy-21,m:tg});for(let q=0;q<5;q++)S.fx.push({x:S.hx+17,y:S.gy-21,vx:40+R()*60,vy:(R()-.5)*40,l:.2,c:'#fff3a8'})}
       else{S.cd=1.1;const vy=-140,gr=280,h=27,tt=(-vy+Math.sqrt(vy*vy+2*gr*h))/gr,dx=(tg.x-tg.v*tt)-(S.hx+6);S.bombs.push({x:S.hx+6,y:S.gy-30,vx:dx/tt,vy:vy,t:0,m:tg})} /* lead the target by the real flight time */}}
   for(const b of S.shots){b.x+=420*dt;if(b.m&&b.x>=b.m.x-4){if(b.m.hitT<=0)boom(b.m);b.dead=1}if(b.x>S.w+10)b.dead=1}S.shots=S.shots.filter(b=>!b.dead);
-  for(const b of S.bombs){b.t+=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vy+=280*dt;if(b.y>=S.gy-3){b.dead=1;
+  for(const q of S.booms)q.t+=dt;S.booms=S.booms.filter(q=>q.t<.7);
+  for(const b of S.bombs){b.t+=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vy+=280*dt;if(b.y>=S.gy-3){b.dead=1;S.booms.push({x:b.x,y:S.gy-8,t:0});
+      for(let q=0;q<10;q++)S.fx.push({x:b.x,y:S.gy-4,vx:(R()-.5)*160,vy:-120-R()*120,l:.8,c:R()<.5?'#7a4a26':'#5a3818'});
       for(let q=0;q<22;q++){const a=R()*TAU,v=40+R()*110;S.fx.push({x:b.x,y:S.gy-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,l:.5+R()*.3,c:R()<.4?'#ffd36b':R()<.5?'#ff8a3d':'#5a5a5a'})}
       for(const m of S.mobs)if(m.hitT<=0&&Math.abs(m.x-b.x)<26)boom(m,'#ff8a3d')}}
   S.bombs=S.bombs.filter(b=>!b.dead);
@@ -8605,8 +8607,19 @@ function tsDraw(){
   const sw=S.sw,sp=S.atk>0?1-S.atk/.26:0,kd=sw?sw.tab:'k',wa=kd==='g'?-.05-(S.fireT>.1?.25:0):kd==='b'?(S.fireT>0?-2.2+(1-S.fireT/.18)*2:-.4):S.atk>0?-1.5+sp*2.4:-.75+Math.sin(t*2)*.06;
   if(sw){g.save();g.translate(Math.round(S.hx+5),Math.round(cy+5));g.rotate(wa);g.scale(.5,.5);try{weaponShape(g,sw,t)}catch(e){}g.restore()}
   if(S.atk>.06){const k=1-(S.atk-.06)/.2,a0=-1.3+k*2.2;g.fillStyle=(sw&&sw.tr)||'#ffffff';for(let a=a0-1;a<a0;a+=.04){for(const r of[17,18,19,20])g.fillRect(Math.round(S.hx+6+Math.cos(a)*r),Math.round(cy+4+Math.sin(a)*r),1,1)}}
+  /* explosions: a white flash, a fireball that swells and cools to smoke, and a shockwave ring */
+  for(const q of S.booms){const k=q.t/.7,x=Math.round(q.x),y=Math.round(q.y);
+    if(k<.12){g.fillStyle='#ffffff';tsCircle(g,x,y,Math.round(8+k*60))}
+    g.globalAlpha=Math.max(0,1-k);g.fillStyle='#4a4a52';tsCircle(g,x,y-Math.round(k*14),Math.round(10+k*18));
+    g.fillStyle=k<.35?'#ff8a3d':'#c8642a';tsCircle(g,x,y-Math.round(k*8),Math.round(14+k*10-k*k*18));
+    g.fillStyle=k<.3?'#ffd36b':'#ff8a3d';tsCircle(g,x,y-Math.round(k*6),Math.max(1,Math.round(9+k*6-k*k*16)));
+    if(k<.4){g.fillStyle='#fff3a8';tsCircle(g,x,y,Math.max(1,Math.round(5-k*10)))}
+    const rr=Math.round(6+k*40);g.globalAlpha=Math.max(0,.8-k);g.fillStyle='#fff3a8';for(let a=0;a<TAU;a+=.12)g.fillRect(Math.round(x+Math.cos(a)*rr),Math.round(y+Math.sin(a)*rr*.45),2,1);
+    g.globalAlpha=1}
   for(const b of S.shots){g.fillStyle=(sw&&sw.tr)||'#fff3a8';g.fillRect(Math.round(b.x)-5,Math.round(b.y),6,2);g.fillStyle='#ffffff';g.fillRect(Math.round(b.x),Math.round(b.y),2,2)}
-  for(const b of S.bombs){const x=Math.round(b.x),y=Math.round(b.y);g.fillStyle='#0a0a10';g.fillRect(x-3,y-5,6,10);g.fillRect(x-5,y-3,10,6);g.fillStyle='#2e2e3e';g.fillRect(x-2,y-4,4,8);g.fillRect(x-4,y-2,8,4);g.fillStyle='#6a6a80';g.fillRect(x-2,y-2,2,2);g.fillStyle='#8a6a3a';g.fillRect(x+1,y-7,1,3);g.fillStyle=((t*20)|0)%2?'#ffd36b':(sw&&sw.glow)||'#ff5a3a';g.fillRect(x+1,y-9,2,2)}
+  for(const b of S.bombs){const x=Math.round(b.x),y=Math.round(b.y);
+    if(sw&&sw.tab==='b'){g.save();g.translate(x,y);g.rotate(b.t*9);g.scale(.42,.42);g.translate(-14,0);try{weaponShape(g,sw,t)}catch(e){}g.restore();continue} /* the thrown bomb is the equipped bomb skin, spinning */
+   g.fillStyle='#0a0a10';g.fillRect(x-3,y-5,6,10);g.fillRect(x-5,y-3,10,6);g.fillStyle='#2e2e3e';g.fillRect(x-2,y-4,4,8);g.fillRect(x-4,y-2,8,4);g.fillStyle='#6a6a80';g.fillRect(x-2,y-2,2,2);g.fillStyle='#8a6a3a';g.fillRect(x+1,y-7,1,3);g.fillStyle=((t*20)|0)%2?'#ffd36b':(sw&&sw.glow)||'#ff5a3a';g.fillRect(x+1,y-9,2,2)}
   for(const q of S.fx){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(Math.round(q.x),Math.round(q.y),2,2)}g.globalAlpha=1;
 }
 function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
