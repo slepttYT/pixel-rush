@@ -617,7 +617,7 @@ summary:hover{color:var(--bone)}
   <div id="hud">
     <div id="bossbar" hidden><span id="bossname"></span><div class="bb"><i id="bossfill"></i></div></div>
     <div class="hrow">
-      <div class="hl"><div id="hp"></div><div class="dashbar"><i id="dashfill"></i></div><div id="owned"></div></div>
+      <div class="hl"><div id="hp"></div><div id="owned"></div></div>
       <div class="hc"><div id="wave"></div><div id="goal"></div></div>
       <div class="hr"><span id="score">0</span><span id="coins"></span><span id="xphud"></span><span id="combo"></span><span id="keyhud" hidden>VAULT KEY</span><button id="snd" type="button">SOUND ON</button><button id="pz" type="button">PAUSE</button></div>
     </div>
@@ -625,6 +625,7 @@ summary:hover{color:var(--bone)}
   <div id="banner"></div>
   <div id="bossintro" hidden><div class="bi-tint"></div><div class="bi-vig"></div><div class="bi-bar t"></div><div class="bi-bar b"></div><div class="bi-txt"><small id="bi-sub"></small><h2 id="bi-name"></h2><p id="bi-zone"></p></div><div class="bi-fl"></div></div>
   <div id="hotbar"></div>
+  <div id="dashwrap"><b>DASH</b><div class="dashbar"><i id="dashfill"></i></div></div>
   <div id="hint">WASD MOVE · CLICK SLASH · SHIFT DASH</div>
   <div id="joy"><i id="knob"></i></div>
   <button class="tbtn" id="bDash" type="button">DASH</button>
@@ -687,6 +688,7 @@ summary:hover{color:var(--bone)}
   </div>
 
   <div id="title" class="ov" hidden>
+    <canvas id="tcv" aria-hidden="true"></canvas>
     <div class="tvig"></div>
     <div class="tbox" id="tscr1">
       <p class="kicker">TOP-DOWN HACK AND SLASH</p>
@@ -1137,6 +1139,22 @@ const SONGS={
     melB:[[0,90,0,85,81,0,85,90],[0,86,0,81,78,0,81,86],[0,88,0,85,81,0,85,88],[0,87,0,83,80,0,83,87]],
     drums:{k:[0,2,4,6],kv:.09,s:[2,6],sv:.035,h:[1,3,5,7],hv:.01}},
   /* final: C minor, fast and relentless, for the vault final bosses (Dragon, Golem, Pharaoh). Driving kick, constant hats, a climbing two-part lead */
+  /* v0.3 dramatic boss themes: minor keys, a driving eighth-note bass, chord stabs, a held pad and heavy drums */
+  epic1:{bpm:140,vol:1.15,lead:'square',lv:.026,len:.95,arp:'square',av:.008,style:'drive',echo:true,pad:.012,stab:[0,3],sv:.011,
+    chords:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]],bass:[38,34,36,33],
+    melA:[[74,0,74,77,76,74,73,0],[74,0,70,74,77,0,74,0],[72,0,76,79,77,76,72,0],[73,0,76,73,69,0,73,76]],
+    melB:[[81,0,77,0,74,0,77,81],[82,0,77,0,74,0,77,82],[79,0,76,0,72,0,76,79],[81,0,79,77,76,0,73,0]],
+    drums:{k:[0,3,4,6],kv:.09,s:[2,6],sv:.03,h:[0,1,2,3,4,5,6,7],hv:.005}},
+  epic2:{bpm:150,vol:1.15,lead:'p25',lv:.03,len:.9,arp:'square',av:.008,style:'drive',echo:true,pad:.011,stab:[0,4],sv:.011,
+    chords:[[52,55,59],[48,52,55],[50,54,57],[47,51,54]],bass:[40,36,38,35],
+    melA:[[76,0,79,0,83,0,79,76],[76,0,79,0,84,83,79,0],[78,0,81,0,86,0,81,78],[75,0,78,0,83,0,78,75]],
+    melB:[[88,0,0,86,83,0,79,0],[84,0,0,83,79,0,76,0],[86,0,0,81,78,0,74,0],[87,0,86,0,83,0,78,0]],
+    drums:{k:[0,2,4,6],kv:.09,s:[4],sv:.035,h:[0,1,2,3,4,5,6,7],hv:.005}},
+  epic3:{bpm:132,vol:1.2,lead:'square',lv:.028,len:1.1,arp:'square',av:.008,style:'drive',echo:true,pad:.013,stab:[0,3,6],sv:.01,
+    chords:[[48,51,55],[44,48,51],[41,44,48],[43,47,50]],bass:[36,32,29,31],
+    melA:[[72,0,0,75,74,0,72,0],[72,0,0,75,77,0,75,0],[77,0,0,80,79,0,77,75],[74,0,71,0,74,0,79,0]],
+    melB:[[84,0,82,0,79,0,75,0],[80,0,79,0,75,0,72,0],[77,0,80,0,84,0,80,0],[83,0,79,0,74,0,71,0]],
+    drums:{k:[0,1,4,5],kv:.085,s:[2,6],sv:.035,h:[0,2,4,6],hv:.006}},
   final:{bpm:152,vol:1.15,lead:'p25',lv:.032,len:1,arp:'square',av:.015,style:'bounce',echo:true,
     chords:[[48,51,55],[44,48,51],[53,56,60],[43,47,50]],bass:[36,32,41,31],
     melA:[[72,0,75,72,79,0,78,79],[80,0,79,75,72,0,75,80],[77,0,80,84,0,80,77,75],[74,0,79,83,86,0,83,79]],
@@ -1182,8 +1200,11 @@ function schedStep(song,s,t,sd){
     if(song.echo)note(mel,t+sd*2,sd*song.len,song.lead,song.lv*.3);
   }
   if(i%2===0)note(song.chords[bar][(i/2)%3]+12,t,sd*1.7,song.arp,song.av||.018);
+  if(song.pad&&i===0)for(const c of song.chords[bar])note(c+12,t,sd*7.6,'triangle',song.pad);
+  if(song.stab&&song.stab.includes(i))for(const c of song.chords[bar])note(c,t,sd*.7,'sawtooth',song.sv||.01);
   const b=song.bass[bar];
-  if(song.style==='bounce'){if(i%2===0)note(b+(i%4===2?12:0),t,sd*1.2,'triangle',.07)}
+  if(song.style==='drive'){note(b+(i%2?12:0),t,sd*.85,'sawtooth',.04);if(i===0)note(b-12,t,sd*7,'triangle',.06)}
+  else if(song.style==='bounce'){if(i%2===0)note(b+(i%4===2?12:0),t,sd*1.2,'triangle',.07)}
   else{
     if(i===0)note(b,t,sd*3.6,'triangle',.07);
     if(i===4)note(b+7,t,sd*3.2,'triangle',.05);
@@ -1217,7 +1238,7 @@ function musicFor(){
   if(state==='pause')return mus.cur||'home';
   if(state==='shop'||state==='win')return wave%10===5?'shop2':'shop';
   if(state==='play'){
-    if(waveActive&&wave%10===0)return ['boss','boss2','boss3'][(Math.floor(wave/10)-1)%3];
+    if(waveActive&&wave%10===0)return ['epic1','epic2','epic3'][(Math.floor(wave/10)-1)%3];
     const w=waveActive?wave-1:wave;return 'g'+(((w%8)+8)%8);
   }
   return homeK;
@@ -3213,6 +3234,11 @@ const UPDATES=[
   'NEW RUN skips the difficulty screen: every save keeps the difficulty you picked when you made it.',
   'The tutorial now brings out every World 1 enemy one at a time and says what to watch for. Thieves crouch and show a red line before they dash, like Lancers. Quitting the tutorial early takes you straight home. Finishing it shows its own win screen. The tutorial no longer has a shop step and earns no coins or XP.',
   'Achievements are off during the tutorial and while any cheat is on.',
+  'A new title screen: a blue sky with drifting clouds, and your fighter cutting down mobs that walk in over the grass.',
+  'Touching an enemy or a boss no longer hurts. Only their attacks do, including a dash or charge that runs into you.',
+  'Three new boss themes: Throne of Ash, Iron Tempest and Crimson Eclipse. A heartbeat plays and your hearts pulse when you are low.',
+  'Slashes no longer break enemy shots for free. Pick up the new Shot Breaker ability (knife and fists) to break them; level 2 breaks boss shots too.',
+  'The dash bar is bigger and sits at the bottom of the screen. Menus, the save screen, the shop and the characters screen fit better on phones.',
   'Gold enemies spill coins and green enemies spill XP gems on the floor. Walk over them to pick them up before they fade (25 seconds). The Updates screen only lists updates now.',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
@@ -3288,6 +3314,9 @@ const TRACKS=[
   ['shop2','Lucky Streak','Shop','#ffe14d'],
   ['boss2','Iron Requiem','Boss fight','#c0c8d8'],
   ['boss3','Crimson Crown','Boss fight','#ff4d5e'],
+  ['epic1','Throne of Ash','Boss fight','#ff4d5e'],
+  ['epic2','Iron Tempest','Boss fight','#9fd3ff'],
+  ['epic3','Crimson Eclipse','Boss fight','#c83a5a'],
   ['final','Last Stand','Final boss','#ff5a2a']
 ];
 const MODE_LABEL={one:'REPEAT ONE',all:'PLAY ALL',shuffle:'SHUFFLE'};
@@ -4046,6 +4075,7 @@ const ABIL=[
   {id:'fknock',tier:1,base:30,max:3,w:'f',name:'Heavy Hands',d:'Punches knock enemies back 30% farther per level.'},
   {id:'fone',tier:1,base:40,max:1,w:'f',name:'One-Two',d:'Every 2nd punch lands a second hit for 50% damage.'},
   {id:'fparry',tier:2,base:55,max:1,w:'f',name:'Parry Fists',d:'Punches deflect enemy shots in a full circle, with extra reach.'},
+  {id:'pbreak',tier:2,base:55,max:2,w:'kf',name:'Shot Breaker',d:'Your slashes break enemy shots in front of you. Level 2 breaks boss shots too.'},
   {id:'fstun',tier:2,base:55,max:1,w:'f',name:'Concussion',d:'Every 4th hit stuns the enemy for 1 second. Bosses resist.'},
   {id:'fshock',tier:3,base:75,max:1,w:'f',name:'Shockwave Punch',d:'Every 5th punch sends a shockwave forward: 3 damage to everything in its path.'},
   {id:'frage',tier:3,base:75,max:3,w:'f',name:'Brawler\u2019s Rage',d:'Hits within 2 seconds stack +4% damage per level, up to 8 stacks.'},
@@ -4198,6 +4228,7 @@ $('slots').addEventListener('click',e=>{
   location.reload();
 });
 function showHome(){
+  lowHp=false;stage.classList.remove('lowhp');
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
   brWant=false;setWorld(1);bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
@@ -5487,7 +5518,8 @@ function attack(){
   }
   bullets=bullets.filter(b=>{
     const dx=b.x-p.x,dy=b.y-p.y;
-    if(!(b.boss&&!m.fparry)&&Math.hypot(dx,dy)<rad*(m.fparry?1.3:1)+b.r&&(heavy||m.fparry||angDiff(Math.atan2(dy,dx),a)<arc/2)){spark(b.x,b.y,'#ffb347',4,120);return false}
+    /* slashes only break shots with Shot Breaker (or Parry Fists); boss shots need Shot Breaker level 2 or Parry Fists */
+    if((m.fparry||m.pbreak)&&!(b.boss&&!(m.fparry||m.pbreak>=2))&&Math.hypot(dx,dy)<rad*(m.fparry?1.3:1)+b.r&&(heavy||m.fparry||angDiff(Math.atan2(dy,dx),a)<arc/2)){spark(b.x,b.y,'#ffb347',6,160);sfx(1500+R()*400,.05,'square',.03,.5);return false}
     return true;
   });
   if(m.chain&&hitList.length){
@@ -5929,6 +5961,7 @@ $('htut').addEventListener('click',()=>{if(state==='menu')startTutorial()});
 
 /* ---------- update ---------- */
 let mvx=0,mvy=0;
+let hbT=0,lowHp=false;
 function update(dt){
   if(state==='menu'||state==='pause')return;
   if(hitstop>0){hitstop-=dt;return}
@@ -5941,6 +5974,9 @@ function update(dt){
   parts=parts.filter(q=>q.l>0);
   tickFade(dt);ambTick(dt);
   if(state!=='play')return;
+  /* low hearts: a heartbeat (and pulsing hearts) while you are down to your last third of hearts */
+  {const low=!tut&&p.hp>0&&p.hp<=Math.max(1,Math.floor(p.maxhp/3));if(low!==lowHp){lowHp=low;stage.classList.toggle('lowhp',low)}
+   if(low){hbT-=dt;if(hbT<=0){hbT=p.hp<=1?.8:1.15;sfx(64,.13,'sine',.16,.7);setTimeout(()=>sfx(56,.16,'sine',.12,.7),170)}}else hbT=.15}
   if(bossIn){bossIntroTick(dt);return}
   padAimUpd();hotTick(dt);wpnTick(dt);
 
@@ -6067,8 +6103,10 @@ function update(dt){
     e.x+=(mx/l*sp+e.kx)*dt;e.y+=(my/l*sp+e.ky)*dt;
     const kf=Math.exp(-dt*8);e.kx*=kf;e.ky*=kf;
     e.x=Math.min(Math.max(e.x,M+e.r),W-M-e.r);e.y=Math.min(Math.max(e.y,M+e.r),H-M-e.r);
-    if(d<e.r+p.r&&!e.ghost&&p.inv<=0&&p.dashT<=0&&state==='play')hurtP(e,ux,uy);
-    else if(d<e.r+p.r+8&&!e.ghost&&p.dashT>0&&state==='play'&&(e.t==='boss'||e.dmg>0))dashDodge(p.x,p.y);
+    /* touching an enemy or boss does no damage; only a dash or charge that runs into you hurts (thief dash, lancer charge, a charging boss) */
+    const ram=e.t==='boss'?sp>260:e.st==='dash';
+    if(ram&&d<e.r+p.r&&!e.ghost&&p.inv<=0&&p.dashT<=0&&state==='play')hurtP(e,ux,uy);
+    else if(ram&&d<e.r+p.r+8&&!e.ghost&&p.dashT>0&&state==='play'&&(e.t==='boss'||e.dmg>0))dashDodge(p.x,p.y);
   }
   enemies=enemies.filter(e=>!e.dead);
   for(let i=0;i<enemies.length;i++)for(let j=i+1;j<enemies.length;j++){
@@ -8343,6 +8381,63 @@ $('hdiff').addEventListener('click',()=>{
 });
 renderDiffs();
 
+/* ---------- title scene: a side view under a blue sky. Clouds drift, and your fighter cuts down World 1 mobs
+   that walk in from the right; every mob falls in one hit. Drawn on a small canvas and scaled up with hard pixels ---------- */
+const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0};
+function tsCircle(g,cx,cy,r){for(let y=-r;y<=r;y++){const hw=Math.floor(Math.sqrt(r*r-y*y+.5));g.fillRect(Math.round(cx-hw),Math.round(cy+y),hw*2+1,1)}}
+function tsSize(){
+  const T=$('title'),cv=$('tcv'),W0=T.clientWidth||stage.clientWidth,H0=T.clientHeight||stage.clientHeight;
+  const k=H0<500?1:Math.max(2,Math.round(H0/360)),w=Math.ceil(W0/k),h=Math.ceil(H0/k);
+  Object.assign(tScene,{k:k,w:w,h:h,gy:h-Math.max(24,Math.round(h*.15))});cv.width=w;cv.height=h;tScene.g=cv.getContext('2d');tScene.g.imageSmoothingEnabled=false;
+  /* the still part, built once per size: banded sky, then a strip of grass over dirt */
+  const bg=document.createElement('canvas');bg.width=w;bg.height=h;const g=bg.getContext('2d'),gy=tScene.gy;
+  const SKY=['#2a6fd0','#3780d8','#4a92de','#5ea5e4','#74b8ea','#8ccaf0','#a5daf4'],bh=gy/SKY.length;
+  SKY.forEach((c,i)=>{g.fillStyle=c;g.fillRect(0,Math.floor(i*bh),w,Math.ceil(bh)+1);if(i){g.fillStyle=SKY[i-1];for(let x=(i%2);x<w;x+=2)g.fillRect(x,Math.floor(i*bh),1,1)}});
+  g.fillStyle='#7a4a26';g.fillRect(0,gy,w,h-gy);
+  for(let i=0;i<w*(h-gy)/14;i++){const x=(hsh(i*1.7)*w)|0,y=gy+5+((hsh(i*2.9+4)*(h-gy-5))|0);g.fillStyle=hsh(i*5.3)<.7?'#5e3818':'#9a6a42';g.fillRect(x,y,hsh(i*7.1)<.2?2:1,1)}
+  for(let i=0;i<w/18;i++){const x=(hsh(i*3.3+9)*w)|0,y=gy+8+((hsh(i*4.1)*(h-gy-10))|0);g.fillStyle='#a08a72';g.fillRect(x,y,3,2);g.fillStyle='#6e5a46';g.fillRect(x,y+2,3,1)}
+  g.fillStyle='#3f9a32';g.fillRect(0,gy,w,5);g.fillStyle='#5fbf3a';g.fillRect(0,gy,w,3);g.fillStyle='#8ee05a';g.fillRect(0,gy,w,1);
+  g.fillStyle='#2f7a28';g.fillRect(0,gy+5,w,1);
+  for(let x=0;x<w;x++){const r=hsh(x*1.31);if(r<.42){const t=r<.12?3:r<.27?2:1;g.fillStyle=r<.2?'#5fbf3a':'#4fae3a';g.fillRect(x,gy-t,1,t)}if(hsh(x*2.7)<.02){g.fillStyle=hsh(x)<.5?'#fff3a8':'#ff9ab0';g.fillRect(x,gy-2,1,1)}}
+  tScene.bg=bg;tScene.hx=Math.round(w*.2);
+  if(!tScene.cl.length)for(let i=0;i<7;i++)tScene.cl.push({x:hsh(i*9.1)*w,y:6+hsh(i*4.7)*gy*.42,s:.7+hsh(i*2.3)*.9,v:2+hsh(i*6.1)*4});
+}
+function tsCloud(g,c){
+  const s=c.s,x=c.x,y=c.y,B=[[0,0,7],[9,-4,9],[20,-1,8],[29,2,6],[12,3,8]];
+  g.fillStyle='#cfe2f6';for(const b of B)tsCircle(g,x+b[0]*s,y+b[1]*s+2,Math.max(2,Math.round(b[2]*s)));
+  g.fillStyle='#ffffff';for(const b of B)tsCircle(g,x+b[0]*s,y+b[1]*s,Math.max(2,Math.round(b[2]*s)));
+  g.fillStyle='#cfe2f6';g.fillRect(Math.round(x-5*s),Math.round(y+6*s),Math.round(38*s),1);
+}
+function tsUpdate(dt){
+  const S=tScene,TY=['goblin','goblin','thief','wizard','jester','archer'];
+  for(const c of S.cl){c.x-=c.v*dt;if(c.x<-50*c.s)c.x=S.w+10}
+  S.spT-=dt;if(S.spT<=0&&S.mobs.length<3){S.spT=1.4+R()*1.4;S.mobs.push({t:TY[(R()*TY.length)|0],x:S.w+16,v:46+R()*16,ph:R()*9,hitT:0})}
+  S.atk=Math.max(0,S.atk-dt);
+  S.mobs.sort((a,b)=>a.x-b.x);
+  for(let i=0;i<S.mobs.length;i++){const m=S.mobs[i];if(m.hitT>0){m.hitT-=dt;continue}
+    const ahead=i>0?S.mobs[i-1]:null,stopAt=Math.max(S.hx+22,ahead&&ahead.hitT<=0?ahead.x+36:0);
+    if(m.x>stopAt)m.x=Math.max(stopAt,m.x-m.v*dt);
+    if(i===0&&m.x<=S.hx+24&&S.atk<=0){S.atk=.26;m.hitT=.12; /* one hit, down it goes */
+      for(let q=0;q<12;q++)S.fx.push({x:m.x,y:S.gy-10,vx:(R()-.3)*90,vy:-40-R()*80,l:.6+R()*.3,c:q%3?'#f1ead8':'#ffd36b'})}}
+  S.mobs=S.mobs.filter(m=>!(m.hitT<0));
+  for(const q of S.fx){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=220*dt;q.l-=dt}S.fx=S.fx.filter(q=>q.l>0&&q.y<S.gy+2);
+}
+function tsDraw(){
+  const S=tScene,g=S.g,t=performance.now()/1000;if(!g)return;
+  g.drawImage(S.bg,0,0);for(const c of S.cl)tsCloud(g,c);
+  const ch=CH(),sk=cSkin(ch.id);
+  g.fillStyle='rgba(0,0,0,.22)';g.fillRect(S.hx-7,S.gy,14,2);
+  for(const m of S.mobs){g.fillStyle='rgba(0,0,0,.22)';g.fillRect(Math.round(m.x)-7,S.gy,14,2);
+    const f=m.hitT>0?'act':(((t*6+m.ph)|0)%2?'w1':'w0');drawMobSpr(g,1,m.t,f,m.x,S.gy-1,true,m.hitT>0,m.hitT>0?Math.min(1,m.hitT/.12):1)}
+  const cs=charSprite(ch,'w0',sk),cy=S.gy-cs.c.height*MOB_U*.38;
+  drawCharSpr(g,ch,S.hx,cy,MOB_U,S.atk>.1?'w1':(((t*2)|0)%2?'w0':'w0'),false,sk);
+  if(S.atk>.08){const k=1-(S.atk-.08)/.18,a0=-1.1+k*1.6;g.fillStyle='#ffffff';for(let a=a0-.9;a<a0;a+=.05){for(const r of[15,16,17])g.fillRect(Math.round(S.hx+6+Math.cos(a)*r),Math.round(cy+Math.sin(a)*r),1,1)}}
+  for(const q of S.fx){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(Math.round(q.x),Math.round(q.y),2,2)}g.globalAlpha=1;
+}
+function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
+function tsStart(){if(tScene.on)return;tScene.on=true;tsSize();tScene.last=performance.now();requestAnimationFrame(tsFrame)}
+addEventListener('resize',()=>{if(tScene.on)setTimeout(tsSize,60)});
+
 /* ---------- title screen: PLAY, then choose a save and a difficulty, then the main menu ---------- */
 const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs per world',nowin:'~10 hrs per world'};
 {
@@ -8393,11 +8488,11 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
     go.disabled=!selSlot;
   }
   function show(screen){
-    T.hidden=false;document.body.classList.add('ontitle');s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
+    T.hidden=false;document.body.classList.add('ontitle');tsStart();s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
     if(screen===2){selSlot=1;selDiff=slotDiff(1);drawSlots();drawDiffs();setTimeout(()=>go.focus(),0)} /* Save 1 is picked by default */
     else setTimeout(()=>$('tplay').focus(),0);
   }
-  function hide(){T.hidden=true;document.body.classList.remove('ontitle');try{fitMenus()}catch(e){}}
+  function hide(){T.hidden=true;tScene.on=false;document.body.classList.remove('ontitle');try{fitMenus()}catch(e){}}
   function delSave(n){
     try{slotKeysOf(n).forEach(k=>localStorage.removeItem(k))}catch(e){}
     confirmDel=0;
@@ -8781,7 +8876,7 @@ body.ontitle #home{visibility:hidden}
 
 /* v0.3: bigger in-game HUD text and pixel-art hearts */
 #hp{gap:5px!important;max-width:320px!important}
-#hp i{width:36px!important;height:32px!important;transform:none!important;border-radius:0!important;box-shadow:none!important;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='7' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='8' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='2' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='2' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='3' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='4' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='6' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='5' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%232a0a10'/%3E%3C/svg%3E") center/100% 100% no-repeat!important;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45))}
+#hp i{width:36px!important;height:32px!important;transform:none;border-radius:0!important;box-shadow:none!important;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='7' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='8' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='2' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='2' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='3' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='4' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='6' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='5' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%232a0a10'/%3E%3C/svg%3E") center/100% 100% no-repeat!important;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45))}
 #hp i.off{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='7' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='8' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='2' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='8' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='3' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='8' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='4' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='6' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='5' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%232a0a10'/%3E%3C/svg%3E")!important;opacity:.85}
 #hud .hc{max-width:min(52cqw,560px)!important}
 #wave{font-family:'Press Start 2P',monospace;font-size:clamp(16px,2.3cqw,28px)!important;letter-spacing:.06em;color:#f1ead8;text-shadow:3px 3px 0 rgba(0,0,0,.6);line-height:1.3}
@@ -8804,5 +8899,49 @@ body.ontitle #home{visibility:hidden}
 #tutwin p{margin:0;color:#d8ffd0;font-size:13px;line-height:1.6}
 #tutwin #twlv{color:#fff;font-size:15px}
 #tutwin .trow .btn{min-width:150px}
+
+/* dash bar: bigger, centred at the bottom of the screen */
+#dashwrap{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:10px;pointer-events:none;font-family:'Press Start 2P',monospace;font-size:11px;color:#f1ead8;text-shadow:2px 2px 0 rgba(0,0,0,.6)}
+#dashwrap .dashbar{width:clamp(160px,22cqw,300px)!important;height:14px!important;border-radius:0!important;background:rgba(10,10,16,.75)!important;border:3px solid #0a0a10;box-shadow:0 0 0 2px rgba(241,234,216,.35)}
+#dashwrap .dashbar i{background:linear-gradient(180deg,#bff6ff,#5fd0ff)!important}
+#dashwrap .dashbar i.cool{background:#4a5068!important}
+.inmenu #dashwrap{display:none}
+.touch #dashwrap{bottom:96px}
+@container (max-height:480px){.touch #dashwrap{bottom:86px}#dashwrap .dashbar{height:10px!important;width:clamp(120px,20cqw,220px)!important}#dashwrap{font-size:9px}}
+
+/* low hearts: the hearts you have left pulse with the heartbeat */
+.lowhp #hp i:not(.off){animation:hbpulse .8s ease-in-out infinite}
+@keyframes hbpulse{0%,100%{transform:scale(1)}12%{transform:scale(1.22)}24%{transform:scale(1)}36%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.lowhp #hp i:not(.off){animation:none}}
+
+/* title: the side-view sky scene replaces the arena behind it */
+#title{background:#2a6fd0!important}
+#title #tcv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:0;display:block}
+#title .tvig,#title::after{display:none!important}
+#title .kicker{color:#fff;text-shadow:2px 2px 0 #123a6e}
+#title .kicker::before,#title .kicker::after{background:#fff}
+#title .logo{text-shadow:.07em .07em 0 #123a6e,-.04em -.04em 0 #123a6e,.04em -.04em 0 #123a6e,-.04em .04em 0 #123a6e!important}
+#title .thint{color:#fff;text-shadow:2px 2px 0 #123a6e}
+#title #tscr1{margin-top:auto;margin-bottom:auto;padding-bottom:12cqh}
+
+/* ===== v0.3: phones and other short screens (the game area is under 480px tall) ===== */
+@container (max-height:480px){
+  .backtl{padding:6px 12px!important;font-size:11px!important;top:calc(env(safe-area-inset-top,0px) + 8px)!important;left:8px!important}
+  #home.ov{padding:22px 22px 54px 24px!important}
+  #home .box{padding-left:0!important;padding-top:0!important}
+  #home .menulist #hach{grid-column:1/-1}
+  .hfoot{bottom:12px!important}
+  .hfoot .hstack{flex-direction:row}
+  #title{align-items:start}
+  #title #tscr2{gap:8px;padding:12px 14px 10px;margin-top:4px}
+  #title .tslots{gap:8px}#title .tsl{min-height:0;padding:8px 10px 28px}#title .tsl .tl{font-size:16px}
+  #title .td{min-height:0;padding:6px}#title .tdesc{display:none}#title .tseh{font-size:16px}
+  #cos #prev,.sub canvas#prev{width:150px!important;height:76px!important}
+  #cos .cosrow{gap:10px;flex-wrap:nowrap}
+  #chars{overflow-y:auto!important}
+  #chars .box{height:auto!important;min-height:0}
+  #chars #chprev{width:150px!important;height:110px!important}
+  #chars #chgrid{flex:none!important;overflow:visible!important;max-height:none!important}
+}
 </style>
 </body></html>
