@@ -294,7 +294,7 @@ summary:hover{color:var(--bone)}
 /* HUD layout: three columns that can never run into each other; the centre text wraps instead of overlapping */
 .hrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto) minmax(0,1fr);align-items:start;column-gap:12px}
 .hrow>div{min-width:0}
-.hl{justify-self:start;max-width:190px}
+.hl{justify-self:start;max-width:330px}
 .hr{justify-self:end;max-width:100%}
 .hc{max-width:min(46vw,420px);line-height:1.35;overflow-wrap:anywhere;font-size:clamp(10px,2.4vw,13px);letter-spacing:.08em}
 #goal{line-height:1.3;font-size:clamp(10px,2.2vw,12px);overflow-wrap:anywhere}
@@ -678,13 +678,12 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hacct" type="button" aria-label="Account level and rewards"><span class="avatar"><canvas id="havatar" width="88" height="88"></canvas></span><span class="xpw" id="hxp"></span></button>
         <div class="mgap"></div>
         <button class="btn ghost mi" id="hjuke" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M9 3.5l11-2v14.2a3.3 3.3 0 1 1-2-3V6.3L11 7.6v11.1a3.3 3.3 0 1 1-2-3z"/></svg>JUKEBOX</button>
-        <button class="btn ghost mi" id="htut" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6l9-4 9 4-9 4zm3 3.3l6 2.7 6-2.7V14c0 2-2.7 4-6 4s-6-2-6-4z"/></svg>TUTORIAL</button>
         <button class="btn ghost mi" id="hhelp" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M8.2 8.6c0-2.3 1.7-3.9 4-3.9s3.8 1.4 3.8 3.4c0 1.5-.8 2.3-1.9 3.1-1 .7-1.4 1.2-1.4 2.2v.4h-2.4v-.6c0-1.6.7-2.4 1.8-3.2.9-.6 1.3-1 1.3-1.8 0-.8-.6-1.3-1.4-1.3-.9 0-1.5.6-1.5 1.7z"/><circle cx="12" cy="19" r="1.6"/></svg>HELP</button>
         <button class="btn ghost mi" id="hkeys" type="button"><svg class="ic" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10.3 2h3.4l.5 2.6 1.6.7 2.2-1.5 2.4 2.4-1.5 2.2.7 1.6 2.6.5v3.4l-2.6.5-.7 1.6 1.5 2.2-2.4 2.4-2.2-1.5-1.6.7-.5 2.6h-3.4l-.5-2.6-1.6-.7-2.2 1.5-2.4-2.4 1.5-2.2-.7-1.6L2 13.7v-3.4l2.6-.5.7-1.6-1.5-2.2 2.4-2.4 2.2 1.5 1.6-.7zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/></svg>SETTINGS</button>
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button></div>
+    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -723,7 +722,7 @@ summary:hover{color:var(--bone)}
   </div>
 
   <div id="tutbox" hidden><small id="tutstep"></small><b id="tutt"></b><span id="tutd"></span><i id="tutbar"><i></i></i><button type="button" class="btn ghost sm" id="tutskip">SKIP TUTORIAL</button></div>
-  <div id="tutask" hidden role="dialog" aria-modal="true" aria-labelledby="tutaskt"><div class="tabox"><h2 id="tutaskt">WANT A TUTORIAL?</h2><p>A short practice run: move, attack, dash, dodge and the shop. Finish it to go up one account level.</p><div class="trow"><button class="btn gold" id="tutyes" type="button">YES, SHOW ME</button><button class="btn ghost" id="tutno" type="button">NO THANKS</button></div></div></div>
+  <div id="tutask" hidden role="dialog" aria-modal="true" aria-labelledby="tutaskt"><div class="tabox"><h2 id="tutaskt">WANT A TUTORIAL?</h2><p>A short practice run: move, attack, dash, dodge, meet every World 1 enemy, and the shop.</p><div class="trow"><button class="btn gold" id="tutyes" type="button">YES, SHOW ME</button><button class="btn ghost" id="tutno" type="button">NO THANKS</button></div></div></div>
   <div id="help" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="helpt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -914,6 +913,7 @@ const SETD={mv:.8,sv:.8,zoom:1,ui:1,q:1,shake:true,fps:false,res:'1920x1080'};
 const RESL=['fill','1920x1080','1720x1080','2560x1080','1600x900','1440x900','1366x768','1280x720','1024x768'];
 let set=Object.assign({},SETD);
 try{const sv=JSON.parse(LS.getItem('cinder-set')||'null');if(sv&&typeof sv==='object')for(const k in SETD)if(typeof sv[k]===typeof SETD[k])set[k]=sv[k]}catch(e){}
+set.zoom=1;set.ui=1; /* game zoom and HUD size were removed from Settings: everyone plays at the standard size */
 function saveSet(){try{LS.setItem('cinder-set',JSON.stringify(set))}catch(e){}}
 /* phones held upright: the game is landscape only, so the whole stage is turned 90 degrees to fill the screen sideways.
    ROT is true while that is happening; cpt() turns a screen point back into the stage's own x/y */
@@ -2478,10 +2478,8 @@ function aspectOf(v){const q=v.split('x'),w=+q[0],h=+q[1],g=(a,b)=>b?g(b,a%b):a,
 function renderSet(){
   const fs=!!document.fullscreenElement,rg=(k,a,b)=>'<input type="range" data-r="'+k+'" min="'+a+'" max="'+b+'" value="'+Math.round(set[k]*100)+'" aria-label="'+k+'">';
   $('setlist').innerHTML=
-   weaponRowHtml()+'<div class="srow"><span>Display mode</span><button type="button" class="btn ghost" data-s="fs">'+(fs?'WINDOWED':'FULLSCREEN')+'</button></div>'+
+   '<div class="srow"><span>Display mode</span><button type="button" class="btn ghost" data-s="fs">'+(fs?'WINDOWED':'FULLSCREEN')+'</button></div>'+
    '<div class="srow"><span>Screen size</span><select data-res aria-label="Screen size">'+RESL.map(v=>'<option value="'+v+'"'+(set.res===v?' selected':'')+'>'+(v==='fill'?'Fill window':v.replace('x',' × ')+' ('+aspectOf(v)+')')+'</option>').join('')+'</select></div>'+
-   '<div class="srow"><span>Game zoom '+Math.round(set.zoom*100)+'%</span>'+rg('zoom',70,150)+'</div>'+
-   '<div class="srow"><span>HUD size '+Math.round(set.ui*100)+'%</span>'+rg('ui',70,150)+'</div>'+
    '<div class="srow"><span>Render quality</span><button type="button" class="btn ghost" data-s="q">'+QL[set.q]+'</button></div>'+
    '<div class="srow"><span>Screen shake</span><button type="button" class="btn ghost" data-s="shake">'+(set.shake?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>FPS counter</span><button type="button" class="btn ghost" data-s="fps">'+(set.fps?'ON':'OFF')+'</button></div>'+
@@ -3079,11 +3077,14 @@ function achToast(a){
   sfx(784,.15,'triangle',.07,1.3);setTimeout(()=>sfx(1176,.25,'triangle',.06,1.2),120);
 }
 let statSnap=null;
+/* achievements are off during the tutorial and while any cheat (or dev god mode / warp) is on: nothing unlocks and stats do not move */
+function achOff(){return !!tut||cheatsOn()}
 function checkAch(){
   /* the hardest mode earns no achievements except wave 5, and its runs do not count toward any stats */
-  if(diff!=='nowin'||statSnap===null)statSnap=JSON.stringify(stats);
+  const off=achOff();
+  if((diff!=='nowin'&&!off)||statSnap===null)statSnap=JSON.stringify(stats);
   else{const o=JSON.parse(statSnap);for(const k in stats)delete stats[k];Object.assign(stats,o)}
-  if(state==='play'||state==='over'||state==='win'){
+  if(!off&&(state==='play'||state==='over'||state==='win')){
     if(combo>stats.combo)stats.combo=combo;
     if(world===3&&totalWave()>(stats.w3best||0))stats.w3best=totalWave();if(world===2&&totalWave()>(stats.w2best||0))stats.w2best=totalWave();
     if(wave>=10&&diff==='hard')ach.hardw=1;
@@ -3094,7 +3095,7 @@ function checkAch(){
   }
   let got=false;
   for(const a of ACH){
-    if(diff==='nowin'&&a[0]!=='nowin')continue;
+    if(off||(diff==='nowin'&&a[0]!=='nowin'))continue;
     if(ach[a[0]]!==2&&a[4]()){ach[a[0]]=2;runAch.push(a);wallet+=a[3];got=true;achToast(a)}
   }
   if(got){saveMeta();try{LS.setItem('cinder-wallet',String(wallet))}catch(e){}if(sub==='ach')renderAch();if(state==='menu')refreshHome()}
@@ -3206,6 +3207,11 @@ const UPDATES=[
   'Phones: the game always plays sideways. Hold your phone upright and the game turns itself to fill the screen; on Android it locks to landscape after your first tap. The main menu fits on short screens.',
   'Difficulty buttons glow when you hover over them.',
   'Shop: the Knives, Guns and Bombs tabs only appear once you unlock that weapon, and the Pets tab is gone. Upgrades show one step at a time (Step 1 / 10, then the box for step 2).',
+  'In a run: bigger wave number, score, coins and XP, and pixel-art hearts. Attacks no longer push you forward.',
+  'The TUTORIAL button moved under UPDATES at the bottom right of the main menu, so you can replay it any time. Its shop step works again. Settings no longer have the weapon, game zoom or HUD size options.',
+  'NEW RUN skips the difficulty screen: every save keeps the difficulty you picked when you made it.',
+  'The tutorial now brings out every World 1 enemy one at a time and says what to watch for. Thieves crouch and show a red line before they dash, like Lancers. Quitting the tutorial early takes you straight home.',
+  'Achievements are off during the tutorial and while any cheat is on.',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
@@ -3338,7 +3344,7 @@ function closeSub(){
   const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
-  if(was==='chars'&&runFlow&&charMode==='play'){openSub('dsel',subOpener);return}
+  if(was==='chars'&&runFlow&&charMode==='play')runFlow=false;
   if(was==='dsel')runFlow=false;
   if(was==='keys'&&fromSet){fromSet=false;openSub('set',subOpener);return}
   if(was==='cheat'&&fromAch){fromAch=false;openSub('ach',subOpener);return}
@@ -3554,7 +3560,7 @@ function hotHud(){
 function giveHot(id){
   const i=p.hot.indexOf(null);if(i<0)return false;
   p.hot[i]=id;p.hotCd[i]=0;stats.hot++;
-  if(!p.hot.includes(null))ach.hf=1;
+  if(!p.hot.includes(null)&&!achOff())ach.hf=1;
   saveMeta();hotC.length=0;hotHud();return true;
 }
 $('hotbar').addEventListener('pointerdown',e=>{const b=e.target.closest('.hs');if(!b)return;e.preventDefault();e.stopPropagation();useHot(+b.dataset.i)});
@@ -4190,6 +4196,7 @@ $('slots').addEventListener('click',e=>{
   location.reload();
 });
 function showHome(){
+  if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
   brWant=false;setWorld(1);bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
 }
@@ -4524,9 +4531,10 @@ function mobAI(e,dt,ux,uy,d,o){
     else{e.chargeT-=cdt;if(w===3){const s=Math.sin(time*3+e.ph)*.8;o.mx=ux-uy*s;o.my=uy+ux*s}if(e.chargeT<=0&&d<e.r+p.r+42)wind(330,w===3?.22:.32)}
   }
   else if(t==='thief'){ /* sprints in a straight dash; the World 3 thief throws a sand burst if you are still close */
-    if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=430+ev*60;if(tick()){if(ev>=2&&!e.cmb){e.cmb=1;e.stT=.35;e.cx=ux;e.cy=uy;return}e.cmb=0;e.st='';e.chargeT=1.8+R()*.8;if(w===3&&d<150){e.st='act';e.stT=.3;shot(a0,240,{spr:1,r:7,l:1.1,c:'#ffcc4a'})}}}
+    if(e.st==='wind'){o.sp=0;if(e.stT>.12)e.aa=a0;if(tick()){e.st='dash';e.stT=.45;e.cx=Math.cos(e.aa);e.cy=Math.sin(e.aa);sfx(140,.2,'sawtooth',.04,1.5)}}
+    else if(e.st==='dash'){o.mx=e.cx;o.my=e.cy;o.sp=430+ev*60;if(tick()){if(ev>=2&&!e.cmb){e.cmb=1;e.st='wind';e.stT=.28;e.aa=a0;return}e.cmb=0;e.st='';e.chargeT=1.8+R()*.8;if(w===3&&d<150){e.st='act';e.stT=.3;shot(a0,240,{spr:1,r:7,l:1.1,c:'#ffcc4a'})}}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
-    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<320&&d>60){e.st='dash';e.stT=.45;e.cx=ux;e.cy=uy;sfx(140,.2,'sawtooth',.04,1.5)}}
+    else{e.chargeT-=cdt;if(e.chargeT<=0&&d<320&&d>60){e.st='wind';e.stT=.45;e.aa=a0;sfx(220,.12,'triangle',.03,1.6)}} /* crouches first: the red line shows the dash */
   }
   else if(t==='wizard'){ /* keeps its distance and casts; Stone and Sand wizards' balls burst into shards */
     keep(200,320);
@@ -5239,7 +5247,8 @@ $('dselgrid').addEventListener('click',e=>{
 });
 function startGame(){
   if(sub||(state!=='menu'&&state!=='over'))return;
-  if(state==='menu'){runFlow=true;openSub('dsel',$('play'));return}
+  /* the difficulty is the one this save was made with (picked on the save screen), so NEW RUN goes straight to the fighters */
+  if(state==='menu'){runFlow=true;charMode='play';openSub('chars',$('play'));return}
   openSub('wpn',$('pbtn'));
 }
 let nwGo=false; /* set while the WORLD 2 button on the win screen starts the next run, so it works even on a test run that did not unlock World 2 */
@@ -5467,7 +5476,7 @@ function attack(){
   const sc0=slashCol(),sk0=skinOf(equip);
   slashes.push({x:p.x,y:p.y,a,arc,R:rad,t:0,life:heavy?.26:.18,heavy,col:sc0,bc:sk0&&sk0.b,kd:(sk0&&sk0.k)||'sword',my:!!sc0,sk:sk0||DEFSK,rr:p.r});
   if(sc0&&sk0.vfx)for(let i=0;i<(sk0.dev?(heavy?40:18):(heavy?8:3));i++){const aa=heavy?R()*TAU:a-arc/2+R()*arc,rr=rad*(.8+R()*.18);emitVfx(sk0,p.x+Math.cos(aa)*rr,p.y+Math.sin(aa)*rr,1,parts)}
-  p.ix+=Math.cos(a)*(heavy?140:210);p.iy+=Math.sin(a)*(heavy?140:210);
+  /* attacks no longer lunge you forward: you stay where you stand */
   let hits=0;const hitList=[];
   for(const e of enemies){
     if(e.dead||e.spawnT>0||e.ghost)continue;
@@ -5825,6 +5834,7 @@ function pauseGame(){
 function resumeGame(){if(state!=='pause')return;state='play';$('pause').hidden=true;$('bossintro').classList.remove('paused')}
 function quitRun(){
   if(state!=='pause')return;
+  if(tut){$('pause').hidden=true;endTutorial(false);return} /* quitting the tutorial goes straight home: not a run, nothing banked */
   $('pause').hidden=true;state='over';finalize();
   showRunPanel('RUN <em>ENDED</em>','','GO AGAIN','HOME',false);
 }
@@ -5836,12 +5846,13 @@ const TUT_STEPS=[
  ['ATTACK','Three practice goblins! Attack with left click or Space. Your weapon hits whatever is in front of you.'],
  ['DASH','Dash with Shift or right click. While you dash nothing can hurt you. Dash twice.'],
  ['DODGE','A wizard is casting fireballs. Dash through one to DODGE it, or just step aside until it gives up.'],
- ['SHOP','Between waves the shop sells abilities that stack up during a run. Here are some coins: buy one, then close the shop.'],
+ ['ENEMIES','Meet every World 1 enemy, one at a time. A red line means a dash or charge is coming; a red circle means a smash. Beat each one or wait.'],
+ ['SHOP','Between waves you pick one ability, and they stack up during a run. Pick one now.'],
  ['READY','Every 10th wave is a boss, and bosses drop vault keys. Unlock new weapons with mastery in the Upgrades shop. Good luck!']
 ];
 function tutUI(){
   const b=$('tutbox');if(!tut){b.hidden=true;return}
-  const st=TUT_STEPS[tut.step];b.hidden=false;$('tutstep').textContent='TUTORIAL · '+(tut.step+1)+' / '+TUT_STEPS.length;$('tutt').textContent=st[0];$('tutd').textContent=st[1];
+  const st=TUT_STEPS[tut.step];b.hidden=false;$('tutstep').textContent='TUTORIAL · '+(tut.step+1)+' / '+TUT_STEPS.length;$('tutt').textContent=tut.sub?tut.sub[0]:st[0];$('tutd').textContent=tut.sub?tut.sub[1]:st[1];
   $('tutbar').firstChild.style.width=Math.round(Math.min(1,tut.prog||0)*100)+'%';
 }
 function tutGo(n){
@@ -5849,8 +5860,25 @@ function tutGo(n){
   const near=(dx,dy)=>[Math.min(Math.max(p.x+dx,M+30),W-M-30),Math.min(Math.max(p.y+dy,M+30),H-M-30)];
   if(n===1)for(let i=0;i<3;i++){const a=i*TAU/3,q=near(Math.cos(a)*120,Math.sin(a)*120),e=addEnemy('goblin',q[0],q[1]);e.ev=0;e.hp=e.maxhp=2;e.frz=1e9;e.dmg=0}
   if(n===3){const q=near(W/2>p.x?260:-260,0),e=addEnemy('wizard',q[0],q[1]);e.ev=0;e.dmg=0;e.hp=e.maxhp=999;tut.wiz=e}
-  if(n===4){if(tut.wiz){tut.wiz.dead=true;tut.wiz=null}enemies=enemies.filter(e=>!e.dead);coins+=150;tut.shop=0}
+  if(n===4){if(tut.wiz){tut.wiz.dead=true;tut.wiz=null}enemies=enemies.filter(e=>!e.dead);tut.mi=-1;tutMob()}
+  if(n===5){tut.sub=null;if(tut.cur){tut.cur.dead=true;tut.cur=null}enemies=enemies.filter(e=>!e.dead);tut.shop=0}
   tutUI();
+}
+/* the ENEMIES step: each World 1 enemy comes out on its own with a name and what to watch for */
+const TUT_MOBS=[
+ ['goblin','GOBLIN','Walks up and swings. Step back when it raises its sword.'],
+ ['thief','THIEF','Dashes at you in a straight line. The red line shows the path: step off it.'],
+ ['wizard','WIZARD','Keeps its distance and throws fireballs. Close in or dodge.'],
+ ['jester','JESTER','Throws a fan of cards. Move between them.'],
+ ['archer','ARCHER','Draws back, then fires a ring of arrows. Find a gap.'],
+ ['lancer','LANCER · MINI BOSS','Lowers its lance, then charges along the red line. Dash out of the way.'],
+ ['golem','GOLEM · MINI BOSS','Raises its club over a red circle, then smashes. Leave the circle.']];
+function tutMob(){
+  if(tut.cur){tut.cur.dead=true;tut.cur=null}enemies=enemies.filter(e=>!e.dead);
+  tut.mi++;tut.mt=0;if(tut.mi>=TUT_MOBS.length){tutGo(5);return}
+  const m=TUT_MOBS[tut.mi],a=Math.atan2(H/2-p.y,W/2-p.x)+(R()-.5),x=Math.min(Math.max(p.x+Math.cos(a)*230,M+40),W-M-40),y=Math.min(Math.max(p.y+Math.sin(a)*230,M+40),H-M-40);
+  const e=addEnemy(m[0],x,y);e.ev=0;e.dmg=0;e.hp=e.maxhp=TYPES[m[0]].mb?5:3;e.chargeT=.6;tut.cur=e;
+  tut.sub=[m[1]+' \u00b7 '+(tut.mi+1)+' / '+TUT_MOBS.length,m[2]];sfx(520,.08,'triangle',.05,1.4);
 }
 function startTutorial(){
   if(sub)closeSub();selWorld=1;brWant=false;beginRun();
@@ -5874,8 +5902,9 @@ function tutTick(dt){
   else if(s===1){const left=enemies.filter(e=>e.t==='goblin'&&!e.dead).length;tut.prog=(3-left)/3;if(!left)tutGo(2)}
   else if(s===2){if(p.dashT>0&&!tut.inDash){tut.inDash=1;tut.dash++}if(p.dashT<=0)tut.inDash=0;tut.prog=tut.dash/2;if(tut.dash>=2)tutGo(3)}
   else if(s===3){tut.prog=Math.max((p.dgT||0)>tut.dg?1:0,tut.t/14);if((p.dgT||0)>tut.dg||tut.t>=14)tutGo(4)}
-  else if(s===4){if(!tut.shop){tut.shop=1;openShop()}else{tut.prog=1;tutGo(5)}}
-  else if(s===5){tut.prog=tut.t/5;if(tut.t>=5)endTutorial(true)}
+  else if(s===4){tut.mt+=dt;tut.prog=(tut.mi+Math.min(1,tut.mt/10))/TUT_MOBS.length;if(!tut.cur||tut.cur.dead||tut.mt>=10)tutMob()}
+  else if(s===5){if(!tut.shop){tut.shop=1;const w0=wave;wave=1;openShop();wave=w0;$('shoptitle').innerHTML='TUTORIAL <em>\u00b7 PICK 1</em>'}else{tut.prog=1;tutGo(6)}} /* wave 1 offers: at wave 0 the shop had nothing to pick */
+  else if(s===6){tut.prog=tut.t/5;if(tut.t>=5)endTutorial(true)}
   tutUI();
 }
 $('tutskip').addEventListener('click',()=>endTutorial(false));
@@ -7550,7 +7579,7 @@ function drawMobCrown(w,t,f,x,y,col){
 /* wind-up warnings drawn under the mob */
 function drawMobTele(e){
   const st=e.st,t=e.t;
-  if(st==='wind'&&(t==='lancer'||t==='phoenix')){ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(e.x,e.y);const a=t==='lancer'?e.aa:Math.atan2(p.y-e.y,p.x-e.x);ctx.lineTo(e.x+Math.cos(a)*(t==='lancer'?330:340),e.y+Math.sin(a)*(t==='lancer'?330:340));ctx.stroke();ctx.restore()}
+  if(st==='wind'&&(t==='lancer'||t==='phoenix'||t==='thief')){ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(e.x,e.y);const a=t==='phoenix'?Math.atan2(p.y-e.y,p.x-e.x):e.aa,ln=t==='thief'?(430+(e.ev||0)*60)*.45:t==='lancer'?330:340;ctx.lineTo(e.x+Math.cos(a)*ln,e.y+Math.sin(a)*ln);ctx.stroke();ctx.restore()}
   const zone=(x,y,rr,k)=>{ctx.save();ctx.globalAlpha=.12+.18*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(x,y,rr,0,TAU);ctx.fill();ctx.globalAlpha=.7;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=2;ctx.stroke();ctx.restore()};
   const ev=e.ev||0;
   if(st==='wind'&&t==='golem')zone(e.sx,e.sy,95+ev*15,1-e.stT/.8);
@@ -8341,7 +8370,7 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
   }
   function show(screen){
     T.hidden=false;document.body.classList.add('ontitle');s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
-    if(screen===2){selSlot=SLOT;selDiff=slotDiff(SLOT);drawSlots();drawDiffs();setTimeout(()=>go.focus(),0)}
+    if(screen===2){selSlot=1;selDiff=slotDiff(1);drawSlots();drawDiffs();setTimeout(()=>go.focus(),0)} /* Save 1 is picked by default */
     else setTimeout(()=>$('tplay').focus(),0);
   }
   function hide(){T.hidden=true;document.body.classList.remove('ontitle');try{fitMenus()}catch(e){}}
@@ -8725,5 +8754,21 @@ body.ontitle #home{visibility:hidden}
 }
 /* the same phone hotbar layout, keyed to the game's own size (also right on turned phones and the dev_phone preview) */
 @container (orientation:landscape) and (max-height:520px){.touch #hotbar{left:50%!important;transform:translateX(-50%);bottom:12px!important}.touch #hotbar .hs{width:64px;height:64px;font-size:30px;border-width:2px;border-radius:10px}.touch #hotbar .hs kbd{font-size:12px;left:6px;top:3px}}
+
+/* v0.3: bigger in-game HUD text and pixel-art hearts */
+#hp{gap:5px!important;max-width:320px!important}
+#hp i{width:36px!important;height:32px!important;transform:none!important;border-radius:0!important;box-shadow:none!important;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='7' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='8' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%23ffc2c2'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='2' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='2' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='2' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='7' y='3' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='8' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='4' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='6' y='4' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%23ff3b4f'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='6' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%23b0182c'/%3E%3Crect x='5' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%232a0a10'/%3E%3C/svg%3E") center/100% 100% no-repeat!important;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45))}
+#hp i.off{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 8' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='7' y='0' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='6' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='1' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='8' y='1' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='2' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='2' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='8' y='2' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='0' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='2' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='7' y='3' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='8' y='3' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='1' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='4' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='6' y='4' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='7' y='4' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='5' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='4' y='5' width='1' height='1' fill='%233a2a30'/%3E%3Crect x='5' y='5' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='6' y='5' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='6' width='1' height='1' fill='%232a1c22'/%3E%3Crect x='5' y='6' width='1' height='1' fill='%232a0a10'/%3E%3Crect x='4' y='7' width='1' height='1' fill='%232a0a10'/%3E%3C/svg%3E")!important;opacity:.85}
+#hud .hc{max-width:min(52cqw,560px)!important}
+#wave{font-family:'Press Start 2P',monospace;font-size:clamp(16px,2.3cqw,28px)!important;letter-spacing:.06em;color:#f1ead8;text-shadow:3px 3px 0 rgba(0,0,0,.6);line-height:1.3}
+#score{font-family:'Press Start 2P',monospace!important;font-size:clamp(20px,2.4cqw,30px)!important;text-shadow:3px 3px 0 rgba(0,0,0,.55)}
+#coins{font-family:'Press Start 2P',monospace;font-size:clamp(14px,1.7cqw,21px)!important;text-shadow:2px 2px 0 rgba(0,0,0,.55);margin-top:4px}
+#xphud{font-family:'Press Start 2P',monospace;font-size:clamp(12px,1.4cqw,17px)!important;text-shadow:2px 2px 0 rgba(0,0,0,.55);margin-top:4px}
+@container (max-height:480px){#hp i{width:25px!important;height:22px!important}#wave{font-size:16px!important}#score{font-size:18px!important}#coins{font-size:13px!important}#xphud{font-size:11px!important}}
+
+/* v0.3: TUTORIAL sits under UPDATES at the bottom right of the main menu */
+.hfoot{align-items:flex-end}
+.hfoot .hstack{display:flex;flex-direction:column;align-items:stretch;gap:6px;pointer-events:auto}
+.hfoot .hstack .hupd{text-align:center}
 </style>
 </body></html>
