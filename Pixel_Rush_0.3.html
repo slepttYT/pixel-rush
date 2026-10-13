@@ -3232,6 +3232,8 @@ const UPDATES=[
   'Achievements are off during the tutorial and while any cheat is on.',
   'A new title screen: a blue sky with drifting clouds, and your fighter cutting down mobs that walk in over the grass.',
   'The difficulty achievements (Hard Knock, Hard Hitter, Not Winning Huh and Hard Way Home) are gone. The cheat menu scrolls.',
+  'Every boss gets tired: the 1st boss of a world attacks twice, the 2nd three times, the 3rd four times and so on, then stands panting for 3 seconds. The Rage Goblin King is slower, and his club stays stuck longer.',
+  'On the title screen your fighter shows off a different mythic weapon every 10 seconds.',
   'Touching an enemy or a boss no longer hurts. Only their attacks do, including a dash or charge that runs into you.',
   'Three new boss themes: Throne of Ash, Iron Tempest and Crimson Eclipse. A heartbeat plays and your hearts pulse when you are low.',
   'Slashes no longer break enemy shots for free. Pick up the new Shot Breaker ability (knife and fists) to break them; level 2 breaks boss shots too.',
@@ -4655,11 +4657,11 @@ function w1AI(e,dt,ux,uy,d){
     e.pt+=dt;if(R()<dt*5)parts.push({x:e.x+(R()-.5)*14,y:e.y-e.r*.2,vx:(R()-.5)*20,vy:60,l:.7,m:.7,c:'#8ee8ff',s:2.5});
     if(d<210||e.pt>12){e.ghost=false;shake=Math.max(shake,22);ringFx(e.x,e.y,150,.5);w1dust(e.x,e.y+e.r*.9,34);sfx(60,.6,'sawtooth',.12,.4);banner('THE PRINCESS IS A GIANT!');go('chase',.6)}
   }else if(k==='gob'||k==='knight'||k==='giant'||k==='keeper'){
-    const PR=k==='gob'?{need:rg?5:3,spd:rg?2.1:1.45,wt:rg?.32:.5,rg:78,hr:66}:k==='knight'?{need:999,spd:1.7,wt:.45,rg:80,hr:70}:k==='giant'?{need:999,spd:2.2,wt:.8,rg:100,hr:84}:{need:2,spd:1.5,wt:.55,rg:84,hr:80};
+    const PR=k==='gob'?{need:tireNeed(e),spd:rg?1.6:1.4,wt:rg?.45:.55,rg:78,hr:66}:k==='knight'?{need:999,spd:1.7,wt:.45,rg:80,hr:70}:k==='giant'?{need:999,spd:2.2,wt:.8,rg:100,hr:84}:{need:2,spd:1.5,wt:.55,rg:84,hr:80};
     const need=PR.need;
     if(s==='chase'){walk(e.sp*PR.spd*(1+(ph-1)*.12));if(d<e.r+PR.rg){go('wind',PR.wt);e.ax=ux;e.ay=uy;sfx(150,.3,'sawtooth',.05,1.4)}}
     else if(s==='wind'){if(e.w1t<=0){const ix=e.x+e.ax*(e.r+46),iy=e.y+e.ay*(e.r+46);ringFx(ix,iy,72,.25);w1dust(ix,iy,14);shake=Math.max(shake,9);sfx(80,.25,'sawtooth',.08,.5);hit(ix,iy,PR.hr,2);e.sw++;
-      if(k==='keeper'&&e.sw>=2){e.sw=0;go('dag',.7)}else if(e.sw>=need){go('stuck',2.6);w1dust(ix,iy,24);shake=Math.max(shake,14);banner('CLUB STUCK!')}else go('rec',.4)}}
+      if(k==='keeper'&&e.sw>=2){e.sw=0;go('dag',.7)}else if(e.sw>=need){go('stuck',3.5);w1dust(ix,iy,24);shake=Math.max(shake,14);banner('CLUB STUCK!')}else go('rec',.4)}}
     else if(s==='rec'){if(e.w1t<=0)go('chase',1)}
     else if(s==='dag'){if(e.w1t<=0){const a=Math.atan2(uy,ux),o=R()*TAU;for(let i=0;i<12;i++){const b=o+i*TAU/12;bullets.push({x:e.x,y:e.y,vx:Math.cos(b)*230,vy:Math.sin(b)*230,r:5,l:5,c:'#dfe6f2',dagger:1})}
       for(let i=-1;i<=1;i++)bullets.push({x:e.x,y:e.y,vx:Math.cos(a+i*.16)*300,vy:Math.sin(a+i*.16)*300,r:5,l:5,c:'#dfe6f2',dagger:1});
@@ -4674,7 +4676,7 @@ function w1AI(e,dt,ux,uy,d){
   }else if(k==='bone'){
     if(s==='idle'){if(d<220){e.mx=-ux;e.my=-uy;walk(e.sp*.9)}else walk(e.sp*.5);if(e.w1t<=0){e.vc=2+ph;e.nx=0;go('throw',99)}}
     else if(s==='throw'){e.nx-=dt;if(e.nx<=0){const a=Math.atan2(uy,ux),n=2+ph;for(let i=0;i<n;i++){const o=(i-(n-1)/2)*.24;bullets.push({x:e.x,y:e.y,vx:Math.cos(a+o)*230,vy:Math.sin(a+o)*230,r:7,l:5,c:'#efe9d2',bone:1})}
-      sfx(300,.12,'triangle',.05,.7);spark(e.x,e.y,'#efe9d2',6,160);e.vc--;e.nx=.75;if(e.vc<=0){e.cyc++;if(e.cyc>=3){e.cyc=0;go('tired',3);banner('THE SKELETON KING IS TIRED')}else go('idle',1.2)}}}
+      sfx(300,.12,'triangle',.05,.7);spark(e.x,e.y,'#efe9d2',6,160);e.vc--;e.nx=.75;if(e.vc<=0){e.cyc++;if(e.cyc>=Math.max(1,Math.ceil(tireNeed(e)/2))){e.cyc=0;go('tired',3);banner('THE SKELETON KING IS TIRED')}else go('idle',1.2)}}}
     else if(s==='tired'){if(R()<dt*10)parts.push({x:e.x+(R()-.5)*e.r,y:e.y-e.r*1.2,vx:(R()-.5)*40,vy:30,l:.6,m:.6,c:'#8ee8ff',s:3});if(e.w1t<=0)go('idle',1)}
   }else if(k==='hydra'){
     if(R()<dt*10)parts.push({x:e.x+(R()-.5)*e.r*4,y:e.y+e.r*.5+(R()-.5)*e.r,vx:0,vy:-25,l:.7,m:.7,c:'#bfefff',s:2.5});
@@ -4821,11 +4823,30 @@ function drawW1(e,fl){
   }
   ctx.restore();
 }
+/* every boss tires: the Nth boss of a world attacks N+1 times (the 1st boss twice, the 2nd three times, and so on),
+   then stands panting for a few seconds and does nothing. The Dark King (his knights), Goblin King (club stuck) and
+   Skeleton King (tired) keep their own breaks, which use the same count */
+const TIRE_T=3;
+const tireNeed=e=>(e.tier||1)+1;
+const tireOwn=e=>!!(e.cfg&&(e.cfg.w1==='dark'||e.cfg.w1==='gob'||e.cfg.w1==='bone'));
+const TIRE_ATK=['aim','wind','dag','tele','throw','pop'],TIRE_REST=['chase','idle','rest','rec'];
 function bossAI(e,dt,ux,uy,d){
-  if(e.cfg&&e.cfg.w1&&!e.fin){const m0=bullets.length;w1AI(e,dt,ux,uy,d);for(let i=m0;i<bullets.length;i++)bullets[i].boss=1;return}
-  const n0=bullets.length;bossAI0(e,dt,ux,uy,d);for(let i=n0;i<bullets.length;i++)bullets[i].boss=1;
-  if(!e.fin&&e.msp>40&&R()<dt*9)w1dust(e.x,e.y+e.r*.9,1,world===3?'#d8b878':'#9a9aa8');
-  if(world===2)for(let i=n0;i<bullets.length;i++){const b=bullets[i];if(e.cfg&&e.cfg.singer){if(!b.note)b.note=1+((R()*2)|0)}else if(!b.shard&&!b.rock&&!b.acid)b.shard=1+((R()*3)|0)}
+  const tire=!e.fin&&!brMode&&e.cfg&&!tireOwn(e),w1=!!(e.cfg&&e.cfg.w1&&!e.fin);
+  if(tire&&e.tiredT>0){
+    e.tiredT-=dt;e.msp=0;e.mx=ux;e.my=uy;
+    if(R()<dt*7)parts.push({x:e.x+(R()-.5)*e.r*1.4,y:e.y-e.r*1.1,vx:(R()-.5)*30,vy:-30-R()*20,l:.7,m:.7,c:'#8ee8ff',s:3});
+    if(e.tiredT<=0){e.atkN=0;floatTxt(e.x,e.y-e.r-24,'BACK UP!','#ff8a5a')}
+    return}
+  const k0=w1?e.w1s:e.bs;
+  if(w1){const m0=bullets.length;w1AI(e,dt,ux,uy,d);for(let i=m0;i<bullets.length;i++)bullets[i].boss=1}
+  else{
+    const n0=bullets.length;bossAI0(e,dt,ux,uy,d);for(let i=n0;i<bullets.length;i++)bullets[i].boss=1;
+    if(!e.fin&&e.msp>40&&R()<dt*9)w1dust(e.x,e.y+e.r*.9,1,world===3?'#d8b878':'#9a9aa8');
+    if(world===2)for(let i=n0;i<bullets.length;i++){const b=bullets[i];if(e.cfg&&e.cfg.singer){if(!b.note)b.note=1+((R()*2)|0)}else if(!b.shard&&!b.rock&&!b.acid)b.shard=1+((R()*3)|0)}
+  }
+  if(tire){const k1=w1?e.w1s:e.bs;
+    if(k1!==k0&&(w1?TIRE_ATK.includes(k1):k1!=='idle'))e.atkN=(e.atkN||0)+1;
+    if((e.atkN||0)>=tireNeed(e)&&(w1?TIRE_REST.includes(k1):k1==='idle')){e.tiredT=TIRE_T;e.atkN=0;floatTxt(e.x,e.y-e.r-24,'TIRED!','#8ee8ff');sfx(220,.4,'sine',.06,.6);shake=Math.max(shake,4)}}
 }
 /* ground strikes: circles mark the floor, then the ground erupts. thorns (Vine Monster), fissure (Gravetender), pillars (Comet Oracle) */
 function mkStrikes(e,a,ph,tier){
@@ -8380,7 +8401,9 @@ renderDiffs();
 
 /* ---------- title scene: a side view under a blue sky. Clouds drift, and your fighter cuts down World 1 mobs
    that walk in from the right; every mob falls in one hit. Drawn on a small canvas and scaled up with hard pixels ---------- */
-const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0};
+const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0,wi:-1,wT:0};
+/* the title fighter shows off a different mythic weapon every 10 seconds */
+const tsMyth=()=>SKINS.filter(x=>x.r==='mythic'&&x.tab!=='b');
 function tsCircle(g,cx,cy,r){for(let y=-r;y<=r;y++){const hw=Math.floor(Math.sqrt(r*r-y*y+.5));g.fillRect(Math.round(cx-hw),Math.round(cy+y),hw*2+1,1)}}
 function tsSize(){
   const T=$('title'),cv=$('tcv'),W0=T.clientWidth||stage.clientWidth,H0=T.clientHeight||stage.clientHeight;
@@ -8416,12 +8439,15 @@ function tsUpdate(dt){
   for(const c of S.cl){c.x-=c.v*dt;if(c.x<-50*c.s)c.x=S.w+10}
   S.spT-=dt;if(S.spT<=0&&S.mobs.length<3){S.spT=1.4+R()*1.4;S.mobs.push({t:TY[(R()*TY.length)|0],x:S.w+16,v:46+R()*16,ph:R()*9,hitT:0})}
   S.atk=Math.max(0,S.atk-dt);
+  S.wT-=dt;if(S.wT<=0||S.wi<0){const L=tsMyth();S.wi=L.length?(S.wi+1+((R()*(L.length-1))|0))%L.length:-1;S.wT=10;S.sw=S.wi>=0?L[S.wi]:null;
+    if(S.sw)for(let q=0;q<14;q++)S.fx.push({x:S.hx+8,y:S.gy-24,vx:(R()-.5)*120,vy:-30-R()*90,l:.7+R()*.4,c:R()<.5?(S.sw.glow||'#fff'):(S.sw.tr||'#fff')})}
+  if(S.sw&&R()<dt*10)S.fx.push({x:S.hx+10+R()*16,y:S.gy-30-R()*14,vx:(R()-.5)*20,vy:-20-R()*20,l:.5+R()*.4,c:S.sw.tr||'#fff'});
   S.mobs.sort((a,b)=>a.x-b.x);
   for(let i=0;i<S.mobs.length;i++){const m=S.mobs[i];if(m.hitT>0){m.hitT-=dt;continue}
     const ahead=i>0?S.mobs[i-1]:null,stopAt=Math.max(S.hx+22,ahead&&ahead.hitT<=0?ahead.x+36:0);
     if(m.x>stopAt)m.x=Math.max(stopAt,m.x-m.v*dt);
     if(i===0&&m.x<=S.hx+24&&S.atk<=0){S.atk=.26;m.hitT=.12; /* one hit, down it goes */
-      for(let q=0;q<12;q++)S.fx.push({x:m.x,y:S.gy-10,vx:(R()-.3)*90,vy:-40-R()*80,l:.6+R()*.3,c:q%3?'#f1ead8':'#ffd36b'})}}
+      for(let q=0;q<16;q++)S.fx.push({x:m.x,y:S.gy-10,vx:(R()-.3)*110,vy:-40-R()*90,l:.6+R()*.3,c:q%3?'#f1ead8':(S.sw&&S.sw.glow)||'#ffd36b'})}}
   S.mobs=S.mobs.filter(m=>!(m.hitT<0));
   for(const q of S.fx){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=220*dt;q.l-=dt}S.fx=S.fx.filter(q=>q.l>0&&q.y<S.gy+2);
 }
@@ -8433,8 +8459,11 @@ function tsDraw(){
   for(const m of S.mobs){g.fillStyle='rgba(0,0,0,.22)';g.fillRect(Math.round(m.x)-7,S.gy,14,2);
     const f=m.hitT>0?'act':(((t*6+m.ph)|0)%2?'w1':'w0');drawMobSpr(g,1,m.t,f,m.x,S.gy-1,true,m.hitT>0,m.hitT>0?Math.min(1,m.hitT/.12):1)}
   const cs=charSprite(ch,'w0',sk),cy=S.gy-cs.c.height*MOB_U*.38;
-  drawCharSpr(g,ch,S.hx,cy,MOB_U,S.atk>.1?'w1':(((t*2)|0)%2?'w0':'w0'),false,sk);
-  if(S.atk>.08){const k=1-(S.atk-.08)/.18,a0=-1.1+k*1.6;g.fillStyle='#ffffff';for(let a=a0-.9;a<a0;a+=.05){for(const r of[15,16,17])g.fillRect(Math.round(S.hx+6+Math.cos(a)*r),Math.round(cy+Math.sin(a)*r),1,1)}}
+  drawCharSpr(g,ch,S.hx,cy,MOB_U,S.atk>.1?'w1':'w0',false,sk);
+  /* the mythic weapon, held out in front; it sweeps down on each kill */
+  const sw=S.sw,sp=S.atk>0?1-S.atk/.26:0,wa=S.atk>0?-1.5+sp*2.4:-.75+Math.sin(t*2)*.06;
+  if(sw){g.save();g.translate(Math.round(S.hx+5),Math.round(cy+5));g.rotate(wa);g.scale(.5,.5);try{weaponShape(g,sw,t)}catch(e){}g.restore()}
+  if(S.atk>.06){const k=1-(S.atk-.06)/.2,a0=-1.3+k*2.2;g.fillStyle=(sw&&sw.tr)||'#ffffff';for(let a=a0-1;a<a0;a+=.04){for(const r of[17,18,19,20])g.fillRect(Math.round(S.hx+6+Math.cos(a)*r),Math.round(cy+4+Math.sin(a)*r),1,1)}}
   for(const q of S.fx){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(Math.round(q.x),Math.round(q.y),2,2)}g.globalAlpha=1;
 }
 function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
@@ -8970,5 +8999,7 @@ body.ontitle #home{visibility:hidden}
 #cheat .row{flex:none}
 #cheat h2,#cheat .note{flex:none}
 @container (max-height:480px){#cheat .box{padding-top:40px;gap:6px}#cheat h2{font-size:20px!important;margin:0}#cheat .note{font-size:9px!important;line-height:1.4;margin:0}#cheat .row .btn{padding:6px 14px}}
+
+#title #tscr1 .thint{display:none!important}
 </style>
 </body></html>
