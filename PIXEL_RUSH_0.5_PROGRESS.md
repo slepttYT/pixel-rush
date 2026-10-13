@@ -80,13 +80,13 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [ ] Refresh at 07:00 in the player's LOCAL time. Available until next local 07:00. Gold + XP reward. Uses existing mechanics/modifiers. One claim per day. Separate from normal runs.
 
 ### 13. Game over screen
-- [ ] Pixel-art framing, animation, consistent type, clear stats. Keep existing post-run info and buttons.
+- [x] Pixel-art framing, animation, consistent type, clear stats (fighter portrait, run time, world; buttons sticky on phones; toasts cleared). Keep existing post-run info and buttons.
 
 ### 14. Run postcards & mailbox
-- [ ] Small mailbox icon near Updates/Tutorial. Opens a pixel postcard of the latest completed run: character, weapon, world reached, highest wave, final score, total run time, with character + weapon art. Updated after each completed run, stored locally.
+- [x] Small mailbox icon near Updates/Tutorial (static icon + unread dot). Opens a pixel postcard of the latest completed run: character, weapon, world reached, highest wave, final score, total run time, with character + weapon art. Updated after each completed run, stored locally.
 
 ### 15. Personal bests
-- [ ] Best completion time per world, kept separate, shown in a stats/progression screen. Run time on the postcard.
+- [x] Best completion time per world (stats.pbt, first clear of wave 100, no cheats/boss rush), kept separate, shown in a stats/progression screen. Run time on the postcard.
 
 ### 16. Small QoL (recommended set, keep it modest)
 - [ ] Damage numbers toggle in Settings. [ ] Pause when the window loses focus. [ ] Run timer shown in pause menu. [ ] Confirm before abandoning a run from pause.
@@ -119,6 +119,8 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 (append as items complete)
 - Hotfix pushed to 0.3/main: an unescaped apostrophe in the changelog stopped the game loading (build.sh now syntax-checks every build).
 - Save select redesign; Lucky/Average Joe text; cheat menu from pause (tested: stays paused, Esc/back return to pause, focus loss stays paused, only Resume resumes); run HUD hidden under menus.
+
+- Game over redesign; run timer (runT, play+shop only); postcard (cinder-postcard per save) + mailbox; PBs on Account screen and win badge. Helpers: fmtT, WNAME, drawFighter(g,ch,sk,ws,x,gy,U,t,world) for previews.
 
 ## Known bugs
 (append as found)

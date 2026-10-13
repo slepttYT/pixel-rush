@@ -649,6 +649,7 @@ summary:hover{color:var(--bone)}
 
   <div id="panel" class="ov" hidden>
     <div class="box">
+      <div class="pport"><canvas id="pport" width="96" height="96"></canvas><div id="pwho"></div></div>
       <h1 id="ptitle">YOU <em>FELL</em></h1>
       <dl class="stats" id="pstats"></dl>
       <div class="rw" id="prew"></div>
@@ -684,7 +685,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
+    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><span class="hstack"><button class="hupd hmail" id="hmail" type="button" aria-label="Mailbox: postcard from your last run" title="Mailbox"><svg viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="4" width="10" height="7" fill="#2f6bd8"/><rect x="2" y="4" width="10" height="1" fill="#6aa0ff"/><rect x="3" y="6" width="5" height="1" fill="#0b1a3a"/><rect x="7" y="11" width="2" height="4" fill="#8a5a2a"/><rect x="12" y="2" width="1" height="6" fill="#d8d8e0"/><rect x="13" y="2" width="2" height="2" fill="#ff4d5e"/><rect x="1" y="5" width="1" height="6" fill="#1a3f8a"/></svg><i class="hdot" id="hmaildot" hidden></i></button><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button><button class="hupd" id="htut" type="button">TUTORIAL</button></span></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -748,11 +749,20 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="mail" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="mailt">
+    <button class="btn ghost backtl" type="button">&#9664; BACK</button>
+    <div class="box">
+      <h2 id="mailt">Mailbox</h2>
+      <div id="mailbody"></div>
+    </div>
+  </div>
   <div id="acct" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="acctt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
       <h2 id="acctt">Account Level</h2>
       <div id="acctsum"></div>
+      <h3 class="pdh">Personal bests</h3>
+      <div id="acctpb"></div>
       <h3 class="pdh">Milestone rewards</h3>
       <div id="acctms"></div>
       <h3 class="pdh">Next levels</h3>
@@ -1273,6 +1283,7 @@ $('hsnd').addEventListener('click',()=>setMuted(!muted));
 /* ---------- state ---------- */
 const keys={},mdown={};let mouse={x:0,y:0},aimMode='auto',btnAtk=false;
 const joy={x:0,y:0,id:null};
+let runT=0; /* 0.5: seconds of real play in this run (pauses and menus do not count) */
 let state='menu',time=0,hitstop=0,shake=0,score=0,best=0,bestWave=0,kills=0,wave=0,toSpawn=0,spawnT=0,clearT=.6,waveActive=false,combo=0,comboT=0;
 let pools=[],runWallet=0,floats=[],stats={kills:0,runs:0,boss:0,yellow:0,green:0,vault:0,best:0,combo:0},ach={},upg={};
 let coins=0,gain=0,shopOffers=[],rerolls=0,pickT=0,shopSel=0;
@@ -3146,10 +3157,14 @@ function renderAcct(){
     rows+='<div class="ar off'+(m||ten?' on':'')+'"><span>'+(m?'★':ten?'🎁':'▸')+'</span><div><b>Level '+n+(n===L+1?' &middot; next':'')+'</b><small>+'+(ten?LEVEL_BONUS+' coins (a free loot box)':LEVEL_COINS+' coins')+(m?' &middot; +'+m.a[3]+' coins for '+m.a[1]+(m.ch?' &middot; unlocks '+m.ch.n:''):'')+'</small></div><em>'+left+' XP to go</em></div>';
   }
   $('acctlv').innerHTML=rows;
+  const pbt=stats.pbt||{},wb={1:stats.w1best,2:stats.w2best,3:stats.w3best};
+  $('acctpb').innerHTML=[1,2,3].map(w=>{const t=pbt[w],open=w===1||(w===2?w2Open():w3Open());
+    return '<div class="ar '+(t?'on':'off')+'"><span>'+(t?'★':open?'▸':'🔒')+'</span><div><b>World '+w+' &middot; '+WNAME[w]+'</b><small>'+(t?'Fastest clear of wave 100':open?'Not cleared yet. Beat wave 100 to set a time.':'Locked')+'</small></div><em>'+(t?fmtT(t):'--:--')+'</em></div>'}).join('');
 }
 $('acdone')?.addEventListener('click',closeSub);
 document.addEventListener('click',e=>{if(e.target.closest('.backtl'))closeSub()});
 $('hacct').addEventListener('click',e=>openSub('acct',e.currentTarget));
+$('hmail').addEventListener('click',e=>openSub('mail',e.currentTarget));
 $('hhelp').addEventListener('click',e=>openSub('help',e.currentTarget));
 $('hsaves').addEventListener('click',e=>openSub('saves',e.currentTarget));
 $('hpdone')?.addEventListener('click',closeSub);
@@ -3365,7 +3380,7 @@ let savesDraw=null;
 function openSub(k,opener){
   document.body.classList.add('insub');
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
-  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('help').hidden=k!=='help';plisten=null;
+  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
   else if(k==='set'){renderSet()}
   else if(k==='ach'){renderAch()}
@@ -3375,6 +3390,7 @@ function openSub(k,opener){
   else if(k==='chars'){skinView=null;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
+  else if(k==='mail'){renderMail()}
   else if(k==='help'){}
   else if(k==='saves'){if(savesDraw)savesDraw()}
   else if(k==='upd'){renderUpd()}
@@ -3385,7 +3401,7 @@ function openSub(k,opener){
 }
 function closeSub(){
   document.body.classList.remove('insub');
-  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
+  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
   if(was==='chars'&&runFlow&&charMode==='play')runFlow=false;
@@ -4224,7 +4240,7 @@ function homeEvo(){
   }catch(e){return ''}
 }
 function refreshHome(){
-  renderSlots();
+  renderSlots();try{refreshMailDot()}catch(e){}
   $('hstats').innerHTML='<div><svg class="si" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.7 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><span><dt>Best score</dt><dd>'+fmtK(best)+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5c-4.7 0-8 3.2-8 7.6 0 2.6 1.2 4.4 3 5.6V20h2.5v-2.2h1.3V20h2.4v-2.2h1.3V20H17v-4.3c1.8-1.2 3-3 3-5.6 0-4.4-3.300-7.6-8-7.6zM8.4 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM15.6 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM12 13.2l1.2 2.4h-2.4z"/></svg><span><dt>Best wave</dt><dd>'+bestWave+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd36b"/></svg><span><dt>Coins</dt><dd>'+fmtK(wallet)+'</dd></span></div>'+(bestLoop?'<div><span><dt>Loops</dt><dd>'+bestLoop+'</dd></span></div>':'')+'';
   $('hxp').innerHTML=xpHtml(acct())+'<small class="ahint">VIEW REWARDS &#9654;</small>';renderDiffs();homeExtras();
 }
@@ -4256,7 +4272,7 @@ function reset(){
   p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});p.rageS=0;p.rageT=0;p.gramp=0;
   hudC={};pickT=0;coins=0;gain=0;runWallet=0;floats=[];
   enemies=[];parts=[];slashes=[];drops=[];bolts=[];bullets=[];thrown=[];meteors=[];pbul=[];pbomb=[];p.wlv=0;lava=[];pools=[];shadows=[];score=0;kills=0;wave=0;combo=0;comboT=0;toSpawn=0;
-  loop=0;dynS=1;runXp=0;winT=0;lastRun=null;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
+  loop=0;dynS=1;runXp=0;winT=0;lastRun=null;runT=0;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
   $('panel').hidden=true;$('shop').hidden=true;
   p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
@@ -5934,7 +5950,50 @@ function finalize(){
   const tw=totalWave();
   if(!cheatsOn()&&!brMode&&tw>bestWave){bestWave=tw;try{LS.setItem('cinder-bestwave',String(bestWave))}catch(e){}}
   lastRun=bankXp(clearedWaves());
+  saveCard();
 }
+/* 0.5: the latest finished run becomes a postcard in the mailbox (stored per save) */
+let endHow=null;
+function saveCard(){
+  if(tut||devWarp){endHow=null;return}
+  try{const fs=skinOf(equip)||DEFSK,base=skinBase(equip),tw=totalWave();
+    const cleared=wave>=100||(brMode&&brIdx>=29),res=endHow||(cleared?'clear':'quit');endHow=null;
+    const pc={v:1,ch:CH().id,eq:equip||'',fi:base&&base.forms?Math.max(0,base.forms.indexOf(fs)):-1,wn:fs.fn||fs.n||'',world,wave:tw,loop,score,kills,t:Math.round(runT),res,br:brMode?1:0,diff:DF().n,at:Date.now(),cheat:cheatsOn()?1:0};
+    LS.setItem('cinder-postcard',JSON.stringify(pc));stats.mailNew=1;saveMeta();
+  }catch(e){}
+}
+function loadCard(){try{const c=JSON.parse(LS.getItem('cinder-postcard')||'null');if(c&&typeof c==='object'&&c.v===1&&typeof c.world==='number')return c}catch(e){}return null}
+let mailRaf=0;
+function renderMail(){
+  stats.mailNew=0;saveMeta();refreshMailDot();
+  const c=loadCard(),mb=$('mailbody');cancelAnimationFrame(mailRaf);
+  if(!c){mb.innerHTML='<div class="pcempty"><p>No mail yet.</p><small>Finish a run and a postcard from it lands here.</small></div>';return}
+  const ch=charById(c.ch),base=skinBase(c.eq)||DEFSK,ws=(base.forms&&c.fi>=0?base.forms[Math.min(c.fi,base.forms.length-1)]:base)||DEFSK;
+  const wl=Math.max(1,Math.min(3,c.world|0)),pb=(stats.pbt||{})[wl],d=new Date(c.at||Date.now());
+  const res=c.res==='fell'?'Fell on wave '+c.wave:c.res==='clear'?(c.br?'Cleared Boss Rush':'Cleared wave 100'):'Ended on wave '+c.wave;
+  const row=(k,v)=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>';
+  mb.innerHTML='<div class="pcard w'+wl+'"><div class="pcart"><canvas id="pccv" width="160" height="120"></canvas><span class="pcgreet">Greetings from<br><b>World '+wl+'</b></span></div>'
+    +'<div class="pcside"><div class="pcstamp"><b>'+wl+'</b><small>'+WNAME[wl]+'</small></div><div class="pcpost">'+d.toLocaleDateString()+'</div>'
+    +'<p class="pcres">'+res+'</p><dl class="pcst">'+row('Fighter',ch.n)+row('Weapon',c.wn||ws.fn||ws.n||'')+row('World reached','World '+wl+(c.loop?' &middot; loop '+(c.loop+1):''))+row('Highest wave',c.wave)+row('Final score',c.score)+row('Run time',fmtT(c.t))+(pb?row('Best W'+wl+' time',fmtT(pb)):'')+row('Difficulty',c.diff||'')+'</dl>'
+    +(c.cheat?'<small class="pcnote">Cheats were on for this run.</small>':'')+'</div></div>';
+  const cv=$('pccv'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;const t0=performance.now(),sk=cSkin(ch.id);
+  const f=n=>{if($('mail').hidden)return;const t=(n-t0)/1000,W2=cv.width,H2=cv.height;
+    pcSky(g,wl,W2,H2,t);try{drawFighter(g,ch,sk,ws,W2/2-6,H2-18,3,t,wl)}catch(e){}mailRaf=requestAnimationFrame(f)};
+  mailRaf=requestAnimationFrame(f);
+}
+/* small world scenes for the postcard: meadow hills, cave with crystals, desert dunes and a pyramid */
+function pcSky(g,wl,W2,H2,t){
+  const sky=g.createLinearGradient(0,0,0,H2);
+  if(wl===2){sky.addColorStop(0,'#14141c');sky.addColorStop(1,'#2a2a36')}else if(wl===3){sky.addColorStop(0,'#f0a860');sky.addColorStop(1,'#ffd890')}else{sky.addColorStop(0,'#4a8ce0');sky.addColorStop(1,'#a8d8ff')}
+  g.fillStyle=sky;g.fillRect(0,0,W2,H2);
+  if(wl===1){g.fillStyle='#fff';for(const [x,y] of[[20,16],[100,26]]){const xx=Math.round((x+t*4)%(W2+40))-20;g.fillRect(xx,y,22,5);g.fillRect(xx+5,y-4,12,4)}
+    g.fillStyle='#3f8a3f';for(let x=0;x<W2;x+=2){const h=Math.round(14+Math.sin(x*.05)*6);g.fillRect(x,H2-18-h,2,h)}}
+  else if(wl===2){g.fillStyle='#3a3a48';for(let x=0;x<W2;x+=4){g.fillRect(x,0,4,Math.round(10+Math.abs(Math.sin(x*.21))*14))}
+    for(let i=0;i<5;i++){const x=12+i*34,y=H2-30-(i%2)*8;g.fillStyle=((t*2+i)|0)%3?'#7ae0ff':'#d8faff';g.fillRect(x,y,3,6);g.fillRect(x-1,y+2,5,2)}}
+  else{g.fillStyle='#e8b060';g.beginPath();g.moveTo(W2-70,H2-18);g.lineTo(W2-40,H2-58);g.lineTo(W2-10,H2-18);g.fill();g.fillStyle='#c8904a';g.beginPath();g.moveTo(W2-40,H2-58);g.lineTo(W2-10,H2-18);g.lineTo(W2-40,H2-18);g.fill();
+    g.fillStyle='#fff3c0';g.fillRect(24,18,10,10);g.fillRect(22,20,14,6)}
+}
+function refreshMailDot(){const d=$('hmaildot');if(d)d.hidden=!stats.mailNew}
 function countUp(el){
   const to=+el.dataset.n,pre=el.dataset.p||'',dur=+el.dataset.d||1000,tick=el.dataset.t==='1',t0=performance.now();let lt=0;
   const f=n=>{const k=Math.min(1,(n-t0)/dur);el.textContent=pre+Math.round(to*(1-Math.pow(1-k,3)));
@@ -5942,18 +6001,47 @@ function countUp(el){
     if(k<1)requestAnimationFrame(f)};
   requestAnimationFrame(f);
 }
+/* 0.5: shared helpers for run time, world names and a fighter portrait holding the run's weapon */
+const WNAME={1:'Dragon\u2019s Curse',2:'Golem\u2019s Hideout',3:'Pharaoh\u2019s Sands'};
+const fmtT=s=>{s=Math.max(0,Math.round(s||0));const h=(s/3600)|0,m=((s%3600)/60)|0,x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')};
+const WGROUND={1:['#2f6b34','#3f8a3f','#1e4a24'],2:['#4a4a56','#62626f','#2e2e38'],3:['#b98a4c','#d4a660','#8a6232']};
+/* draws a fighter standing on a little patch of their world, holding a weapon skin. gy is the ground line. */
+function drawFighter(g,ch,sk,ws,x,gy,U,t,wl){
+  const gr=WGROUND[wl]||WGROUND[1];
+  g.fillStyle=gr[2];g.fillRect(0,gy,g.canvas.width,g.canvas.height-gy);g.fillStyle=gr[0];g.fillRect(0,gy,g.canvas.width,Math.max(2,U));
+  g.fillStyle=gr[1];for(let i=0;i<g.canvas.width;i+=U*3)g.fillRect(i+((i/U)%2?U:0),gy-U,U,U);
+  const cs=charSprite(ch,'w0',sk),cy=gy-cs.c.height*U*.38,bob=Math.round(Math.sin(t*3))*(U>>1);
+  g.fillStyle='rgba(0,0,0,.28)';g.fillRect(Math.round(x-4*U),gy,8*U,U);
+  drawCharSpr(g,ch,x,cy+bob,U,((t*2)|0)%4===3?'w1':'w0',false,sk);
+  if(ws){g.save();g.translate(Math.round(x+2.5*U),Math.round(cy+bob+2.5*U));g.rotate(ws.tab==='g'?-.05:ws.tab==='b'?-.4:-.75+Math.sin(t*2)*.06);g.scale(U*.25,U*.25);try{weaponShape(g,ws,t)}catch(e){}g.restore()}
+}
+let portRaf=0;
+function portLoop(lose){
+  cancelAnimationFrame(portRaf);const cv=$('pport');if(!cv)return;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+  const ch=CH(),sk=cSkin(ch.id),ws=skinOf(equip)||DEFSK,wl=world,t0=performance.now();
+  $('pwho').innerHTML='<b>'+ch.n+'</b><small>'+(ws.fn||ws.n||'')+'</small>';
+  const f=n=>{if($('panel').hidden)return;const t=(n-t0)/1000,W2=cv.width,H2=cv.height;
+    const sky=g.createLinearGradient(0,0,0,H2);if(lose){sky.addColorStop(0,'#2a0710');sky.addColorStop(1,'#5a1420')}else{sky.addColorStop(0,'#3a2a08');sky.addColorStop(1,'#7a5a14')}
+    g.fillStyle=sky;g.fillRect(0,0,W2,H2);
+    /* drifting pixel motes: embers when you fall, gold sparks when you win */
+    for(let i=0;i<14;i++){const px=(i*37+t*(8+i%5*3))%W2,py=H2-((t*(10+i%4*6)+i*23)%H2);g.globalAlpha=.25+.5*((i%3)/2);g.fillStyle=lose?(i%2?'#ff4d5e':'#ff8a3d'):(i%2?'#ffd36b':'#fff3a8');g.fillRect(px|0,py|0,2,2)}
+    g.globalAlpha=1;
+    try{drawFighter(g,ch,sk,ws,W2/2-4,H2-14,3,t,wl)}catch(e){}
+    portRaf=requestAnimationFrame(f)};
+  portRaf=requestAnimationFrame(f);
+}
 function showRunPanel(title,note,btnA,btnB,lose){
   const L=lastRun,a=L.after,lv=a.L>L.before.L,start=lv?0:Math.min(100,L.before.x/L.before.need*100);
   $('panel').className='ov'+(lose?' lose':'');
   $('ptitle').innerHTML=title;
   const st=(k,v,pre)=>'<div><dt>'+k+'</dt><dd data-n="'+v+'" data-p="'+(pre||'')+'">'+(pre||'')+'0</dd></div>';
-  $('pstats').innerHTML=st('Score',score)+st('Wave',wave)+(loop?st('Loop',loop+1):'')+st('Kills',kills);
+  $('pstats').innerHTML=st('Score',score)+st('Wave',wave)+(loop?st('Loop',loop+1):'')+st('Kills',kills)+'<div><dt>Time</dt><dd>'+fmtT(runT)+'</dd></div>'+'<div><dt>World</dt><dd>'+world+'</dd></div>';
   $('prew').innerHTML='<div class="rwi xp"><small>XP</small><b data-n="'+L.gained+'" data-p="+" data-d="800" data-t="1">+0</b></div><div class="rwi cn"><small>COINS</small><b data-n="'+L.coins+'" data-p="+" data-d="800" data-t="1">+0</b><i class="coin"></i></div>';
   $('pxp').innerHTML=(lv?'<div class="lvup">LEVEL UP · '+L.before.L+' → '+a.L+(L.lvCoins?' · +'+L.lvCoins+' coins':'')+'</div>':'')+xpHtml(a,start)+'<div class="clnote" style="margin-top:6px">'+clUp(L)+'</div>';
   $('pnote').textContent=(note?note+' ':'')+'Coins: '+L.runCoins+' from this run (waves and gold enemies)'+(L.lvCoins?', '+L.lvCoins+' from level ups':'')+'. You now have '+wallet+'.';
   $('pbtn').textContent=btnA;$('hbtn').textContent=btnB;$('wbtn').style.display='none';
-  $('panel').hidden=false;$('pbtn').focus();
-  $('pstats').querySelectorAll('dd').forEach(el=>{el.dataset.d=600;countUp(el)});
+  $('panel').hidden=false;$('pbtn').focus();portLoop(lose);{const ap=$('achpops');if(ap)ap.innerHTML=''} /* the panel lists them; no toasts left floating over the menus */
+  $('pstats').querySelectorAll('dd[data-n]').forEach(el=>{el.dataset.d=600;countUp(el)});
   $('prew').querySelectorAll('b').forEach(countUp);
   setTimeout(()=>{const i=$('pxp').querySelector('.xpb i');if(i){i.style.transition='width .8s cubic-bezier(.2,.8,.2,1)';i.style.width=Math.min(100,a.x/a.need*100).toFixed(1)+'%'}},120);
   /* achievements earned this run fade in one by one, quickly, after the counters finish */
@@ -5962,7 +6050,7 @@ function showRunPanel(title,note,btnA,btnB,lose){
   [...pa.children].forEach((el,i)=>setTimeout(()=>{if($('panel').hidden)return;el.classList.add('in');if(i>0)sfx(700+i*60,.08,'triangle',.04,1.3)},950+i*170));
 }
 function gameOver(){
-  state='over';finalize();
+  state='over';endHow='fell';finalize();
   stage.classList.add('dead');
   spark(p.x,p.y,'#f1ead8',40,460);spark(p.x,p.y,'#ff4d5e',30,380);
   slashes.push({x:p.x,y:p.y,a:0,arc:TAU,R:260,t:0,life:.7,heavy:true,col:'#ff4d5e'});
@@ -5991,16 +6079,19 @@ function openWin(){
   const L=acct(),pend=Math.round(runXp);
   $('panel').className='ov';
   $('ptitle').innerHTML=world===3?'THE SERPENT <em>FALLS</em>':world===2?'THE COLOSSUS <em>FALLS</em>':'THE DRAGON <em>FALLS</em>';
-  $('pstats').innerHTML='<div><dt>Score</dt><dd>'+score+'</dd></div><div><dt>Loop</dt><dd>'+(loop+1)+'</dd></div><div><dt>Kills</dt><dd>'+kills+'</dd></div><div><dt>XP this run</dt><dd>+'+pend+'</dd></div>';
+  $('pstats').innerHTML='<div><dt>Score</dt><dd>'+score+'</dd></div><div><dt>Loop</dt><dd>'+(loop+1)+'</dd></div><div><dt>Kills</dt><dd>'+kills+'</dd></div><div><dt>Time</dt><dd>'+fmtT(runT)+'</dd></div><div><dt>XP this run</dt><dd>+'+pend+'</dd></div>';$('prew').innerHTML='';$('pach').innerHTML='';
   $('pxp').innerHTML=xpHtml(L);
   $('pnote').textContent='End the run to bank your XP and coins, or loop back to wave 1. Enemies get tougher, your build carries over, and XP gets ×'+xpMul(loop+1).toFixed(2)+' (stacks every loop).';
+  if(!brMode&&loop===0&&!cheatsOn()&&!devWarp&&!tut){stats.pbt=stats.pbt||{};const old=stats.pbt[world],tt=Math.round(runT);
+    if(!old||tt<old){stats.pbt[world]=tt;saveMeta();$('prew').innerHTML='<div class="pbnew">&#9733; NEW BEST TIME &middot; WORLD '+world+' &middot; '+fmtT(tt)+(old?' <small>(was '+fmtT(old)+')</small>':'')+'</div>';sfx(1046,.2,'triangle',.06,1.2)}
+    else $('prew').innerHTML='<div class="pbnew old">TIME '+fmtT(tt)+' <small>&middot; BEST '+fmtT(old)+'</small></div>'}
   if(w2New){$('pnote').textContent+=' World 2: Golem\u2019s Hideout is now unlocked.';w2New=false}
   if(w3New){$('pnote').textContent+=' World 3: Pharaoh\u2019s Sands is now unlocked. Pick it after you choose your weapon.';w3New=false}
   if(world===2){$('pnote').textContent+=' Or follow the tunnel on to World 3: Pharaoh\u2019s Sands. Your XP and coins are banked, but the run resets, so you lose every ability you picked up (only what is built into your character stays).'}
   if(world===1){$('pnote').textContent+=' Or take the stairs down to World 2: Golem\u2019s Hideout. Your XP and coins are banked, but the run resets, so you lose every ability you picked up (only what is built into your character stays).'}
   $('wbtn').style.display=(world===1||(world===2&&w3Open()))?'':'none';$('wbtn').textContent=world===1?'WORLD 2':'WORLD 3';
   $('pbtn').textContent='LOOP · ×'+xpMul(loop+1).toFixed(2)+' XP';$('hbtn').textContent='END RUN';
-  $('panel').hidden=false;$('pbtn').focus();
+  $('panel').hidden=false;$('pbtn').focus();portLoop(false);
   winJingle();
 }
 function loopGame(){
@@ -6121,6 +6212,7 @@ let mvx=0,mvy=0;
 let hbT=0,lowHp=false;
 function update(dt){
   if(state==='menu'||state==='pause')return;
+  if(state==='play'||state==='shop')runT+=dt;
   if(hitstop>0){hitstop-=dt;return}
   time+=dt;
   shake*=Math.exp(-dt*12);
@@ -9272,5 +9364,62 @@ body:has(#pause:not([hidden])) #hotbar,body:has(#pause:not([hidden])) #dashwrap,
   #title .tdesc{font-size:10px!important;min-height:0!important;margin:0!important;display:block!important;text-align:center;max-width:none!important}
   #title .trow .btn{padding:8px 18px!important;min-height:0!important}
 }
+/* ===== 0.5: game over / run complete screen, pixel-art frame with a fighter portrait ===== */
+#panel .box{display:grid!important;grid-template-columns:150px minmax(0,1fr);column-gap:22px;row-gap:10px;align-items:start;max-width:min(680px,94vw)!important;max-height:calc(100% - 24px);overflow:auto;box-sizing:border-box;
+  background:#0b0d12!important;border:0!important;border-radius:0!important;padding:22px 24px!important;text-align:left;
+  box-shadow:0 0 0 4px #8a6a1e,0 0 0 8px #3a2a08,0 0 0 12px #ffd36b,0 18px 50px rgba(0,0,0,.6)!important;animation:pnlIn .35s steps(6) both}
+#panel.lose .box{box-shadow:0 0 0 4px #7a1b28,0 0 0 8px #3a0a12,0 0 0 12px #ff4d5e,0 18px 50px rgba(0,0,0,.6)!important}
+#panel .box>*:not(.pport){grid-column:2;margin:0}
+#panel .pport{grid-column:1;grid-row:1/span 8;display:flex;flex-direction:column;gap:8px;align-items:stretch;position:sticky;top:0}
+#panel #pport{width:150px;height:150px;image-rendering:pixelated;box-shadow:inset 0 0 0 3px #ffd36b,0 0 0 3px #3a2a08;background:#14100a}
+#panel.lose #pport{box-shadow:0 0 0 3px #ff4d5e,0 0 0 6px #3a0a12}
+#panel:not(.lose) #pport{box-shadow:0 0 0 3px #ffd36b,0 0 0 6px #3a2a08}
+#pwho{display:flex;flex-direction:column;gap:3px;text-align:center}
+#pwho b{font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;line-height:1.4}
+#pwho small{font-family:'Silkscreen',monospace;font-size:10px;color:#ffd36b;letter-spacing:.06em}
+#panel.lose #pwho small{color:#ff8a9a}
+#panel #ptitle{font-family:'Press Start 2P',monospace!important;font-size:clamp(20px,3.2vw,30px)!important;line-height:1.15;text-shadow:3px 3px 0 #000}
+#panel .stats{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px!important}
+#panel .stats div{background:#141822;padding:6px 8px;box-shadow:inset 0 0 0 2px #232a38}
+#panel .stats dt{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.12em}
+#panel .stats dd{font-family:'Press Start 2P',monospace;font-size:14px;margin-top:4px}
+#panel .rw>div,#panel .pa{border-radius:0!important}
+#panel #pnote{font-size:12px;line-height:1.5;color:#c9cfdb}
+#panel #pach:empty{display:none}
+#panel #pach{max-height:150px;overflow:auto}
+#panel .row{margin-top:4px!important;flex-wrap:wrap;position:sticky;bottom:-22px;z-index:2;background:linear-gradient(to bottom,rgba(11,13,18,0),#0b0d12 30%);padding:10px 0 4px}
+#panel .lvup{font-family:'Silkscreen',monospace!important;font-size:12px!important;letter-spacing:.12em;white-space:normal;line-height:1.4}
+#panel .row .btn{border-radius:0!important;font-family:'Silkscreen',monospace;font-weight:700;letter-spacing:.16em}
+@keyframes pnlIn{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body:has(#panel:not([hidden])) .tbtn,body:has(#panel:not([hidden])) #hotbar,body:has(#panel:not([hidden])) #dashwrap,body:has(#panel:not([hidden])) #hint{visibility:hidden}
+@media (max-width:620px){#panel .box{grid-template-columns:1fr}#panel .box>*:not(.pport){grid-column:1}#panel .pport{grid-row:auto;flex-direction:row;align-items:center;position:static}#panel #pport{width:84px;height:84px}#pwho{text-align:left}}
+@media (max-height:480px){#panel .box{padding:12px 16px!important;row-gap:6px;grid-template-columns:110px minmax(0,1fr);max-height:calc(100% - 28px)}#panel #pport{width:110px;height:110px}#panel #ptitle{font-size:18px!important}
+  #panel .stats dd{font-size:11px}#panel .stats div{padding:4px 6px}#panel #pnote{font-size:10px}#panel #pach{max-height:none}#panel .row{bottom:-12px;padding:6px 0 2px}#panel .row .btn{padding:8px 16px;min-height:0}}
+/* ===== 0.5: mailbox button + run postcard ===== */
+.hfoot .hstack{position:relative}
+.hfoot .hstack .hmail{position:absolute;right:calc(100% + 8px);top:0;bottom:0;width:44px;padding:0!important;display:grid;place-items:center}
+.hfoot .hstack .hmail svg{image-rendering:pixelated}
+@media (max-width:700px),(max-height:480px){.hfoot .hstack .hmail{position:static;width:auto;min-width:40px}}
+#mail .box{max-width:min(760px,94vw)}
+.pcempty{text-align:center;padding:30px 10px;font-family:'Silkscreen',monospace}.pcempty p{font-family:'Press Start 2P',monospace;font-size:14px;margin:0 0 8px}
+.pcard{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;background:#f4ead2;color:#2a2018;padding:14px;box-shadow:0 0 0 4px #c8b48a,0 0 0 8px #5a4a30,0 10px 30px rgba(0,0,0,.5);transform:rotate(-.6deg);animation:pcIn .45s steps(7) both}
+@keyframes pcIn{from{transform:rotate(-6deg) translateY(30px);opacity:0}to{transform:rotate(-.6deg);opacity:1}}
+.pcart{position:relative;border-right:2px dashed #b8a47a;padding-right:14px}
+.pcart canvas{width:100%;aspect-ratio:4/3;image-rendering:pixelated;display:block;box-shadow:0 0 0 3px #2a2018}
+.pcgreet{position:absolute;left:8px;top:8px;background:rgba(10,14,30,.55);padding:4px 6px;font-family:'Silkscreen',monospace;font-size:11px;color:#fff;text-shadow:2px 2px 0 #000;line-height:1.2}.pcgreet b{font-family:'Press Start 2P',monospace;font-size:13px}
+.pcside{position:relative;padding-left:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pcstamp{align-self:flex-end;width:62px;padding:6px 4px;background:#ff8a3d;color:#fff;text-align:center;outline:3px dotted #f4ead2;outline-offset:-6px;box-shadow:0 0 0 2px #2a2018}
+.pcard.w1 .pcstamp{background:#3f8a3f}.pcard.w2 .pcstamp{background:#62626f}.pcard.w3 .pcstamp{background:#c8904a}
+.pcstamp b{display:block;font-family:'Press Start 2P',monospace;font-size:20px}.pcstamp small{display:block;font-family:'Silkscreen',monospace;font-size:7px;line-height:1.2}
+.pcpost{position:absolute;right:64px;top:6px;font-family:'Silkscreen',monospace;font-size:10px;color:#7a2a2a;border:2px solid #7a2a2a;border-radius:50%;padding:10px 8px;transform:rotate(-12deg);opacity:.75}
+#mail .pcres{font-family:'Press Start 2P',monospace;font-size:12px;margin:2px 0;color:#2a2018!important;text-shadow:none}
+.pcst{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0}
+.pcst div{border-bottom:2px solid #d8c8a0;padding-bottom:2px;min-width:0}
+#mail .pcst dt{font-family:'Silkscreen',monospace;font-size:9px;letter-spacing:.1em;color:#8a7a5a;text-transform:uppercase}
+#mail .pcst dd{color:#2a2018;margin:0;font-family:'Silkscreen',monospace;font-weight:700;font-size:13px;overflow-wrap:anywhere}
+.pcnote{font-family:'Silkscreen',monospace;color:#8a3a2a}
+@media (max-width:620px){.pcard{grid-template-columns:1fr}.pcart{border-right:0;border-bottom:2px dashed #b8a47a;padding:0 0 12px}.pcside{padding:12px 0 0}}
+@media (max-height:480px){.pcard{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);padding:10px}.pcst dd{font-size:11px}.pcres{font-size:10px}}
+#panel .pbnew{grid-column:1/-1;font-family:'Press Start 2P',monospace;font-size:11px;color:#1a1204;background:#ffd36b;padding:8px 10px;box-shadow:inset 0 -3px 0 #c89a2a;animation:rise .5s .3s ease-out both}#panel .pbnew small{font-family:'Silkscreen',monospace;font-size:10px}#panel .pbnew.old{background:#141822;color:#ffd36b;box-shadow:inset 0 0 0 2px #3a2a08}
 </style>
 </body></html>
