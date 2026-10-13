@@ -6909,6 +6909,8 @@ function pixelDraw(cx,cy,half,fn){
   const c=BPX.c,g=BPX.g,N=c.width;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,N,N);
   g.setTransform(1/U,0,0,1/U,(half-cx)/U+2,(half-cy)/U+2);
   const main=ctx;ctx=g;try{fn()}finally{ctx=main}
+  /* grade the boss into its world: cool slate in the Stone World, warm sand in the Sand World */
+  {const wt=world===2?'rgba(70,95,130,.18)':world===3?'rgba(220,160,80,.18)':null;if(wt){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-atop';g.fillStyle=wt;g.fillRect(0,0,sz,sz);g.globalCompositeOperation='source-over'}}
   const d=g.getImageData(0,0,sz,sz),A=d.data,on=i=>A[i*4+3]>=110;
   for(let i=0;i<sz*sz;i++)if(A[i*4+3]<40)A[i*4+3]=0;
   const add=[];for(let y=0;y<sz;y++)for(let x=0;x<sz;x++){const i=y*sz+x;if(A[i*4+3])continue;if((x>0&&on(i-1))||(x<sz-1&&on(i+1))||(y>0&&on(i-sz))||(y<sz-1&&on(i+sz)))add.push(i)}
