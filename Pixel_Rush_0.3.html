@@ -3212,6 +3212,7 @@ const UPDATES=[
   'NEW RUN skips the difficulty screen: every save keeps the difficulty you picked when you made it.',
   'The tutorial now brings out every World 1 enemy one at a time and says what to watch for. Thieves crouch and show a red line before they dash, like Lancers. Quitting the tutorial early takes you straight home.',
   'Achievements are off during the tutorial and while any cheat is on.',
+  'Gold enemies spill coins and green enemies spill XP gems on the floor. Walk over them to pick them up before they fade (25 seconds). The Updates screen only lists updates now.',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
@@ -3260,7 +3261,7 @@ function ratesHtml(){
   }catch(e){return ''}
 }
 function renderUpd(){
-  $('updlist').innerHTML=ratesHtml()+UPDATES.map(u=>'<div class="cx" style="--tc:'+u[2]+'"><b>'+u[1]+'<small>'+u[0]+'</small></b><ul>'+u[3].map(x=>'<li>'+x+'</li>').join('')+'</ul></div>').join('');
+  $("updlist").innerHTML=UPDATES.map(u=>'<div class="cx" style="--tc:'+u[2]+'"><b>'+u[1]+'<small>'+u[0]+'</small></b><ul>'+u[3].map(x=>'<li>'+x+'</li>').join('')+'</ul></div>').join('');
   try{LS.setItem('cinder-updseen',UPD_VER)}catch(e){}
   updDot();
 }
@@ -5652,6 +5653,19 @@ function hurtE(e,dmg,a,heavy,pierce){
   spark(e.x,e.y,e.c,6,200);
   if(e.hp<=0)kill(e);
 }
+/* coins and XP from gold and green enemies spill on the floor: walk over them to pick them up (they fade after 25 s) */
+const LOOT_PX={coin:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffd36b',H:'#fff4c2',D:'#c98a1c'}],xp:[['..G..','.GHG.','GHGGD','.GGD.','..D..'],{G:'#5dff7a',H:'#e2ffe6',D:'#1f9a3a'}]};
+function drawLoot(h){
+  const L=LOOT_PX[h.k],g=L[0],c=L[1],u=2.4,sx=h.k==='coin'?Math.max(.25,Math.abs(Math.cos(time*3+h.sd))):1,bob=h.vx||h.vy?0:Math.sin(time*4+h.sd)*1.5;
+  ctx.save();ctx.translate(h.x,h.y+bob);ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(-5,6,10,3);ctx.scale(sx,1);
+  ctx.fillStyle='#0a0a10';for(let y=0;y<5;y++)for(let x=0;x<5;x++)if(g[y][x]!=='.')ctx.fillRect((x-2.5)*u-1,(y-2.5)*u-1,u+2,u+2);
+  for(let y=0;y<5;y++)for(let x=0;x<5;x++){const k=g[y][x];if(k!=='.'){ctx.fillStyle=c[k];ctx.fillRect((x-2.5)*u,(y-2.5)*u,u,u)}}
+  ctx.restore();
+}
+function spillLoot(x,y,k,total,n){
+  n=Math.max(1,n|0);for(let i=0;i<n;i++){const a=R()*TAU,sp=90+R()*130;
+    drops.push({k:k,v:k==='coin'?Math.floor(total/n)+(i<Math.round(total)%n?1:0):total/n,x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,age:0,life:25,sd:R()*TAU})}
+}
 function kill(e){
   e.dead=true;kills++;stats.kills++;if(e.t==='boss'&&!e.dkb&&!brMode)stats.boss++;if(world===3&&!brMode){stats.w3k=(stats.w3k||0)+1;if(e.t==='boss')stats.w3b=(stats.w3b||0)+1}if(world===2&&!brMode){stats.w2k=(stats.w2k||0)+1;if(e.t==='boss')stats.w2b=(stats.w2b||0)+1}
   if(e.t==='boss'&&!e.dkb){
@@ -5667,8 +5681,8 @@ function kill(e){
   if(p.mods.devour)p.dv++;
   score+=e.pts*(1+Math.floor(combo/5));
   {const cm=DF().coin*(p.coinM||1)*(cheat.coinx?5:1)*(loop>0?2:1);let cg=Math.max(1,Math.round(e.pts/8*cm));
-  if(e.el==='y'){const yw=Math.max(2,Math.round((3+wave*.4)*cm*(1+.1*(upg.coin||0))));runWallet+=yw;stats.yellow++;floatTxt(e.x,e.y-e.r,'+'+yw,'#ffe14d');cg=Math.round((25+wave*3)*cm);spark(e.x,e.y,'#ffe14d',26,340);for(let q=0;q<yw&&q<10;q++)parts.push({x:e.x,y:e.y,vx:(R()-.5)*260,vy:-120-R()*160,l:.8,m:.8,c:'#ffd36b',s:5});sfx(1200,.15,'triangle',.06,1.4);setTimeout(()=>sfx(1600,.12,'triangle',.05,1.2),90)}
-  if(e.el==='g'){stats.green++;runXp+=(12+wave*.6)*xpMul()*DF().xp*(1+.1*(upg.xp||0));spark(e.x,e.y,'#5dff7a',22,320);sfx(880,.15,'triangle',.06,1.5)}
+  if(e.el==='y'){const yw=Math.max(2,Math.round((3+wave*.4)*cm*(1+.1*(upg.coin||0))));spillLoot(e.x,e.y,'coin',yw,Math.min(6,yw));stats.yellow++;cg=Math.round((25+wave*3)*cm);spark(e.x,e.y,'#ffe14d',26,340);for(let q=0;q<yw&&q<10;q++)parts.push({x:e.x,y:e.y,vx:(R()-.5)*260,vy:-120-R()*160,l:.8,m:.8,c:'#ffd36b',s:5});sfx(1200,.15,'triangle',.06,1.4);setTimeout(()=>sfx(1600,.12,'triangle',.05,1.2),90)}
+  if(e.el==='g'){stats.green++;spillLoot(e.x,e.y,'xp',(12+wave*.6)*xpMul()*DF().xp*(1+.1*(upg.xp||0)),3);spark(e.x,e.y,'#5dff7a',22,320);sfx(880,.15,'triangle',.06,1.5)}
   coins+=cg}
   spark(e.x,e.y,e.c,18,300);spark(e.x,e.y,'#f1ead8',5,240);
   {const mb=TYPES[e.t]&&TYPES[e.t].mb;hitstop=Math.max(hitstop,mb?.12:.05);shake=Math.max(shake,mb?12:6)}
@@ -6076,6 +6090,12 @@ function update(dt){
   /* pickups */
   for(const h of drops){
     h.life-=dt;
+    if(h.k){ /* coin / XP piece: slides to a stop, then waits to be walked over */
+      h.age+=dt;if(h.vx||h.vy){h.x+=h.vx*dt;h.y+=h.vy*dt;const f=Math.exp(-dt*5);h.vx*=f;h.vy*=f;if(Math.abs(h.vx)+Math.abs(h.vy)<4)h.vx=h.vy=0;h.x=Math.min(Math.max(h.x,M+10),W-M-10);h.y=Math.min(Math.max(h.y,M+10),H-M-10)}
+      if(h.age>.35&&Math.hypot(h.x-p.x,h.y-p.y)<p.r+16){h.life=0;
+        if(h.k==='coin'){const v=Math.max(1,Math.round(h.v));runWallet+=v;floatTxt(h.x,h.y-10,'+'+v,'#ffe14d');spark(h.x,h.y,'#ffd36b',6,140);sfx(1300+R()*300,.06,'triangle',.04,1.4)}
+        else{runXp+=h.v;floatTxt(h.x,h.y-10,'+'+Math.round(h.v)+' XP','#5dff7a');spark(h.x,h.y,'#5dff7a',6,140);sfx(900+R()*200,.06,'sine',.04,1.6)}}
+      continue}
     if(Math.hypot(h.x-p.x,h.y-p.y)<p.r+14&&p.hp<p.maxhp){p.hp++;h.life=0;spark(h.x,h.y,'#ffd36b',10,160);sfx(600,.15,'triangle',.06,1.6)}
   }
   drops=drops.filter(h=>h.life>0);
@@ -7836,6 +7856,7 @@ function draw(){
   ctx.globalAlpha=.55;for(const a of amb){ctx.fillStyle=a.c;ctx.fillRect(a.x,a.y,a.s,a.s)}ctx.globalAlpha=1;}
 
   for(const h of drops){
+    if(h.k){if(h.life<4&&((h.life*8)|0)%2)continue;drawLoot(h);continue}
     if(h.life<2&&((h.life*8)|0)%2)continue;
     ctx.save();ctx.translate(h.x,h.y+Math.sin(time*4)*2);ctx.rotate(Math.PI/4);
     ctx.fillStyle='#ff4d5e';ctx.fillRect(-7,-7,14,14);ctx.strokeStyle='#ffd36b';ctx.lineWidth=2;ctx.strokeRect(-7,-7,14,14);ctx.restore();
