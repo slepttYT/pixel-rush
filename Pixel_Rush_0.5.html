@@ -5879,7 +5879,7 @@ const Online=(()=>{
   const Leaderboards={async top(board){if(!st.addr)return null;try{return (await fetchJ('http://'+st.addr+'/leaderboard?board='+encodeURIComponent(board),3000)).top}catch(e){return null}}};
   return {PROTOCOL,Core,Events,Network,Identity,ServerBrowser,Leaderboards,st};
 })();
-let raceMode=false,raceWant=null,raceTarget=0,raceQ=0,raceSentT=0,raceDone=false,olView='browse',olBoard='wins',olBoardRows=null;
+let raceGot=0,raceMode=false,raceWant=null,raceTarget=0,raceQ=0,raceSentT=0,raceDone=false,olView='browse',olBoard='wins',olBoardRows=null;
 const escH=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 function olStatusBtn(){const b=$('honst');if(!b)return;const on=Online.Network.online();b.textContent=on?'CONNECTED':'VERSUS';b.className='dlyst'+(on?' claim':'')}
 function renderOnline(){
@@ -5904,7 +5904,7 @@ function renderOnline(){
       +'<div class="olcard"><h3 class="pdh">Race settings '+(lead?'(you are the leader)':'(the leader picks)')+'</h3>'
       +'<div class="cfgwd ol5">'+wbtn+'</div>'
       +'<div class="olrow2"><span>FIRST TO WAVE</span>'+[10,20,30].map(t=>'<button type="button" class="btn ghost sm'+(S.target===t?' on':'')+'" data-owt="'+t+'"'+(lead?'':' disabled')+'>'+t+'</button>').join('')+'</div>'
-      +'<div class="olrow2"><span>DIFFICULTY</span>'+Object.keys(DIFFS).map(k=>'<button type="button" class="btn ghost sm'+(S.diff===k?' on':'')+'" data-owd="'+k+'"'+(lead?'':' disabled')+'>'+DIFFS[k].n.split(' ')[0]+'</button>').join('')+'</div>'
+      +'<div class="olrow2"><span>DIFFICULTY</span>'+Object.keys(DIFFS).map(k=>'<button type="button" class="btn ghost sm'+(S.diff===k?' on':'')+'" data-owd="'+k+'"'+(lead?'':' disabled')+'>'+({easy:'EASY',medium:'MEDIUM',hard:'HARD',nowin:'BRUTAL'})[k]||DIFFS[k].n+'</button>').join('')+'</div>'
       +'<div class="olrow2 wrap"><span>MODIFIERS</span>'+MODS.map(m=>'<button type="button" class="btn ghost sm'+(S.mods.includes(m[0])?' on':'')+'" data-owm="'+m[0]+'"'+(lead?'':' disabled')+' title="'+escH(m[2])+'">'+m[1]+'</button>').join('')+'</div>'
       +'<p class="note">You race as '+escH(CH().n)+' with your '+EVO_NAME[wType].toLowerCase()+'. Clearing a wave sends '+'extra enemies to everyone else.</p></div></div>'
       +(st.info?'<p class="note olinfo">'+escH(st.info)+'</p>':'')
@@ -5939,7 +5939,7 @@ $('olbody').addEventListener('click',e=>{
 });
 $('olbody').addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='olchatin'){e.preventDefault();const i=e.target;if(i.value.trim()){Online.Network.send({t:'chat',text:i.value});i.value=''}}else if(e.target.id==='oladdr'||e.target.id==='olpw'){e.preventDefault();Online.Identity.set($('olname').value);Online.Network.connect($('oladdr').value,$('olpw').value);renderOnline()}}e.stopPropagation()});
 $('olbody').addEventListener('change',e=>{if(e.target.id==='olname')Online.Identity.set(e.target.value)});
-$('honline').addEventListener('click',e=>{if(state==='menu'||state==='over')openSub('online',e.currentTarget)});
+$('honline').addEventListener('click',e=>{if(state==='menu')openSub('online',e.currentTarget)});
 for(const k of ['status','room','browser','chat','info'])Online.Events.on(k,()=>{olStatusBtn();if(sub==='online'){const fo=document.activeElement&&document.activeElement.id,v=fo&&$(fo)?$(fo).value:null;renderOnline();if(fo&&$(fo)){$(fo).focus();if(v!==null&&$(fo).value!==v)$(fo).value=v}}});
 Online.Events.on('countdown',n=>{if(sub==='online'||state==='menu'){banner('RACE STARTS IN '+n);sfx(440,.1,'square',.05,1)}});
 Online.Events.on('go',m=>{
@@ -5949,9 +5949,9 @@ Online.Events.on('go',m=>{
   diff=DIFFS[m.diff]?m.diff:diff;selWorld=m.world;raceWant=m;
   worldGo=true;nwGo=true;try{beginRun()}finally{nwGo=false;worldGo=false;raceWant=null}
 });
-Online.Events.on('attack',m=>{if(!raceMode||raceDone)return;raceQ+=Math.max(1,Math.min(6,m.n|0));banner(String(m.from).toUpperCase()+' SENT '+m.n+' ENEMIES!');sfx(160,.2,'sawtooth',.05,.6)});
+Online.Events.on('attack',m=>{if(!raceMode||raceDone)return;raceGot=(raceGot||0)+1;raceQ+=Math.max(1,Math.min(6,m.n|0));banner(String(m.from).toUpperCase()+' SENT '+m.n+' ENEMIES!');sfx(160,.2,'sawtooth',.05,.6)});
 Online.Events.on('race',ps=>{if(!raceMode)return;renderRaceHud(ps)});
-Online.Events.on('results',()=>{if(sub==='online')renderOnline();else if(state==='over'||state==='menu'){olView='browse';openSub('online',$('honline'))}});
+Online.Events.on('results',()=>{if(sub==='online')renderOnline();else if(state==='over'||state==='menu'){if(state==='over')showHome();olView='browse';openSub('online',$('honline'))}}); /* the run is already banked: go home and show the standings */
 function renderRaceHud(ps){
   const h=$('racehud');if(!h)return;h.hidden=!raceMode;if(!raceMode)return;const me=Online.st.me||{};
   h.innerHTML='<b>FIRST TO WAVE '+raceTarget+'</b>'+(ps||[]).slice().sort((a,c)=>c.wave-a.wave).map(p=>'<div class="'+(p.id===me.id?'me':'')+(p.alive?'':' out')+'"><span>'+escH(p.name)+'</span><em>W'+p.wave+(p.done&&p.alive?' &#10003;':!p.alive?' &#10005;':' &middot; '+p.hp+'&#9829;')+'</em></div>').join('')+(Online.Network.online()?'':'<div class="out"><span>connection lost</span></div>');
@@ -10318,7 +10318,7 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 .olhelp ol{margin:4px 0 6px 18px;padding:0;font-size:12px;line-height:1.5}.olhelp small{color:#9ec8a0;font-size:10px}
 .oltabs .btn.on{box-shadow:inset 0 0 0 2px #ffd36b;color:#ffd36b}
 .olinfo{color:#ffd36b}
-#racehud{position:absolute;left:12px;top:64px;min-width:150px;background:rgba(8,12,10,.72);box-shadow:inset 0 0 0 2px #1e6b2c;padding:6px 8px;font-family:'Silkscreen',monospace;font-size:10px;z-index:5;pointer-events:none}
+#racehud{position:absolute;left:12px;top:96px;min-width:150px;background:rgba(8,12,10,.72);box-shadow:inset 0 0 0 2px #1e6b2c;padding:6px 8px;font-family:'Silkscreen',monospace;font-size:10px;z-index:5;pointer-events:none}
 #racehud b{display:block;color:#ffd36b;font-size:9px;letter-spacing:.12em;margin-bottom:3px}#racehud div{display:flex;justify-content:space-between;gap:10px;color:#e9ffe0}#racehud div.me span{color:#ffd36b}#racehud div.out{opacity:.5}#racehud em{font-style:normal}
 @media (max-width:760px),(max-height:480px){.olgrid{grid-template-columns:1fr}.ol5 .cwd small{display:none}}
 </style>
