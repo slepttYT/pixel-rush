@@ -3235,6 +3235,7 @@ const UPDATES=[
   'Every boss gets tired: the 1st boss of a world attacks twice, the 2nd three times, the 3rd four times and so on, then is staggered for 3 seconds. The Rage Goblin King is slower, and his club stays stuck longer.',
   'On the title screen your fighter shows off a different mythic weapon every 10 seconds: swords swing, guns shoot, and bombs (the real bomb skin) get thrown and explode.',
   'A pixel-block wipe plays when you move between the title screen, the save screen and the main menu.',
+  'Fixed: boss attack warnings (red circles, charge lines, breath cones, landing zones) were cut off or invisible away from the boss. They now always show in full.',
   'Final boss entrances are now cinematics: the camera looks up and follows the Dragon down, pans into the vault as the Golem wakes and smashes through the wall, and the Pharaoh rises out of the sand.',
   'New looks for the Catfish (a real princess until you walk up), the Lake Hydra, and the Keeper (an armoured vault warden). The Dark King and the Rogue have arms and legs.',
   'The main menu battle shows at most 3 enemies at a time. Text no longer overlaps: menu footers hide behind menu screens, and the hotbar no longer shows over the pause menu.',
@@ -4790,10 +4791,12 @@ function drawW1(e,fl){
   const q=e.spawnT>0?Math.min(1,e.spawnT/1.4):0,jy=k==='gob'?-q*q*320:0,fc=Math.cos(Math.atan2(p.y-e.y,p.x-e.x))>=0?1:-1,wk=e.wk||0,bob=Math.abs(Math.sin(wk))*-3,HR={gob:66,knight:70,giant:84,keeper:80}[k];
   const wm=Math.min(1,1-e.w1t/(e.w1m||1));let ang=-1+Math.sin(wk)*.3;if(s==='wind')ang=-1-1.6*wm;else if(s==='rec')ang=1-.8*wm;else if(s==='stuck')ang=1.05+Math.sin(T*45)*.04*Math.min(1,e.w1t);
   const mix=(a,b,t)=>{const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),f=v=>Math.round(((A>>v)&255)*(1-t)+((B>>v)&255)*t);return '#'+((1<<24)|(f(16)<<16)|(f(8)<<8)|f(0)).toString(16).slice(1)};
+  const _pc=ctx;if(PXM)ctx=PXM; /* warnings straight onto the arena */
   if(HR&&s==='wind'){const w=Math.min(1,1-e.w1t/(e.w1m||1)),ix=e.x+e.ax*(r+46),iy=e.y+e.ay*(r+46);ctx.save();ctx.globalAlpha=.15+.3*w;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(ix,iy,HR*w,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(ix,iy,HR,0,TAU);ctx.stroke();ctx.restore()}
   if(k==='hydra'&&(s==='tele'||(s==='rest'&&e.w1t>.9))){const w=s==='tele'?Math.min(1,1-e.w1t/(e.w1m||1)):1;ctx.save();ctx.globalAlpha=.15+.3*w;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.tx,e.ty,72*w,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.tx,e.ty,72,0,TAU);ctx.stroke();ctx.restore()}
   if(k==='knight'&&e.mounted!==false&&s==='aim'){const w=Math.min(1,1-e.w1t/(e.w1m||1));ctx.save();ctx.globalAlpha=.12+.3*w;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=r*1.6;ctx.lineCap='butt';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.cx*620,e.y+e.cy*620);ctx.stroke();ctx.restore()}
   if(k==='egg'&&s==='tele'){const w=Math.min(1,1-e.w1t/(e.w1m||1));ctx.save();ctx.globalAlpha=.2+.5*w;ctx.strokeStyle='#ff7a2a';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(e.x,e.y,r+10+w*60,0,TAU);ctx.stroke();ctx.restore()}
+  ctx=_pc;
   ctx.save();ctx.globalAlpha=.34;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+r*1.0,r*(1.2-.5*q),r*.3,0,0,TAU);ctx.fill();ctx.restore();
   ctx.save();ctx.translate(e.x,e.y+jy+bob);ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle=INK;ctx.lineWidth=3;
   const L=(x1,y1,x2,y2,w,c)=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineWidth=w+5;ctx.strokeStyle=INK;ctx.stroke();ctx.lineWidth=w;ctx.strokeStyle=F(c);ctx.stroke();ctx.strokeStyle=INK;ctx.lineWidth=3};
@@ -7293,12 +7296,15 @@ function drawPharaoh(e,fl){drawSandBoss(e,fl,'The Pharaoh',1.6)} /* the vault fi
 /* ---------- boss pixel renderer: the vector bosses of Worlds 1 and 2 (and the Dragon and Golem) draw onto a grid at 2 screen px per pixel,
    get an ink outline, and are blitted back without smoothing, so they match the pixel arenas, mobs and weapons ---------- */
 const BPX={c:null,g:null};
+/* PXM is the real screen while pixelDraw paints a boss into its small pixel canvas. Attack warnings (red circles,
+   lines, zones) switch to it so they are never clipped to the boss's box or wiped by the pixel pass */
+let PXM=null;
 function pixelDraw(cx,cy,half,fn,noTint){
   const U=2,sz=Math.ceil(half*2/U)+4;
   if(!BPX.c||BPX.c.width<sz){BPX.c=document.createElement('canvas');BPX.c.width=BPX.c.height=sz;BPX.g=BPX.c.getContext('2d',{willReadFrequently:true})}
   const c=BPX.c,g=BPX.g,N=c.width;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,N,N);
   g.setTransform(1/U,0,0,1/U,(half-cx)/U+2,(half-cy)/U+2);
-  const main=ctx;ctx=g;try{fn()}finally{ctx=main}
+  const main=ctx;PXM=main;ctx=g;try{fn()}finally{ctx=main;PXM=null}
   /* grade the boss into its world: cool slate in the Stone World, warm sand in the Sand World */
   {const wt=noTint?null:world===2?'rgba(70,95,130,.18)':world===3?'rgba(220,160,80,.18)':null;if(wt){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-atop';g.fillStyle=wt;g.fillRect(0,0,sz,sz);g.globalCompositeOperation='source-over'}}
   const d=g.getImageData(0,0,sz,sz),A=d.data,on=i=>A[i*4+3]>=110;
@@ -7311,6 +7317,7 @@ function pixelDraw(cx,cy,half,fn,noTint){
 const bossHalf=e=>Math.min(440,e.r*4.6+70);
 function drawBossBase(e,fl){
   const ph=e.phase,cf=e.cfg,col=fl?'#ffffff':(ph===3?'#ff5a3d':cf.bc);
+  const _pc=ctx;if(PXM)ctx=PXM; /* warnings straight onto the arena */
   if(e.bs==='slam'){
     const k=Math.min(1,e.st/e.wd);
     ctx.globalAlpha=.18+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.tx,e.ty,e.slamR*k,0,TAU);ctx.fill();
@@ -7319,6 +7326,7 @@ function drawBossBase(e,fl){
   if(e.zs&&(e.bs==='thorns'||e.bs==='fissure'||e.bs==='pillars')){for(const z of e.zs){if(z.done)continue;const k=Math.max(0,Math.min(1,1-z.t/z.d));ctx.globalAlpha=.1+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(z.x,z.y,z.r*k,0,TAU);ctx.fill();ctx.globalAlpha=.85;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.stroke()}ctx.globalAlpha=1}
   if(e.bs==='acid'){const k=Math.min(1,(e.st||0)/(e.fireAt||.7));ctx.save();ctx.globalAlpha=.25+.5*k;ctx.strokeStyle='#a8ff3d';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,56-26*k,0,TAU);ctx.stroke();ctx.restore()}
   if(e.bs==='maw'){const k=e.sub===0?Math.min(1,e.st/.6):1;ctx.save();ctx.globalAlpha=.12+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.x,e.y,e.r*2.1,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.setLineDash([10,8]);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
+  ctx=_pc;
   if(e.bs==='burrow'&&e.sub===2){ /* the ground bulges: get out of the circle */
     const k=Math.min(1,e.st/e.wd);
     ctx.globalAlpha=.18+.3*k;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.x,e.y,e.slamR*k,0,TAU);ctx.fill();
@@ -7637,8 +7645,10 @@ function drawFinal(e,fl){
   const fly=e.fly>0,fz=(fly&&e.fk!==2)?e.fz:0;
   if(!(e.cine&&e.y<M)){ctx.save();ctx.globalAlpha=.34*(1-fz*.5);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.85,e.r*(1.5-fz*.5),e.r*.38,0,0,TAU);ctx.fill();ctx.restore()} /* no ground shadow while it is up in the sky */
   if(fly){
+    const _pc=ctx;if(PXM)ctx=PXM;
     const pr=e.fk===2?Math.min(1,(e.flyMax-e.fly)/1.1):e.fk===3?Math.min(1,(e.flyMax-e.fly)/e.flyMax):1-fz;
     ctx.save();ctx.strokeStyle='#ff4d5e';ctx.fillStyle='#ff4d5e';ctx.globalAlpha=.1+.3*pr;ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.lx,e.ly,e.landR,0,TAU);ctx.fill();ctx.globalAlpha=.3+.6*pr;ctx.stroke();ctx.restore();
+    ctx=_pc;
 
   }
   if(e.fk===2)drawGolem(e,fl);else if(e.fk===3)drawPharaoh(e,fl);else drawDragon(e,fl);
