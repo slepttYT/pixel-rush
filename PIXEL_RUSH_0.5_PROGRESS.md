@@ -106,6 +106,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 Five worlds work; menu rotation 30 s; button colors per world; previews show weapon; exact evolution paths; evolution animation; punches front-only; spawn cooldowns per type; ambience balanced; BPM sort; cheat/pause never overlap and never resume; Save & Exit restores; daily resets at local 07:00; postcards accurate; PBs save; existing bosses/enemies/progression/cosmetics/achievements intact; HTML + EXE work; keyboard, mouse, controller, touch.
 
 ### Worlds 4 and 5 (needed by sections 4, 8, 18)
+(Code map of every world-specific path: scratchpad/world_map.md in the session scratchpad. If lost, re-run an Explore agent: grep world===2/3, w3Open, ZONES3, FIN_CFG, SB_ART, MOB_ART, MAPS, drawWorldBg.)
 - [ ] World 4 "Robot/Cyber" and World 5 "Spooky Swamp" are playable: arena backgrounds, mob looks, 10 bosses each + a final boss each, unlock W4 after beating W3, W5 after W4 (no skipping).
 
 ## Carried over from 0.3 work (unfinished)
