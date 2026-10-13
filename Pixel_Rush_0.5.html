@@ -965,7 +965,7 @@ const cv=$('cv'),stage=$('stage');let ctx=cv.getContext('2d'); /* let: bosses br
 const R=Math.random,TAU=Math.PI*2,M=18;
 let W=800,H=560,S=1,DPR=1;
 const p={r:11};
-const SETD={mv:.8,sv:.8,zoom:1,ui:1,q:1,shake:true,fps:false,res:'1920x1080',dmgN:true,autoP:true};
+const SETD={mv:.8,sv:.8,zoom:1,ui:1,q:1,shake:true,fps:false,res:'1920x1080',dmgN:true,autoP:true,amb:true};
 const RESL=['fill','1920x1080','1720x1080','2560x1080','1600x900','1440x900','1366x768','1280x720','1024x768'];
 let set=Object.assign({},SETD);
 try{const sv=JSON.parse(LS.getItem('cinder-set')||'null');if(sv&&typeof sv==='object')for(const k in SETD)if(typeof sv[k]===typeof SETD[k])set[k]=sv[k]}catch(e){}
@@ -1020,6 +1020,15 @@ function ac(){
   if(AC.state==='suspended')AC.resume();
   return AC;
 }
+/* 0.5: everything (effects, music, voices) goes through one master bus with a compressor-limiter,
+   so a pile of overlapping sounds can never peak or get painful */
+let OUT=null;
+function outBus(){
+  const A=ac();if(OUT&&OUT.ctx===A)return OUT.in;
+  const i=A.createGain(),c=A.createDynamicsCompressor(),o=A.createGain();
+  c.threshold.value=-12;c.knee.value=6;c.ratio.value=14;c.attack.value=.002;c.release.value=.18;o.gain.value=1.1;
+  i.connect(c);c.connect(o);o.connect(A.destination);OUT={ctx:A,in:i};return i;
+}
 const lastSfx={};
 function ok(key,ms){const n=performance.now();if(lastSfx[key]&&n-lastSfx[key]<ms)return false;lastSfx[key]=n;return true}
 function sfx(f,d,type,v,slide){
@@ -1029,7 +1038,7 @@ function sfx(f,d,type,v,slide){
     o.type=type||'square';o.frequency.setValueAtTime(f,t);
     if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+d);
     g.gain.setValueAtTime(Math.max(.0002,(v||.05)*set.sv),t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
-    o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+d);
+    o.connect(g);g.connect(outBus());o.start(t);o.stop(t+d);
     sfxN++;o.onended=()=>{sfxN--};
   }catch(e){}
 }
@@ -1038,7 +1047,7 @@ function noise(d,v){
   try{
     const A=ac(),n=Math.max(1,(A.sampleRate*d)|0),b=A.createBuffer(1,n,A.sampleRate),ch=b.getChannelData(0);
     for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);
-    const s=A.createBufferSource(),g=A.createGain();g.gain.value=v*set.sv;s.buffer=b;s.connect(g);g.connect(A.destination);s.start();
+    const s=A.createBufferSource(),g=A.createGain();g.gain.value=v*set.sv;s.buffer=b;s.connect(g);g.connect(outBus());s.start();
     sfxN++;s.onended=()=>{sfxN--};
   }catch(e){}
 }
@@ -1048,7 +1057,7 @@ function fnoise(d,v,ft,fq){
   try{
     const A=ac(),n=Math.max(1,(A.sampleRate*d)|0),b=A.createBuffer(1,n,A.sampleRate),ch=b.getChannelData(0);
     for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
-    const s=A.createBufferSource(),f=A.createBiquadFilter(),g=A.createGain();f.type=ft;f.frequency.value=fq;g.gain.value=v*set.sv;s.buffer=b;s.connect(f);f.connect(g);g.connect(A.destination);s.start();
+    const s=A.createBufferSource(),f=A.createBiquadFilter(),g=A.createGain();f.type=ft;f.frequency.value=fq;g.gain.value=v*set.sv;s.buffer=b;s.connect(f);f.connect(g);g.connect(outBus());s.start();
     sfxN++;s.onended=()=>{sfxN--};
   }catch(e){}
 }
@@ -1092,9 +1101,55 @@ function bossStep(e){
   const f=(e.stp?62:54)*(1.25-big*.45);
   sfx(f*1.6,.2,'sine',.16*near,.45);sfx(f,.26,'triangle',.12*near,.5);noise(.07+big*.05,.035*near);
 }
+/* 0.5: every enemy type has its own spawn call with its own 3 s cooldown, so a wave never becomes a wall of noise.
+   Bosses are exempt: they keep their entrance audio */
 function spawnSfx(e){
-  if(!ok('spawn',70))return;
-  const s=SND[e.t]||SND.goblin;sfx(s[0]*.8,.12,s[1],.025,1.8);
+  if(!e||e.t==='boss'||!ok('spawn'+e.t,3000))return;
+  const s=SND[e.t]||SND.goblin;sfx(s[0]*.8,.12,s[1],.022,1.8);setTimeout(()=>sfx(s[0]*1.2,.08,s[1],.014,1.4),70);
+}
+
+/* ---------- 0.5: world ambience. A barely-there bed that swells and fades, plus an occasional sound now and then.
+   It sits well under the music and effects, follows the SFX volume and mute, has its own switch in Settings, and only plays during a run ---------- */
+const ambS={src:[],g:null,w:0,next:2};
+const AMB_BED={1:{t:'lowpass',f:520,v:.010},2:{t:'lowpass',f:260,v:.012},3:{t:'bandpass',f:760,q:.7,v:.012,sweep:1},4:{t:'lowpass',f:420,v:.006,hum:[60,120]},5:{t:'lowpass',f:380,v:.009}};
+function ambStop(){
+  if(!ambS.g)return;const g=ambS.g,s=ambS.src;ambS.g=null;ambS.src=[];ambS.w=0;
+  try{g.gain.setTargetAtTime(0,AC.currentTime,.5)}catch(e){}
+  setTimeout(()=>{for(const n of s)try{n.stop()}catch(e){}},2500);
+}
+function ambStart(w){
+  const C=AMB_BED[w];if(!C)return;
+  try{
+    const A=ac(),n=A.sampleRate*4,b=A.createBuffer(1,n,A.sampleRate),ch=b.getChannelData(0);let l=0;
+    for(let i=0;i<n;i++){l=(l+.02*(Math.random()*2-1))/1.02;ch[i]=l*3.5}
+    const s=A.createBufferSource(),f=A.createBiquadFilter(),g=A.createGain(),sw=A.createGain(),lf=A.createOscillator(),lg=A.createGain(),t=A.currentTime;
+    s.buffer=b;s.loop=true;f.type=C.t;f.frequency.value=C.f;if(C.q)f.Q.value=C.q;
+    /* a slow swell so the bed never sounds like a flat loop */
+    lf.frequency.value=.07+Math.random()*.05;lg.gain.value=.45;sw.gain.value=.55;lf.connect(lg);lg.connect(sw.gain);
+    if(C.sweep){const l2=A.createOscillator(),g2=A.createGain();l2.frequency.value=.05;g2.gain.value=C.f*.45;l2.connect(g2);g2.connect(f.frequency);l2.start();ambS.src.push(l2)}
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(C.v*set.sv,t+2.5);
+    s.connect(f);f.connect(sw);sw.connect(g);g.connect(outBus());s.start();lf.start();ambS.src.push(s,lf);
+    if(C.hum)for(const hz of C.hum){const o=A.createOscillator(),og=A.createGain();o.type='sine';o.frequency.value=hz;og.gain.value=hz<100?.05:.025;o.connect(og);og.connect(sw);o.start();ambS.src.push(o)}
+    ambS.g=g;ambS.w=w;ambS.next=1.5+Math.random()*2;
+  }catch(e){}
+}
+/* one quiet event from the world's palette (each very soft, well below combat sounds) */
+function ambEvent(w){
+  const r=Math.random(),q=set.sv?1:0;if(!q)return;
+  if(w===1){if(r<.7){const n=2+((Math.random()*3)|0),b=2400+Math.random()*1200;for(let i=0;i<n;i++)setTimeout(()=>sfx(b*(1+Math.random()*.15),.07,'sine',.007,1.35),i*(90+Math.random()*60))}else fnoise(1.1,.012,'lowpass',650)}
+  else if(w===2){const f=900+Math.random()*700;[0,170,340].forEach((d,i)=>setTimeout(()=>sfx(f,.06,'sine',.009/(1+i*1.6),.5),d));if(r<.15)setTimeout(()=>sfx(48,.9,'sine',.012,.7),600)}
+  else if(w===3){fnoise(1.6,.014,'bandpass',600+Math.random()*700);if(r<.3)setTimeout(()=>fnoise(.9,.008,'highpass',3200),300)}
+  else if(w===4){if(r<.45){const n=2+((Math.random()*4)|0);for(let i=0;i<n;i++)setTimeout(()=>sfx(2600+Math.random()*1800,.015,'square',.0035,.6),i*35)}
+    else if(r<.75){sfx(170+Math.random()*60,.08,'square',.004,.7);fnoise(.06,.008,'bandpass',1800)}else sfx(260,.5,'sawtooth',.0028,1.8)}
+  else{if(r<.5){const f=4200+Math.random()*900;for(let k=0;k<2;k++)for(let i=0;i<3;i++)setTimeout(()=>sfx(f,.025,'sine',.004,1),k*260+i*45)}
+    else if(r<.8){const f=95+Math.random()*30;sfx(f,.13,'sawtooth',.006,.8);setTimeout(()=>sfx(f*.9,.15,'sawtooth',.005,.75),190)}else sfx(260+Math.random()*120,.09,'sine',.007,2)}
+}
+function ambSndTick(dt){
+  const want=(!muted&&set.amb!==false&&state==='play'&&room!=='vault'&&!sub)?world:0;
+  if(want!==ambS.w){ambStop();if(want)ambStart(want);return}
+  if(!want)return;
+  try{if(ambS.g)ambS.g.gain.setTargetAtTime(AMB_BED[want].v*set.sv,AC.currentTime,.3)}catch(e){}
+  ambS.next-=dt;if(ambS.next<=0){ambS.next=2+Math.random()*4.5;ambEvent(want)}
 }
 
 /* ---------- music: a home song, an upbeat shop song, and four in-game songs that rotate each wave ---------- */
@@ -1303,7 +1358,7 @@ function musicStart(){
   try{
     const A=ac();
     mus.song=SONGS[mus.cur||'home']||SONGS.home;
-    mus.gain=A.createGain();mus.gain.gain.value=mus.song.vol*set.mv;mus.gain.connect(A.destination);
+    mus.gain=A.createGain();mus.gain.gain.value=mus.song.vol*set.mv;mus.gain.connect(outBus());
     mus.step=0;mus.next=A.currentTime+.15;mus.timer=setInterval(musicTick,50);
   }catch(e){}
 }
@@ -2693,6 +2748,7 @@ function renderSet(){
    '<div class="srow"><span>FPS counter</span><button type="button" class="btn ghost" data-s="fps">'+(set.fps?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>Damage numbers</span><button type="button" class="btn ghost" data-s="dmgN">'+(set.dmgN?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>Pause when the game loses focus</span><button type="button" class="btn ghost" data-s="autoP">'+(set.autoP?'ON':'OFF')+'</button></div>'+
+   '<div class="srow"><span>World ambience</span><button type="button" class="btn ghost" data-s="amb">'+(set.amb!==false?'ON':'OFF')+'</button></div>'+
    '<div class="srow"><span>Music volume '+Math.round(set.mv*100)+'%</span>'+rg('mv',0,100)+'</div>'+
    '<div class="srow"><span>Sound effects '+Math.round(set.sv*100)+'%</span>'+rg('sv',0,100)+'</div>';
 }
@@ -4649,7 +4705,7 @@ function singNote(e,adv){
     lf.frequency.value=6;lg.gain.value=f*.012;lf.connect(lg);lg.connect(o.frequency);lg.connect(o2.frequency);
     bp.type='bandpass';bp.frequency.setValueAtTime(700,t);bp.frequency.linearRampToValueAtTime(1100,t+d*.5);bp.Q.value=2.5;
     g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.09*set.sv,t+.04);g.gain.exponentialRampToValueAtTime(.0001,t+d);
-    o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(A.destination);
+    o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(outBus());
     for(const q of[o,o2,lf]){q.start(t);q.stop(t+d+.02)}
   }catch(x){}
 }
@@ -4665,8 +4721,8 @@ function beastCall(kind){
     if(kind==='hiss'){
       const d=2.1,s=noiseSrc(d),hp=A.createBiquadFilter(),bp=A.createBiquadFilter(),g=A.createGain(),[tg,tl]=trem(11,.35);
       hp.type='highpass';hp.frequency.value=2600;bp.type='bandpass';bp.frequency.setValueAtTime(5200,t);bp.frequency.linearRampToValueAtTime(7600,t+d*.6);bp.Q.value=.7;
-      env(g,.3,.35,d,.9);s.connect(hp);hp.connect(bp);bp.connect(tg);tg.connect(g);g.connect(A.destination);
-      const s2=noiseSrc(d),b2=A.createBiquadFilter(),g2=A.createGain();b2.type='bandpass';b2.frequency.value=2200;b2.Q.value=1.2;env(g2,.12,.5,d,.9);s2.connect(b2);b2.connect(g2);g2.connect(A.destination);
+      env(g,.3,.35,d,.9);s.connect(hp);hp.connect(bp);bp.connect(tg);tg.connect(g);g.connect(outBus());
+      const s2=noiseSrc(d),b2=A.createBiquadFilter(),g2=A.createGain();b2.type='bandpass';b2.frequency.value=2200;b2.Q.value=1.2;env(g2,.12,.5,d,.9);s2.connect(b2);b2.connect(g2);g2.connect(outBus());
       for(const q of[s,s2,tl]){q.start(t);q.stop(t+d)}
     }else{
       const roar=kind==='roar',d=roar?2.2:1.7,g=A.createGain(),lp=A.createBiquadFilter(),sh=grit(),[tg,tl]=trem(roar?22:32,roar?.45:.6);
@@ -4676,8 +4732,8 @@ function beastCall(kind){
       else{o.frequency.setValueAtTime(46,t);o.frequency.linearRampToValueAtTime(68,t+.5);o.frequency.exponentialRampToValueAtTime(40,t+d);o2.frequency.setValueAtTime(69,t);o2.frequency.linearRampToValueAtTime(102,t+.5);o2.frequency.exponentialRampToValueAtTime(60,t+d);
         lp.frequency.setValueAtTime(260,t);lp.frequency.linearRampToValueAtTime(520,t+.5);lp.frequency.exponentialRampToValueAtTime(220,t+d);env(g,.4,.2,d,.7)}
       lp.Q.value=roar?2:3;
-      const og2=A.createGain();og2.gain.value=.5;o.connect(sh);o2.connect(og2);og2.connect(sh);sh.connect(lp);lp.connect(tg);tg.connect(g);g.connect(A.destination);
-      const s=noiseSrc(d),nb=A.createBiquadFilter(),ng=A.createGain();nb.type='bandpass';nb.frequency.value=roar?600:300;nb.Q.value=.9;env(ng,roar?.2:.14,.2,d,.8);s.connect(nb);nb.connect(ng);ng.connect(A.destination);
+      const og2=A.createGain();og2.gain.value=.5;o.connect(sh);o2.connect(og2);og2.connect(sh);sh.connect(lp);lp.connect(tg);tg.connect(g);g.connect(outBus());
+      const s=noiseSrc(d),nb=A.createBiquadFilter(),ng=A.createGain();nb.type='bandpass';nb.frequency.value=roar?600:300;nb.Q.value=.9;env(ng,roar?.2:.14,.2,d,.8);s.connect(nb);nb.connect(ng);ng.connect(outBus());
       for(const q of[o,o2,tl,s]){q.start(t);q.stop(t+d)}
     }
   }catch(x){}
@@ -4759,7 +4815,7 @@ function bossCall(name,mode){
         if(L.trem){const tg=A.createGain(),l=A.createOscillator(),lg=A.createGain();tg.gain.value=1-L.trem[1];l.frequency.value=L.trem[0];lg.gain.value=L.trem[1];l.connect(lg);lg.connect(tg.gain);l.start(t0);l.stop(end);node.connect(tg);node=tg}
         node.connect(g);
       }
-      g.connect(A.destination);src.start(t0);src.stop(end);
+      g.connect(outBus());src.start(t0);src.stop(end);
     }
   }catch(x){}
 }
@@ -6134,9 +6190,23 @@ function dmgNum(e,v,heavy){
 }
 function spark(x,y,c,n,sp){for(let i=0;i<n;i++){const a=R()*TAU,v=(.3+R()*.7)*(sp||200);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.3+R()*.3,m:.6,c,s:2+R()*3})}}
 const SWING={japan:[330,'triangle',.35],viking:[170,'sawtooth',.6],knight:[260,'sawtooth',.45],pirate:[300,'square',.5],cyber:[520,'sine',.3],dragon:[200,'sawtooth',.3],arcane:[420,'sine',.4],ocean:[280,'triangle',.5],shadow:[150,'square',.35],candy:[620,'triangle',.4],punch:[110,'square',.3],knife:[640,'triangle',.25]};
+/* 0.5: every melee weapon stage has its own body sound (punch thump, knife swish, machete chop, sword ring, mace whoosh);
+   the skin's tone plays softly on top so cosmetics still sound different */
+const MELEE_SFX={
+  fist:h=>{fnoise(.05,.035,'lowpass',850);sfx(h?95:130,.07,'square',.03,.5)},
+  wrap:h=>{fnoise(.06,.04,'lowpass',1000);sfx(h?90:120,.08,'square',.032,.5);sfx(260,.03,'triangle',.008,.7)},
+  knuckle:h=>{fnoise(.06,.04,'lowpass',1100);sfx(h?85:115,.08,'square',.034,.5);sfx(1900,.03,'square',.006,.8)},
+  knife:h=>{fnoise(.07,.03,'highpass',3600);sfx(h?520:700,.06,'triangle',.012,1.4)},
+  machete:h=>{fnoise(.09,.035,'bandpass',2200);sfx(h?300:420,.08,'sawtooth',.012,.6)},
+  sword:h=>{fnoise(.12,.035,'bandpass',1500);sfx(1250,.2,'triangle',.009,.98);if(h)sfx(180,.14,'sawtooth',.02,.6)},
+  mace:h=>{fnoise(.16,.04,'lowpass',700);sfx(h?70:90,.15,'sine',.04,.6)},
+  mace2:h=>{fnoise(.17,.042,'lowpass',760);sfx(h?66:86,.16,'sine',.042,.6);sfx(2100,.03,'square',.005,.9)},
+  mace3:h=>{fnoise(.18,.045,'lowpass',820);sfx(h?62:82,.17,'sine',.045,.6);setTimeout(()=>sfx(2300,.03,'square',.005,.9),40);sfx(2000,.03,'square',.005,.9)}
+};
 function swingSfx(heavy){
-  const s=skinOf(equip),w=s&&SWING[s.pk]?SWING[s.pk]:[260,'sawtooth',.45],ri=s?RI[s.r]:0;
-  sfx(w[0]*(heavy?.6:1)*(1+ri*.04),.12+ri*.01,w[1],.04,w[2]);
+  const s=skinOf(equip),w=s&&SWING[s.pk]?SWING[s.pk]:[260,'sawtooth',.45],ri=s?RI[s.r]:0,mb=s&&MELEE_SFX[s.k];
+  if(mb)mb(heavy);
+  sfx(w[0]*(heavy?.6:1)*(1+ri*.04),.12+ri*.01,w[1],mb?.016:.04,w[2]);
   if(ri>=3)sfx(w[0]*2,.1,'triangle',.02,.5);
 }
 
@@ -6196,7 +6266,8 @@ function fireRanged(sk,w,heavy,a){
     };
     if(m.btwin){lob(-.18,1,1,1);lob(.18,1,1,1)}else lob(0,1,1,1);
     if(m.bcarp){lob(0,.35,.6,.85);lob(0,.68,.6,.85)}
-    sfx(300,.14,'triangle',.05,1.8);
+    sfx(300,.12,'triangle',.022,1.8);fnoise(.08,.012,'highpass',2400); /* a quiet toss */
+    if(w.roll)setTimeout(()=>fnoise(.5,.02,'lowpass',260),250); /* the Cannonball rumbles along the ground */
   }
 }
 /* 0.5: arrows (wooden shaft, steel head, fletching; charged ones glow gold) and magic bolts (a glowing orb with a white core) */
@@ -9630,6 +9701,7 @@ function frame(now){
     const mk=musicFor();if(mk!==mus.cur)setSong(mk);
     if(state==='menu'){menuTick(dt);drawMenu()}
     else{update(dt);hud();draw()}
+    ambSndTick(dt);
   }catch(err){
     /* one bad frame must never stop the game loop */
     try{ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1}catch(e2){}
