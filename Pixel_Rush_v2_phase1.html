@@ -209,7 +209,7 @@ summary:hover{color:var(--bone)}
 .cosrow{display:flex;gap:16px;align-items:center;flex-wrap:wrap;width:100%}
 #prev{width:240px;height:120px;background:#0e1017;border:2px solid #2b3144;border-radius:6px;max-width:100%}
 #prev.pop{animation:pop .9s ease-out}
-@keyframes pop{0%{transform:scale(.7) rotate(-4deg);filter:brightness(3)}45%{transform:scale(1.1)}100%{transform:none;filter:none}}
+@keyframes pop{0%{transform:scale(.7) rotate(-4deg);filter:brightness(1.6)}45%{transform:scale(1.1)}100%{transform:none;filter:none}}
 #cosname{font-family:var(--display);font-size:20px}
 #wallet{font-size:18px;font-weight:700;color:var(--gold);padding-top:6px}
 #packs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%}
@@ -602,7 +602,7 @@ summary:hover{color:var(--bone)}
 .rc canvas{width:112px;height:56px}
 .rc b{font-size:12px;line-height:1.15;max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rc small{font-size:10px;letter-spacing:.1em;color:var(--tc);text-transform:uppercase;font-weight:700}
-.rc.win{transform:scale(1.07);box-shadow:0 0 0 2px var(--gold),0 0 24px var(--tc)}
+.rc.win{transform:scale(1.05);box-shadow:0 0 0 2px var(--gold),0 0 12px var(--tc)}
 #rmark{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:var(--gold);box-shadow:0 0 12px var(--gold);z-index:3;pointer-events:none}
 #rollres{min-height:1.6em;font-family:var(--display);font-size:clamp(14px,3.5cqw,20px);text-align:center}
 #qtybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
@@ -890,6 +890,7 @@ summary:hover{color:var(--bone)}
 /* ---- save slots: slot 1 keeps the original storage keys, slots 2 and 3 get their own prefix. Settings stay shared between slots ---- */
 const SLOT_G=['cinder-set','cinder-jukemode','cinder-muted','cinder-binds','cinder-padbinds','cinder-slot'];
 let SLOT=1;try{SLOT=Math.max(1,Math.min(3,+localStorage.getItem('cinder-slot')||1))}catch(e){}
+const fmtK=n=>{n=Math.round(n||0);const a=Math.abs(n),f=(v,s)=>(v>=100?Math.round(v):Math.round(v*10)/10)+s;return a<1000?String(n):a<999500?f(n/1000,'k'):f(n/1e6,'M')}; /* 999,999 rounds up to 1M, never 1000k */
 const slotKey=(k,n)=>{n=n||SLOT;return n>1&&SLOT_G.indexOf(k)<0?k.replace('cinder-','cinder-s'+n+'-'):k};
 const LS={getItem:k=>localStorage.getItem(slotKey(k)),setItem:(k,v)=>localStorage.setItem(slotKey(k),v),removeItem:k=>localStorage.removeItem(slotKey(k))};
 const $=id=>document.getElementById(id);
@@ -1538,9 +1539,10 @@ const skinBase=id=>id?(isDevId(id)?(dev.skin?DEVIDS[id]:null):SKINS.find(s=>s.id
 /* ---------- weapon mastery (Shop > Upgrades). Each weapon has a 10-step track of small upgrades instead of two big ones.
    Steps 4 and 8 evolve it into its next form, step 9 gives it a special, and step 10 masters it and unlocks the next weapon (fists > knife > gun > bomb).
    Bonuses are percentages, so a slow heavy weapon gains exactly as much as a fast light one and a later weapon is never just better.
-   Track costs (about 1,500 / 2,450 / 3,500 / 4,460 coins) are tuned toward roughly an hour of play per weapon ---------- */
+   Unlock prices: mastering the fists costs 1,000 coins (unlocks the knife), the knife 2,000 (gun), the gun about 3,000 (bomb); the bomb track is about 4,000.
+   Each step costs a little more than the last, so the first steps come quickly and the last ones are a goal ---------- */
 const EVO_T=['f','k','g','b'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb'};
-const WM_MAX=10,WM_BASE={f:70,k:115,g:165,b:210};
+const WM_MAX=10,WM_BASE={f:47,k:94,g:141,b:188};
 const WM_SPEC={f:['Knockout','Heavy punches stun enemies for a moment'],k:['Precision','+10% chance to crit for double damage'],g:['Armor Piercing','+25% damage to mini bosses and bosses'],b:['Napalm','Blasts set enemies on fire']};
 const WM_STEPS={
  f:[['dmg',.08],['spd',.06],['reach',.06],['form'],['dmg',.08],['spd',.06],['reach',.06],['form'],['spec'],['dmg',.1]],
@@ -1624,7 +1626,7 @@ function rollBox(pk){
 function shine(c,y0,y1,a){const g=c.createLinearGradient(0,y0,0,y1);g.addColorStop(0,'rgba(255,255,255,'+(a||.6)+')');g.addColorStop(.5,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.4)');c.fillStyle=g;c.fill()}
 function petShape(c,s,t){
   const k=s.pet,my=RI[s.r]>=5;c.lineJoin='round';c.lineCap='round';c.lineWidth=2;c.strokeStyle='#12141c';
-  if(my){c.save();c.globalCompositeOperation='lighter';c.fillStyle=s.vfx==='sun'?'hsl('+(((t*90)%360)|0)+',100%,55%)':s.glow;c.globalAlpha=.25+.1*Math.sin(t*6);c.beginPath();c.arc(0,0,19,0,TAU);c.fill();c.restore()}
+  if(my){c.save();c.globalCompositeOperation='lighter';c.fillStyle=s.vfx==='sun'?'hsl('+(((t*90)%360)|0)+',100%,55%)':s.glow;c.globalAlpha=s.dev?.25+.1*Math.sin(t*6):.12+.04*Math.sin(t*6);c.beginPath();c.arc(0,0,19,0,TAU);c.fill();c.restore()}
   const f=col=>{c.fillStyle=col;c.fill();c.stroke()},wag=Math.sin(t*8)*4,bob=Math.sin(t*6);
   const eye=(x,y,r)=>{c.fillStyle='#fff';c.beginPath();c.arc(x,y,r+.8,0,TAU);c.fill();c.fillStyle='#12141c';c.beginPath();c.arc(x+.5,y,r*.6,0,TAU);c.fill()};
   if(k==='dog'){
@@ -1900,7 +1902,7 @@ function weaponShape(c,s,t,nofx){
   const ri=RI[s.r],sun=s.vfx==='sun',hue=((t*90)%360)|0,bc=sun?'hsl('+hue+',90%,72%)':s.b,L=s.len,k=s.vk||s.k;
   c.save();
   c.lineJoin='round';c.lineCap='round';
-  if(ri>=5&&!nofx){c.shadowColor=sun?'hsl('+hue+',100%,60%)':s.glow;c.shadowBlur=9+4*Math.sin(t*7)}
+  if(ri>=5&&!nofx){c.shadowColor=sun?'hsl('+hue+',100%,60%)':s.glow;c.shadowBlur=s.dev?9+4*Math.sin(t*7):4+1.5*Math.sin(t*7)}
   c.strokeStyle='#12141c';c.lineWidth=2;
   const grip=(x0,x1)=>{c.fillStyle=s.h;c.beginPath();c.rect(x0,-2,x1-x0,4);c.fill();c.stroke();c.save();c.strokeStyle='rgba(0,0,0,.4)';c.lineWidth=1;for(let x=x0+1;x<x1-1;x+=2.6){c.beginPath();c.moveTo(x,-2);c.lineTo(x+1.6,2);c.stroke()}c.restore()};
   const ball=(x,y,r,col)=>{c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,TAU);c.fill();c.stroke()};
@@ -1961,7 +1963,7 @@ function weaponShape(c,s,t,nofx){
   c.restore();
 }
 function emitVfx(s,x,y,dt,arr){
-  const v=s.vfx;if(!v||RI[s.r]<5||R()>dt*300)return;
+  const v=s.vfx,dev=!!s.dev||RI[s.r]>=6;if(!v||RI[s.r]<5||R()>dt*(dev?300:70))return; /* v4.6: mythic trails toned down so fights stay readable; admin skins keep the full show */
   const hue=((performance.now()/6)%360)|0,j=()=>R()-.5;
   const o={x:x+j()*6,y:y+j()*6,vx:j()*40,vy:j()*40,l:.5,m:.5,c:s.tr,s:3};
   if(v==='flame'){o.vy=-50-R()*40;o.c=R()<.5?'#ff8a3d':'#ffd36b'}
@@ -1976,8 +1978,8 @@ function emitVfx(s,x,y,dt,arr){
   else if(v==='rune2'){o.vy=-40;o.vx=j()*50;o.c=R()<.5?'#e0c8ff':'#9a7bff';o.l=o.m=1;o.s=R()<.4?5:3}
   else if(v==='void'){o.vx=j()*70;o.vy=j()*70;o.c=R()<.5?'#7a5aff':'#ffffff';o.l=o.m=.8;o.s=R()<.3?5:2}
   else if(v==='glitch'){o.vx=j()*180;o.vy=j()*180;o.c=R()<.5?'#4dfff0':'#ff4dd8';o.l=o.m=.25;o.s=R()<.5?4:6}
-  o.s=o.s*1.4+1;o.l=o.m=o.m*1.3;arr.push(o);
-  if(R()<.5)arr.push({x:o.x,y:o.y,vx:j()*90,vy:-50-R()*60,l:.9,m:.9,c:'#ffffff',s:2});
+  if(dev){o.s=o.s*1.4+1;o.l=o.m=o.m*1.3}arr.push(o);
+  if(R()<(dev?.5:.12))arr.push({x:o.x,y:o.y,vx:j()*90,vy:-50-R()*60,l:.9,m:.9,c:'#ffffff',s:2});
 }
 const slashCol=()=>{const s=skinOf(equip);return !s||RI[s.r]<5?null:s.vfx==='sun'?'hsl('+(((performance.now()/5)%360)|0)+',100%,70%)':s.vfx==='galaxy'?'hsl('+(250+(((performance.now()/20)%60)|0))+',90%,70%)':s.tr};
 /* ---------- rooms: ten themes, each with its own enemy skin and boss ---------- */
@@ -2158,7 +2160,7 @@ function renderCos(){
   $('tu').classList.remove('on');
   const P=cosTab==='p',eqId=P?petEq:eq[cosTab];
   TABS.forEach(t=>$('t'+t).classList.toggle('on',cosTab===t));
-  $('wallet').innerHTML='<i class="coin"></i>'+wallet+' coins';
+  $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
   if(!P&&!typeOpen(cosTab)){ /* this weapon is still locked until the one before it is mastered */
     const pt=EVO_T[EVO_T.indexOf(cosTab)-1];
     $('qtybar').hidden=true;$('qtybar').style.display='none';{const on=$('oddsnote');if(on)on.style.display='none'}
@@ -2293,7 +2295,7 @@ function drawPrev(now,dt){
     const fs=maxF(s);
     c.save();c.translate(80,76);c.rotate(a);c.scale(2.2,2.2);c.globalAlpha=ow?1:.25;weaponShape(c,fs,t);c.restore();
     if(ow&&s.forms){c.fillStyle='#ffffff';c.font='700 13px Chakra Petch,sans-serif';c.textAlign='left';c.fillText('MAX LEVEL · '+fs.fn,10,112)}
-    if(ow&&s.vfx){const L=fs.len*2.2*(.35+R()*.65);emitVfx(s,80+Math.cos(a)*L,76+Math.sin(a)*L,dt,pv);emitVfx(s,80+Math.cos(a)*L,76+Math.sin(a)*L,dt,pv)}
+    if(ow&&s.vfx){const L=fs.len*2.2*(.35+R()*.65);emitVfx(s,80+Math.cos(a)*L,76+Math.sin(a)*L,dt,pv);if(s.dev)emitVfx(s,80+Math.cos(a)*L,76+Math.sin(a)*L,dt,pv)}
   }
   for(const q of pv){q.x+=q.vx*dt;q.y+=q.vy*dt;q.l-=dt;c.globalAlpha=Math.max(0,q.l/q.m);c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s*1.4,q.s*1.4)}
   c.globalAlpha=1;pv=pv.filter(q=>q.l>0);
@@ -2946,7 +2948,7 @@ function buyEvo(t,n){
 function renderUpg(){
   $('qtybar').hidden=true;
   TABS.forEach(t=>$('t'+t).classList.remove('on'));$('tu').classList.add('on');
-  $('wallet').innerHTML='<i class="coin"></i>'+wallet+' coins';
+  $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
   $('cosname').textContent='Upgrades';
   const NM=[['f','FISTS'],['k','KNIFE'],['g','GUN'],['b','BOMB'],['p','PERMA']];
   if(upgTab!=='p'&&!typeOpen(upgTab))upgTab='f';
@@ -2973,8 +2975,12 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.5';
+const UPD_VER='4.6';
 const UPDATES=[
+ ['v4.6','Pixel Rush 2.0, part 7: cleaner effects and prices','#ff5ac8',[
+  'Mythic weapons and pets are calmer: fewer, smaller particles, a softer glow and lighter slashes, so you can always see the fight. Loot box reveals are toned down too. Admin weapons and admin knives keep their full effects.',
+  'Weapon unlock prices: master the fists for 1,000 coins to unlock the knife, the knife for 2,000 to unlock the gun, and the gun for about 3,000 to unlock the bomb.',
+  'Big numbers are shortened: best score and coins show 1k, 12.5k, 1.2M and so on.']],
  ['v4.5','Pixel Rush 2.0, part 6: a living main menu','#5fd0a2',[
   'The main menu is now a tiny version of the game: your fighter moves around the arena and actually fights mobs that walk in.',
   'The weapon changes every 10 seconds (fists, knife, gun, bomb), each time with a random skin, showing real swings, shots and bomb throws.',
@@ -2989,7 +2995,7 @@ const UPDATES=[
   'The two big evolution upgrades are gone. Each weapon now has a 10-step mastery track in Shop > Upgrades with small upgrades you can feel: damage, attack speed and reach (range for the gun, blast size for bombs).',
   'Steps 4 and 8 evolve the weapon into its next form. Step 9 gives it a special: Knockout (fists stun), Precision (knife crits), Armor Piercing (gun vs bosses) or Napalm (bombs burn). Step 10 masters it and unlocks the next weapon.',
   'Every bonus is a percentage, so the bomb no longer gains more per upgrade than the fists. Each weapon is meant to carry a full run.',
-  'Each track is paced for about an hour of play. Old saves keep everything: evolution upgrade 1 became step 4, and a weapon with both upgrades is fully mastered.',
+  'Unlock prices: mastering the fists costs 1,000 coins (unlocks the knife), the knife 2,000 (gun) and the gun about 3,000 (bomb). Old saves keep everything: evolution upgrade 1 became step 4, and a weapon with both upgrades is fully mastered.',
   'Mobs are drawn a bit smaller, with hitboxes to match.']],
  ['v4.2','Pixel Rush 2.0, part 3: enemy evolution','#ff6a1a',[
   'Mobs now evolve through a run instead of only getting more health. Early waves are basic, the middle of a world brings Evolved mobs (glowing outline) and late waves bring Elites (a crown and a pulsing outline).',
@@ -4003,7 +4009,7 @@ function homeEvo(){
 }
 function refreshHome(){
   renderSlots();
-  $('hstats').innerHTML='<div><svg class="si" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.7 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><span><dt>Best score</dt><dd>'+best+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5c-4.7 0-8 3.2-8 7.6 0 2.6 1.2 4.4 3 5.6V20h2.5v-2.2h1.3V20h2.4v-2.2h1.3V20H17v-4.3c1.8-1.2 3-3 3-5.6 0-4.4-3.300-7.6-8-7.6zM8.4 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM15.6 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM12 13.2l1.2 2.4h-2.4z"/></svg><span><dt>Best wave</dt><dd>'+bestWave+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd36b"/></svg><span><dt>Coins</dt><dd>'+wallet+'</dd></span></div>'+(bestLoop?'<div><span><dt>Loops</dt><dd>'+bestLoop+'</dd></span></div>':'')+'';
+  $('hstats').innerHTML='<div><svg class="si" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.7 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><span><dt>Best score</dt><dd>'+fmtK(best)+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5c-4.7 0-8 3.2-8 7.6 0 2.6 1.2 4.4 3 5.6V20h2.5v-2.2h1.3V20h2.4v-2.2h1.3V20H17v-4.3c1.8-1.2 3-3 3-5.6 0-4.4-3.300-7.6-8-7.6zM8.4 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM15.6 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM12 13.2l1.2 2.4h-2.4z"/></svg><span><dt>Best wave</dt><dd>'+bestWave+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd36b"/></svg><span><dt>Coins</dt><dd>'+fmtK(wallet)+'</dd></span></div>'+(bestLoop?'<div><span><dt>Loops</dt><dd>'+bestLoop+'</dd></span></div>':'')+'';
   $('hxp').innerHTML=xpHtml(acct())+'<small class="ahint">VIEW REWARDS &#9654;</small>';renderDiffs();homeExtras();
 }
 /* ---------- save slots ---------- */
@@ -5289,7 +5295,7 @@ function attack(){
   const rad=(heavy?98:76)*(wst.rad||1)*(1+.15*m.reach)*(p.reachM||1),arc=heavy?TAU:Math.PI*.9,dmg=(heavy?2:1)+(wst.dmg||0)+sharpOf(m)+(p.dmgB||0);
   const sc0=slashCol(),sk0=skinOf(equip);
   slashes.push({x:p.x,y:p.y,a,arc,R:rad,t:0,life:heavy?.26:.18,heavy,col:sc0,bc:sk0&&sk0.b,kd:(sk0&&sk0.k)||'sword',my:!!sc0,sk:sk0||DEFSK,rr:p.r});
-  if(sc0&&sk0.vfx)for(let i=0;i<(heavy?40:18);i++){const aa=heavy?R()*TAU:a-arc/2+R()*arc,rr=rad*(.8+R()*.18);emitVfx(sk0,p.x+Math.cos(aa)*rr,p.y+Math.sin(aa)*rr,1,parts)}
+  if(sc0&&sk0.vfx)for(let i=0;i<(sk0.dev?(heavy?40:18):(heavy?8:3));i++){const aa=heavy?R()*TAU:a-arc/2+R()*arc,rr=rad*(.8+R()*.18);emitVfx(sk0,p.x+Math.cos(aa)*rr,p.y+Math.sin(aa)*rr,1,parts)}
   p.ix+=Math.cos(a)*(heavy?140:210);p.iy+=Math.sin(a)*(heavy?140:210);
   let hits=0;const hitList=[];
   for(const e of enemies){
@@ -5832,8 +5838,8 @@ function hud(){
   }else if(!bb.hidden)bb.hidden=true;
   const xt=(wave||loop)?'XP '+Math.round(runXp)+(loop?'  ×'+xpMul().toFixed(2):''):'';
   if(hudC.x!==xt){$('xphud').textContent=xt;hudC.x=xt}
-  if(hudC.s!==score){$('score').textContent=score;hudC.s=score}
-  {const ct=wave||loop?'<i class="coin"></i>'+Math.round(runWallet):'';if(hudC.cn!==ct){$('coins').innerHTML=ct;hudC.cn=ct}}
+  if(hudC.s!==score){$('score').textContent=fmtK(score);hudC.s=score}
+  {const ct=wave||loop?'<i class="coin"></i>'+fmtK(runWallet):'';if(hudC.cn!==ct){$('coins').innerHTML=ct;hudC.cn=ct}}
   const c=combo>=2?combo+' HITS  ×'+(1+Math.floor(combo/5)):'';if(hudC.c!==c){$('combo').textContent=c;hudC.c=c}
   const ow=ABIL.filter(a=>p.mods&&p.mods[a.id]).map(a=>'<span>'+a.name+(p.mods[a.id]>1?' '+p.mods[a.id]:'')+(a.id==='soulreap'?' '+Math.min(10,p.souls)+'/10':a.id==='devour'?' '+Math.min(25,p.dv)+'/25':a.id==='infinity'&&p.infS?' x'+p.infS:a.id==='phxsw'&&p.phxCd>0?' '+Math.ceil(p.phxCd)+'s':'')+'</span>').join('');
   if(hudC.o!==ow){$('owned').innerHTML=ow;hudC.o=ow}
@@ -7505,9 +7511,10 @@ function draw(){
       const edge=()=>{for(let i=0;i<=N;i++){const u=i/N,aa=tl2+(head-tl2)*u;const x=s.x+Math.cos(aa)*ro,y=s.y+Math.sin(aa)*ro;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}};
       const crescent=m=>{ctx.beginPath();edge();for(let i=N;i>=0;i--){const u=i/N,aa=tl2+(head-tl2)*u,w=thk*m*Math.pow(u,P.pw);ctx.lineTo(s.x+Math.cos(aa)*(ro-w),s.y+Math.sin(aa)*(ro-w))}ctx.closePath()};
       ctx.save();
-      if(s.my)ctx.globalCompositeOperation='lighter';
+      const big=s.my&&sk.dev;
+      if(big)ctx.globalCompositeOperation='lighter';
       ctx.fillStyle=col;
-      for(const [m,al] of [[1,.16],[.66,.2],[.34,.32]]){crescent(m);ctx.globalAlpha=(1-k)*al*(s.my?1.4:1);ctx.fill()}
+      for(const [m,al] of [[1,.16],[.66,.2],[.34,.32]]){crescent(m);ctx.globalAlpha=(1-k)*al*(big?1.4:1);ctx.fill()}
       ctx.globalCompositeOperation='source-over';
       /* ghost copies of the actual weapon art, scaled so the tip rides the crescent edge */
       const wl=(sk.len||36)+3,gs=Math.max(.5,(ro-(s.rr||13)*.45)/wl),gn=hv?7:4,gstep=(head-tl2)/(hv?10:5),tn=performance.now()/1000;
@@ -7520,9 +7527,9 @@ function draw(){
       /* bright cutting edge along the tip path */
       ctx.globalAlpha=(1-k)*.95;ctx.strokeStyle='#fff';ctx.lineWidth=P.ln;ctx.beginPath();edge();ctx.stroke();
       if(s.my){
-        ctx.globalCompositeOperation='lighter';ctx.strokeStyle=col;ctx.globalAlpha=(1-k)*.55;ctx.lineWidth=P.ln*3.2;ctx.beginPath();edge();ctx.stroke();
+        ctx.globalCompositeOperation=big?'lighter':'source-over';ctx.strokeStyle=col;ctx.globalAlpha=(1-k)*(big?.55:.3);ctx.lineWidth=P.ln*(big?3.2:2);ctx.beginPath();edge();ctx.stroke();
         ctx.fillStyle='#fff';ctx.globalAlpha=1-k;
-        for(let i=0;i<9;i++){const aa=tl2+(head-tl2)*R(),rr2=ro-R()*thk*.8;ctx.fillRect(s.x+Math.cos(aa)*rr2-1.5,s.y+Math.sin(aa)*rr2-1.5,3,3)}
+        for(let i=0;i<(big?9:3);i++){const aa=tl2+(head-tl2)*R(),rr2=ro-R()*thk*.8;ctx.fillRect(s.x+Math.cos(aa)*rr2-1.5,s.y+Math.sin(aa)*rr2-1.5,3,3)}
       }
       ctx.restore();
     }else
