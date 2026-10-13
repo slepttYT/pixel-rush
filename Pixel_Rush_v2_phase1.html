@@ -967,6 +967,17 @@ function fnoise(d,v,ft,fq){
     sfxN++;s.onended=()=>{sfxN--};
   }catch(e){}
 }
+/* jingles: a short tune of [midi, start beat, length beats], two voices, over the music which ducks for a moment */
+const mhz=m=>440*Math.pow(2,(m-69)/12);
+function jingle(notes,bpm,wave2,v){
+  if(muted)return;const bt=60/bpm;
+  try{if(mus.gain){const A=ac(),t=A.currentTime;mus.gain.gain.cancelScheduledValues(t);mus.gain.gain.setValueAtTime(mus.gain.gain.value,t);mus.gain.gain.linearRampToValueAtTime(mus.gain.gain.value*.25,t+.08);const back=notes.reduce((m,n)=>Math.max(m,n[1]+n[2]),0)*bt+.4;mus.gain.gain.linearRampToValueAtTime(mus.gain.gain.value,t+back)}}catch(e){}
+  for(const n of notes)setTimeout(()=>{sfx(mhz(n[0]),n[2]*bt*1.1,'square',v||.045);if(wave2)sfx(mhz(n[0]-12),n[2]*bt*1.2,wave2,(v||.045)*.9)},n[1]*bt*1000);
+}
+/* victory: a rising C-major fanfare that lands on a held high C */
+function winJingle(){jingle([[60,0,.5],[64,.5,.5],[67,1,.5],[72,1.5,.5],[67,2,.25],[72,2.25,.25],[76,2.5,.5],[79,3,.5],[84,3.5,2]],150,'triangle',.05);setTimeout(()=>{fnoise(.6,.03,'highpass',6000)},3.5*400)}
+/* defeat: a slow minor fall that sinks to the low root */
+function loseJingle(){jingle([[67,0,.75],[66,.75,.75],[65,1.5,.75],[63,2.25,.75],[60,3,2]],96,'sawtooth',.04)}
 /* player footsteps: one soft step per stride, sounding like the ground of the world you are in (grass, stone, sand) */
 function stepSfx(){
   const alt=(p.stepN=(p.stepN||0)+1)%2;
@@ -3019,8 +3030,12 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.7';
+const UPD_VER='4.8';
 const UPDATES=[
+ ['v4.8','Boss music, footsteps, win and loss','#ffd36b',[
+  'New final boss track, Last Stand: a fast, relentless tune that plays while the Dragon, the Golem or the Pharaoh is awake. It is in the jukebox too.',
+  'Footsteps: your fighter makes a soft step every stride, and it sounds like the ground: grass in World 1, stone in World 2, sand in World 3.',
+  'Winning a world plays a rising fanfare, and falling plays a slow, sinking tune. The music dips while they play.']],
  ['v4.7','Pixel weapons','#6fe39a',[
   'Every weapon and skin is now pixel art with an ink outline, matching the mobs and arenas. Mythic and admin skins get a coloured pixel ring.',
   'Slashes no longer drag giant copies of the weapon along the arc, so the fight stays clear.',
@@ -5631,6 +5646,7 @@ function gameOver(){
   spark(p.x,p.y,'#f1ead8',40,460);spark(p.x,p.y,'#ff4d5e',30,380);
   slashes.push({x:p.x,y:p.y,a:0,arc:TAU,R:260,t:0,life:.7,heavy:true,col:'#ff4d5e'});
   shake=26;hitstop=0;sfx(180,.9,'sawtooth',.09,.25);noise(.6,.06);
+  setTimeout(()=>{if(state==='over')loseJingle()},500);
   setTimeout(()=>{
     if(state!=='over')return;
     showRunPanel('YOU <em>FELL</em>',brMode?'Boss Rush: you fell on boss '+(brIdx+1)+' of 30.':loop?'You reached loop '+(loop+1)+'.':'','GO AGAIN','HOME',true);
@@ -5664,7 +5680,7 @@ function openWin(){
   $('wbtn').style.display=(world===1||(world===2&&w3Open()))?'':'none';$('wbtn').textContent=world===1?'WORLD 2':'WORLD 3';
   $('pbtn').textContent='LOOP · ×'+xpMul(loop+1).toFixed(2)+' XP';$('hbtn').textContent='END RUN';
   $('panel').hidden=false;$('pbtn').focus();
-  sfx(784,.3,'triangle',.08,1.5);setTimeout(()=>sfx(1176,.3,'triangle',.06,1.3),120);
+  winJingle();
 }
 function loopGame(){
   if(state!=='win')return;
