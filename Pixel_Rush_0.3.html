@@ -684,7 +684,7 @@ summary:hover{color:var(--bone)}
         <button class="btn ghost mi" id="hsaves" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 3h13l3 3v15H4zm3 2v5h9V5zm1 9v5h8v-5z"/></svg>SAVES</button>
       </div>
     </div>
-    <div class="hfoot"><span>v2.7</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button></div>
+    <div class="hfoot"><span>v0.3</span><span class="pconly">WASD MOVE &middot; CLICK SLASH &middot; SHIFT DASH</span><span class="hpress">&#9654; NEW RUN</span><button class="hupd" id="hupd" type="button" aria-label="What's new">UPDATES<i class="hdot" id="hupdot"></i></button></div>
   </div>
 
   <div id="title" class="ov" hidden>
@@ -915,9 +915,21 @@ const RESL=['fill','1920x1080','1720x1080','2560x1080','1600x900','1440x900','13
 let set=Object.assign({},SETD);
 try{const sv=JSON.parse(LS.getItem('cinder-set')||'null');if(sv&&typeof sv==='object')for(const k in SETD)if(typeof sv[k]===typeof SETD[k])set[k]=sv[k]}catch(e){}
 function saveSet(){try{LS.setItem('cinder-set',JSON.stringify(set))}catch(e){}}
+/* phones held upright: the game is landscape only, so the whole stage is turned 90 degrees to fill the screen sideways.
+   ROT is true while that is happening; cpt() turns a screen point back into the stage's own x/y */
+let ROT=false,devPhone=false; /* devPhone: set by the dev_phone admin command to preview the phone controls on a computer */
+function cpt(e,el){const r=el.getBoundingClientRect();if(ROT)return {x:e.clientY-r.top,y:r.right-e.clientX};const k=r.width/(el.offsetWidth||r.width)||1;return {x:(e.clientX-r.left)/k,y:(e.clientY-r.top)/k}}
 function applyRes(){
   const v=set.res,st=stage.style,coarse=matchMedia('(pointer:coarse)').matches;
   st.setProperty('margin','0','important');st.setProperty('right','auto','important');st.setProperty('bottom','auto','important');
+  ROT=coarse&&matchMedia('(orientation:portrait)').matches;document.documentElement.classList.toggle('rot',ROT);
+  st.setProperty('position',ROT?'fixed':'absolute','important');
+  /* fixed and sized in viewport units, so the turned stage can never make the page itself bigger */
+  if(devPhone){ /* dev_phone preview: a sideways iPhone-sized screen (844x390) scaled to fit the window */
+    const w=844,h=390,k=Math.min(innerWidth/w,innerHeight/h);
+    st.setProperty('width',w+'px','important');st.setProperty('height',h+'px','important');st.setProperty('left','0','important');st.setProperty('top','0','important');st.setProperty('transform-origin','0 0','important');
+    st.setProperty('transform','translate('+((innerWidth-w*k)/2)+'px,'+((innerHeight-h*k)/2)+'px) scale('+k+')','important');return}
+  if(ROT){st.setProperty('width','100vh','important');st.setProperty('height','100vw','important');st.setProperty('left','100vw','important');st.setProperty('top','0','important');st.setProperty('transform-origin','0 0','important');st.setProperty('transform','rotate(90deg)','important');return}
   if(v==='fill'||coarse||!/^\d+x\d+$/.test(v)){st.setProperty('width','100%','important');st.setProperty('height','100%','important');st.setProperty('left','0','important');st.setProperty('top','0','important');st.setProperty('transform-origin','50% 50%','important');st.setProperty('transform','translateZ(0)','important');return}
   const q=v.split('x'),w=+q[0],h=+q[1],k=Math.min(innerWidth/w,innerHeight/h);
   st.setProperty('width',w+'px','important');st.setProperty('height',h+'px','important');st.setProperty('left','0','important');st.setProperty('top','0','important');st.setProperty('transform-origin','0 0','important');
@@ -925,7 +937,7 @@ function applyRes(){
 }
 function resize(){
   applyRes();
-  const r=cv.getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,2)*set.q;
+  const r={width:cv.offsetWidth,height:cv.offsetHeight};DPR=Math.min(window.devicePixelRatio||1,2)*set.q;
   cv.width=Math.max(1,r.width*DPR);cv.height=Math.max(1,r.height*DPR);
   S=Math.max(.5,Math.min(Math.min(r.width,r.height)/560*set.zoom,2.2));
   W=r.width/S;H=r.height/S;
@@ -933,6 +945,11 @@ function resize(){
 }
 if(matchMedia('(pointer:coarse)').matches)stage.classList.add('touch');
 addEventListener('touchstart',()=>{stage.classList.add('touch');aimMode='auto'},{passive:true,once:true});
+addEventListener('pointerup',function lockLand(e){
+  if(e.pointerType!=='touch')return;removeEventListener('pointerup',lockLand,true);
+  const de=document.documentElement,so=screen.orientation;if(!so||!so.lock||!de.requestFullscreen||document.fullscreenElement)return;
+  de.requestFullscreen({navigationUI:'hide'}).then(()=>so.lock('landscape')).catch(()=>{});
+},true);
 
 /* jukebox state lives up here so the music code can see it */
 let homeK=Math.random()<.5?'home':'home2';
@@ -3177,6 +3194,8 @@ const UPDATES=[
   'The main menu scene is pixel art, like the arenas. Saves moved to their own SAVES screen, under Settings.',
   'A new title screen: the game opens on PIXEL RUSH with a live battle behind it. Press PLAY, pick your save, then you are on the main menu. The PIXEL RUSH logo on the main menu is bigger too.',
   'New players are asked if they want the tutorial before their first run (say no to skip it). Finishing the tutorial now gives you one account level.',
+  'Phones: the game always plays sideways. Hold your phone upright and the game turns itself to fill the screen; on Android it locks to landscape after your first tap. The main menu fits on short screens.',
+  'Difficulty buttons glow when you hover over them.',
   'Weapons in your hands are drawn smaller so they fit the new fighters.',
   'Fix: the Black Knight (World 1, boss 2) now really makes all three lance charges before the duel.']],
  ['v0.2','Pixel Rush 0.2: pixel-art bosses','#ffcc4a',[
@@ -3187,106 +3206,16 @@ const UPDATES=[
   'New TUTORIAL: a guided practice run (move, attack, dash, dodge, shop). It starts the first time you press New Run, and you can replay it from the menu.',
   'Every fighter is now a side-view pixel sprite that faces where you aim and walks, with its own look: hats, helmets, capes, a rock body for Stonebreaker, a ghost for Phantom. Skins repaint them gold, diamond or galaxy.',
   'New version names: this is Pixel Rush 0.2 (Pixel_Rush_0.2.html).']],
- ['v4.8','Boss music, footsteps, win and loss','#ffd36b',[
-  'New final boss track, Last Stand: a fast, relentless tune that plays while the Dragon, the Golem or the Pharaoh is awake. It is in the jukebox too.',
-  'Footsteps: your fighter makes a soft step every stride, and it sounds like the ground: grass in World 1, stone in World 2, sand in World 3.',
-  'Winning a world plays a rising fanfare, and falling plays a slow, sinking tune. The music dips while they play.']],
- ['v4.7','Pixel weapons','#6fe39a',[
-  'Every weapon and skin is now pixel art with an ink outline, matching the mobs and arenas. Mythic and admin skins get a coloured pixel ring.',
-  'Slashes no longer drag giant copies of the weapon along the arc, so the fight stays clear.',
-  'You always draw on top of mobs, with a ring at your feet that lights up white whenever a mob overlaps you.',
-  'The Pixel Pack is gone from the loot box shop. If you had a pixel sword equipped, you get the basic knife back.',
-  'The main menu battle now shows random skins from the whole collection.']],
- ['v4.6','Pixel Rush 2.0, part 7: cleaner effects and prices','#ff5ac8',[
-  'Mythic weapons and pets are calmer: fewer, smaller particles, a softer glow and lighter slashes, so you can always see the fight. Loot box reveals are toned down too. Admin weapons and admin knives keep their full effects.',
-  'Weapon unlock prices: master the fists for 1,000 coins to unlock the knife, the knife for 2,000 to unlock the gun, and the gun for about 3,000 to unlock the bomb.',
-  'Big numbers are shortened: best score and coins show 1k, 12.5k, 1.2M and so on.']],
- ['v4.5','Pixel Rush 2.0, part 6: a living main menu','#5fd0a2',[
-  'The main menu is now a tiny version of the game: your fighter moves around the arena and actually fights mobs that walk in.',
-  'The weapon changes every 10 seconds (fists, knife, gun, bomb), each time with a random skin, showing real swings, shots and bomb throws.',
-  'It is only a show: nothing on the menu touches your save or progress.']],
- ['v4.4','Pixel Rush 2.0, part 5: weapon challenges','#ff8a3d',[
-  'New weapon challenges: beat World 2 and World 3 using only one weapon (Rock Puncher, Stone Cutter, Ricochet, Quarry Blaster, Desert Duelist, High Noon, Sandstorm, plus Bare-Knuckle Legend).',
-  'Jack of All Trades: win World 1 once with every weapon. Mastery achievements for finishing each weapon\u2019s mastery track, and Arsenal Master for all four.',
-  'Stone Ghost and Mirage: beat World 2 or World 3 without taking a hit.',
-  'Two new fighters: Weaponmaster (Jack of All Trades) is strong with every weapon, and the Bare-Knuckle Champion (Bare-Knuckle Legend) has monstrous Fists.',
-  'Rewards follow difficulty as always: World 3 weapon wins and no-hit runs are Legendary (1,000 coins).']],
- ['v4.3','Pixel Rush 2.0, part 4: weapon mastery','#8fd3ff',[
-  'The two big evolution upgrades are gone. Each weapon now has a 10-step mastery track in Shop > Upgrades with small upgrades you can feel: damage, attack speed and reach (range for the gun, blast size for bombs).',
-  'Steps 4 and 8 evolve the weapon into its next form. Step 9 gives it a special: Knockout (fists stun), Precision (knife crits), Armor Piercing (gun vs bosses) or Napalm (bombs burn). Step 10 masters it and unlocks the next weapon.',
-  'Every bonus is a percentage, so the bomb no longer gains more per upgrade than the fists. Each weapon is meant to carry a full run.',
-  'Unlock prices: mastering the fists costs 1,000 coins (unlocks the knife), the knife 2,000 (gun) and the gun about 3,000 (bomb). Old saves keep everything: evolution upgrade 1 became step 4, and a weapon with both upgrades is fully mastered.',
-  'Mobs are drawn a bit smaller, with hitboxes to match.']],
- ['v4.2','Pixel Rush 2.0, part 3: enemy evolution','#ff6a1a',[
-  'Mobs now evolve through a run instead of only getting more health. Early waves are basic, the middle of a world brings Evolved mobs (glowing outline) and late waves bring Elites (a crown and a pulsing outline).',
-  'Evolved mobs move and recover faster, hit harder and can inflict their world\u2019s element: burn in World 1, chill in World 2 (slows you), poison in World 3. Elites always do.',
-  'Every mob upgrades in its own way: goblins swing twice, thieves chain dashes, wizards cast three at once, archers fire a second ring, lancers charge twice, golems leave an aftershock, phoenixes dive twice, and more.',
-  'Evolution never adds health. Loops, a strong build and later worlds bring evolved mobs sooner. Evolved and elite mobs are worth more points and coins.']],
- ['v4.1','Pixel Rush 2.0, part 2: new roster and achievements','#ffd36b',[
-  'All mobs are redrawn as crisp pixel art on the same grid as the arenas. Each world has its own builds: World 1 regular, Stone World short and armoured with glowing eyes and crystals, Sand World tall and wrapped in scarves. Projectiles match too.',
-  'A new roster of 13 fighters, each with a clear job. Brawler, Duelist, Gunslinger and Demolitionist are weapon specialists: beat World 1 using only Fists, the Knife, the Gun or Bombs to earn them, and their bonuses only work with that weapon.',
-  'Scrapper (level 5), Scholar (level 10), Veteran (level 15) and Legend (level 30) give you real reasons to level your account. Phantom is for clearing World 1 without a scratch; Stonebreaker and Sun Sovereign are for beating the Golem and the Pharaoh.',
-  'Achievement rewards now follow difficulty, from Easy (10 coins) to Legendary (1,000 coins). The list shows each tier, easiest first.',
-  'New achievements: These Hands, Sharp Solution, Trigger Happy, Explosive Personality, Bare-Knuckle Legend, Untouchable Run and Hard Way Home.']],
- ['v4.0','Pixel Rush 2.0, part 1: new mobs','#7fbf3f',[
-  'Every regular enemy and mini boss is new, drawn as pixel art on the same grid as the arena: Goblins, Thieves, Wizards, Jesters and Archers, plus Lancer and Golem mini bosses.',
-  'World 2 has its own Stone versions with their own looks (rock-skinned goblins with curved stone swords, hooded rock mages, a skeleton knight on a grey steed, a club golem with glowing cracks), plus the Stone Worm and the Diamond Golem mini bosses.',
-  'World 3 has Sand versions (turbaned scimitar goblins, hooded sand mages, a lancer in a headwrap), plus Sand Lizards, Sand Crabs, the Sand Giant, a burrowing great lizard and the Sand Phoenix.',
+ ['v0.1','Pixel Rush 0.1: the rebuild','#7fbf3f',[
+  'New mobs drawn as crisp pixel art on the same grid as the arenas: Goblins, Thieves, Wizards, Jesters and Archers, plus Lancer and Golem mini bosses. World 2 (Stone) and World 3 (Sand) each have their own builds, looks and projectiles.',
+  'Mobs evolve through a run: Evolved mobs (glowing outline) in the middle of a world and Elites (crown, pulsing outline) late on. They move and hit harder and bring their world\u2019s element: burn, chill or poison.',
   'Every attack has a wind-up you can read: a raised weapon, a dotted charge line or a red circle on the ground.',
-  'Only one mini boss can be out at a time (two from wave 20).',
-  'The old character roster is retired. Everyone plays as the Rookie for now; a new roster with real reasons to unlock each fighter is coming next.',
-  'All bosses, account levels, saves and world progress are unchanged.']],
- ['v3.3','The Cheese Update','#ff8a3d',[
-  'Boss projectiles can no longer be slashed away, and dashing through them no longer deletes them. You are safe while you dash, but the shot keeps flying, so time it and move. Parry still works.',
-  'The Lake Hydra no longer gets knocked back and has a bigger body, so it is a little easier to hit.',
-  'Bosses no longer fall to big luck procs: KO now does 3x damage on a boss (10x on others) and Godslayer does 2x (5x on others).',
-  'The Dark King now guards himself with two full Black Knights. Beat both and he dies in one hit.',
-  'Difficulty now really matters. Easy is really easy, Medium is a little hard and Hard is really hard: enemy health, speed, wave size and boss attack speed all follow it.',
-  'The two Black Knights guarding the Dark King now have full boss health for his wave and can no longer be one-shot. Only the king can.',
-  'New Rates card at the top of this tab. It shows how coins and XP are decided and how they scale with wave, difficulty, world, build and upgrades.',
-  'Bosses stagger at each new phase, and the Cinder Warden is back as the first boss of World 1.']],
- ['v3.2','Scaling progression and faster bosses','#ffd36b',[
-  'Enemies now scale with your build, not only the wave. Stacked abilities, extra hearts and weapon evolutions raise enemy health and crowd size (up to 1.6x). A weaker build is never made easier (it stays at 1x). It eases in over a few waves instead of jumping.',
-  'Harder fights pay better: the XP and coins you earn each wave rise with that scaling.',
-  'Each world is a real step up: World 2 enemies have 1.6x health, move 2.5% faster and come in bigger crowds, and World 3 has 2.6x health, 5% faster enemies (+2.5% per world), still bigger crowds and harder contact hits.',
-  'After you beat the wave 100 boss in World 2 there is now a WORLD 3 button next to Loop and End Run.',
-  'Removed the Weapon Evo tile from the home screen.',
-  'Boss attack speed now grows with the boss level, from 1.1x on the first boss up to 2x by wave 100, with up to 30% more depending on how strong your skills and build are (capped at 2.4x). Bosses also have 20% less health.']],
- ['v3.1','Stone Lizard and World 2 boss attacks','#a8ff3d',[
-  'World 2 boss 5 is now the Stone Lizard. It lobs globs of acid that leave poison pools on the floor. Poison hurts you every second or so until it wears off, so dash out of the green.',
-  'Every boss shot in World 2 is now a jagged rock shard instead of a little ball.',
-  'Every World 2 boss now has its own signature attack: thorns (Vine Monster), boulder throws (Iron Golem), fire (Stone Dragon), shell spin (Rock Turtle), acid (Stone Lizard), claw slams (Rock Crab), closing pillars (Comet Oracle), cross fire (Thorn Behemoth), pinwheels (Seraph Husk) and sung music notes (The Singer).',
-  'Evolution upgrades now evolve your weapon the moment you buy them, and the vault chest now gives gold, with a secret ability after the wave 10, 30, 60 and 90 bosses.']],
- ['v3.0','Rock Turtle, dash dodge and evolution damage','#c9a066',[
-  'World 2 boss 4 is now the Rock Turtle. It plods on stone legs, then tucks into its shell and spins around the whole map, bouncing off the walls and knocking loose rocks. When the spin ends it is dizzy for a moment: hit it then.',
-  'Dashing is a full dodge: nothing hurts you while you dash, and enemy shots you dash into are wiped out (DODGE pops up).',
-  'Every evolution upgrade you buy now makes every form of that weapon hit harder: +0.5 damage each for fists, knife and gun, +1 each for bombs. It stacks with the extra damage evolved forms already have.']],
- ['v3.0','Stone Dragon and the road to World 2','#b6c0d4',[
-  'The Stone Dragon is now the World 1 dragon boss with a stone texture: grey scales, glowing cracks and a furnace throat. Its attacks are unchanged.',
-  'After beating the World 1 dragon you can pick WORLD 2 on the win screen. Your XP and coins are banked, then World 2 starts fresh. You lose every ability from the run, and keep only what your character is built with.']],
- ['v3.0','Vine Monster and whip attacks','#9be04a',[
-  'World 2\u2019s first boss (wave 10) is now the Vine Monster: a glowing, spore-cracked tangle of bark and vine with root legs, grasping vine arms and a snapping flower head.',
-  'New boss attack: the Whip. The boss coils back, then lashes a limb across a wide arc. Step outside the red wedge or dash through it. Later phases lash more times and the whip tip scatters thorns.',
-  'The other World 2 bosses and the Stone Colossus now use the Whip too.']],
- ['v2.9','World 1 maps','#5fd0a2',[
-  'World 1 now has ten maps, one for each zone, going from green all the way to red. World 2 has ten desert maps, going from sand to dark orange. Maps fit any window size without stretching. World 3 keeps its original map.',
-  'The map changes as soon as you walk out of the vault door after a boss, with a short rumble and shake.',
-  'The darkest map of each world is the last zone, where the final boss waits.']],
- ['v2.8','The Eclipse Serpent and the Perma lock','#b58cff',[
-  'World 3 now ends with the Eclipse Serpent, a giant snake that wakes after the wave 100 boss. The World 3 vault is now its nest, with the serpent asleep on an altar of gold.',
-  'The Serpent can burrow. Underground it turns a little see-through, cannot be hurt and tunnels after you, then bulges up under a red ring and bursts out in a shockwave.',
-  'Perma upgrades stay locked until every weapon is unlocked: buy both Fists, Knife and Gun evolution upgrades first.',
-  'New achievement: Serpent Slayer for beating the Eclipse Serpent.']],
- ['v2.7','Upgrades tab and evolution upgrades','#ffd36b',[
-  'Shop > Upgrades now has tabs: Fists, Knife, Gun, Bomb and Perma. Perma holds the old permanent upgrades.',
-  'Weapons no longer evolve on their own. Buy Evolution 1 to evolve after the first boss and Evolution 2 to evolve after the second boss.',
-  'Prices: Fists 50 and 100 coins, Knife 150 and 200, Gun 250 and 300, Bomb 350 and 400.',
-  'Buy both Fists upgrades to unlock the basic common knife. Both Knife upgrades unlock the basic pistol, and both Gun upgrades unlock the basic bomb. Locked weapons and their boxes stay closed until then.']],
- ['v2.7','Final bosses and new achievements','#ff8a3d',[
-  'World 1 ends with the Ember Wyrm, the dragon that wakes after the wave 100 boss.',
-  'World 2 ends with the Stone Colossus, a golem that smashes through the wall of its vault after the wave 100 boss. The World 2 vault now fits it, with a dormant golem under moss and vines.',
-  'New achievements: Dragonslayer for beating the dragon and Colossus Crusher for beating the golem.']],
- ['v2.7','Updates button','#8fd3ff',['This screen. Open it from the bottom right of the main menu.']]
+  'A new roster of fighters with real reasons to unlock each one: weapon specialists, account level fighters and challenge fighters.',
+  'Weapon mastery: each weapon has a 10-step track in Shop > Upgrades. Master the fists (1,000 coins) to unlock the knife, the knife (2,000) for the gun and the gun (about 3,000) for the bomb.',
+  'Weapon challenges and achievement rewards that follow difficulty, from Easy (10 coins) to Legendary (1,000 coins).',
+  'All weapons and skins are pixel art. You always draw on top of mobs, so you never lose your fighter in a crowd.',
+  'A living main menu: your fighter battles mobs with a new weapon and skin every few seconds.',
+  'Boss music, footsteps that match the ground, and win and loss tunes. Big numbers are shortened (1k, 12.5k, 1.2M).']]
 ];
 function ratesHtml(){
   try{
@@ -5206,7 +5135,7 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;if(state==='play'&&!sub)pauseGame()});
-function setMouse(e){const r=cv.getBoundingClientRect();mouse.x=(e.clientX-r.left)/S;mouse.y=(e.clientY-r.top)/S}
+function setMouse(e){const q=cpt(e,cv);mouse.x=q.x/S;mouse.y=q.y/S}
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){aimMode='mouse';setMouse(e)}});
 cv.addEventListener('pointerdown',e=>{
   if(e.pointerType!=='mouse'||state!=='play')return;
@@ -5232,7 +5161,7 @@ $('bDash').addEventListener('pointerdown',e=>{e.preventDefault();dash()});
 const jz=$('joy'),knob=$('knob');
 function joyMove(e){
   const r=jz.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,rad=r.width/2*.7;
-  let dx=(e.clientX-cx)/rad,dy=(e.clientY-cy)/rad;const l=Math.hypot(dx,dy);
+  let dx=(e.clientX-cx)/rad,dy=(e.clientY-cy)/rad;if(ROT){const t=dx;dx=dy;dy=-t}const l=Math.hypot(dx,dy);
   if(l>1){dx/=l;dy/=l}
   joy.x=dx;joy.y=dy;knob.style.transform='translate('+dx*rad+'px,'+dy*rad+'px)';
 }
@@ -8077,7 +8006,7 @@ function menuSim(dt){
   for(const f of mfx)f.l-=dt;mfx=mfx.filter(f=>f.l>0);
   menv=menv.filter(e=>!e.dead);
 }
-addEventListener('pointermove',e=>{if(state!=='menu')return;const r=cv.getBoundingClientRect();mcur.x=(e.clientX-r.left)/S;mcur.y=(e.clientY-r.top)/S;mcur.on=true},{passive:true});
+addEventListener('pointermove',e=>{if(state!=='menu')return;const q=cpt(e,cv);mcur.x=q.x/S;mcur.y=q.y/S;mcur.on=true},{passive:true});
 /* green grass menu scene: stripes, scenery and the studded arena ring around the hero */
 const GRASS_DECOR=(()=>{let sd=7;const r=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};const o=[];for(let i=0;i<46;i++){const t=i%9===0?'mush':i%7===0?'bush':i%11===0?'rock':'flower';o.push({t:t,x:r(),y:r()})}return o})();
 function drawGrass(cx,cy){
@@ -8169,7 +8098,7 @@ function frame(now){
     if(!frame.warned){frame.warned=true;console.error(err)}
   }
 }
-resize();addEventListener('resize',resize);
+resize();addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(()=>{resize();fitMenus()},120));
 if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);
 Object.assign(p,{x:W/2,y:H/2,hp:5,maxhp:5,face:0,cd:0,dashCd:0,dashMax:1.1,dashId:0,dashT:0,inv:0,dx:1,dy:0,vx:0,vy:0,ix:0,iy:0,swings:0,ddx:1,ddy:0,vc:0,ka:0,kp:[]});
 p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});
@@ -8261,6 +8190,9 @@ requestAnimationFrame(frame);
     }else if(cmd==='dev_home'){ /* DEV_HOME: back to the title screen (before picking a save). Remove this branch to remove the command */
       closeAdmin();if(sub)closeSub();if(state!=='menu')showHome();if(window.__title)window.__title.show(1);
       return;
+    }else if(cmd==='dev_phone'){ /* DEV_PHONE: preview the phone screen and touch controls on a computer. Type it again to turn it off */
+      devPhone=!devPhone;stage.classList.toggle('touch',devPhone||matchMedia('(pointer:coarse)').matches);if(devPhone)aimMode='auto';
+      resize();fitMenus();say(devPhone?'Phone preview on: sideways phone screen with the touch controls. Use the mouse on the stick and buttons. Type dev_phone again to turn it off.':'Phone preview off.');
     }else if(cmd==='dev_boss_go'){
       startRush();closeAdmin();
       return;
@@ -8772,5 +8704,16 @@ body.ontitle #home{visibility:hidden}
 #home .box{padding-top:0!important}
 #home .logo,#home .logo em{font-size:clamp(40px,min(8.4cqw,15cqh),150px)!important}
 #home .logo{margin-top:0!important;white-space:nowrap}
+
+/* v0.3: sideways phones (short screens): no kicker or stats, menu buttons in two columns so all of them fit */
+@container (max-height:480px){
+  #home .kicker,#home .stats{display:none!important}
+  #home .box{max-width:min(620px,64cqw)!important}
+  #home .menulist{display:grid!important;grid-template-columns:1fr 1fr;gap:6px!important}
+  #home .menulist #play,#home .menulist #hacct{grid-column:1/-1}
+  #home .menulist .mgap{display:none}
+}
+/* the same phone hotbar layout, keyed to the game's own size (also right on turned phones and the dev_phone preview) */
+@container (orientation:landscape) and (max-height:520px){.touch #hotbar{left:50%!important;transform:translateX(-50%);bottom:12px!important}.touch #hotbar .hs{width:64px;height:64px;font-size:30px;border-width:2px;border-radius:10px}.touch #hotbar .hs kbd{font-size:12px;left:6px;top:3px}}
 </style>
 </body></html>
