@@ -2427,10 +2427,24 @@ const ACH=[
 /* ================= characters, extra achievements, cheat menu ================= */
 ['dashes','flawless','hot','hotuse'].forEach(k=>{if(typeof stats[k]!=='number')stats[k]=0});
 if(!stats.chars||typeof stats.chars!=='object')stats.chars={};
-/* v4.0 rebuild: the old roster is retired. Rookie is the only fighter until the new roster arrives (id 'ember' keeps old saves and fighter XP working) */
+/* v4.1 roster: every fighter has a job. Weapon specialists are earned by beating World 1 with only that weapon, and account levels unlock the rest.
+   wb = weapon bonus that only applies while that weapon type is equipped: dm flat damage, cd attack-time multiplier, reach reach/range/blast multiplier, crit chance. Rookie keeps id 'ember' so old saves load */
 const CHARS=[
- {id:'ember',n:'Rookie',t:'Balanced Starter',d:'Balanced in every way. No tricks, no weaknesses.',ach:null,body:'#f1ead8',trim:'#12141c',acc:'#ff8a3d',eye:'#12141c',sty:'plain'}
+ {id:'ember',n:'Rookie',t:'Balanced Starter',d:'Balanced in every way. No tricks, no weaknesses. Good with any weapon.',ach:null,body:'#f1ead8',trim:'#12141c',acc:'#ff8a3d',eye:'#12141c',sty:'plain'},
+ {id:'scrapper',n:'Scrapper',t:'Quick Feet',d:'Never stands still. Faster on foot and the dash comes back sooner.',ach:'lv5',body:'#f0c9a0',trim:'#2b1a0a',acc:'#ff8a1f',eye:'#2b1a0a',sty:'headband',spd:1.1,dash:.8},
+ {id:'brawler',n:'Brawler',t:'Close Combat',d:'Fights with bare hands. Hits much harder and faster with Fists, and takes a punch.',ach:'fists1',body:'#d96a4a',trim:'#2a0805',acc:'#8a1a12',acc2:'#ff4d2e',eye:'#ffffff',sty:'mohawk',hp:1,wb:{w:'f',dm:.5,cd:.85}},
+ {id:'duelist',n:'Duelist',t:'Melee Specialist',d:'A blade master. Longer reach and deadly crits with the Knife and every sword it grows into.',ach:'knife1',body:'#cdb79a',trim:'#1c140c',acc:'#7a5a3a',acc2:'#e8d8b0',eye:'#1c140c',sty:'ronin',wb:{w:'k',dm:.5,reach:1.2,crit:.15}},
+ {id:'gunslinger',n:'Gunslinger',t:'Ranged Specialist',d:'Quick on the draw. Fires faster and hits harder with the Gun, and moves a little quicker.',ach:'gun1',body:'#d8b48a',trim:'#24150a',acc:'#8a5a2a',acc2:'#5b3a1a',eye:'#24150a',sty:'cowboy',spd:1.05,wb:{w:'g',dm:.5,cd:.8}},
+ {id:'demo',n:'Demolitionist',t:'Explosives Expert',d:'Loves a big bang. Bigger, harder blasts with Bombs, and an extra heart for the close calls.',ach:'bomb1',body:'#aab4c6',trim:'#10131c',acc:'#ff8a3d',acc2:'#6b7388',eye:'#ff8a3d',sty:'helm',hp:1,wb:{w:'b',dm:.5,reach:1.3}},
+ {id:'scholar',n:'Scholar',t:'Quick Study',d:'Learns fast. Earns a lot more XP, so your account levels up sooner.',ach:'lv10',body:'#cfd8ff',trim:'#0d1228',acc:'#ffd36b',acc2:'#1d2548',eye:'#0d1228',sty:'cap',xp:1.35},
+ {id:'veteran',n:'Veteran',t:'Versatile Fighter',d:'Has seen it all. Harder hits with every weapon, an extra heart, and a ward that blocks the first hit of each wave.',ach:'lv15',body:'#e9e0ea',trim:'#1a0509',acc:'#b3122d',eye:'#3a78c9',sty:'cape',hp:1,dm:.25,cp:{ward:1}},
+ {id:'hunter',n:'Treasure Hunter',t:'Coin Chaser',d:'Works for pay. Many more coins and a chance to crit for double damage.',ach:'gold2',body:'#f2d2b0',trim:'#2a0a14',acc:'#c2185b',acc2:'#ffd36b',eye:'#2a0a14',sty:'gambler',coin:1.3,cp:{crit:.1}},
+ {id:'phantom',n:'Phantom',t:'Never Touched',d:'Earned by clearing World 1 without a scratch. A tiny hitbox, fast feet and a long dodge, but frail.',ach:'nohit1',body:'#dfe8ff',trim:'#202a52',acc:'#8fa8ff',acc2:'#ffffff',eye:'#202a52',glow:1,alpha:.78,sty:'phantom',hp:-1,spd:1.15,r:9,cp:{dashInv:.25}},
+ {id:'breaker',n:'Stonebreaker',t:'Golem Slayer',d:'Took down the Golem. Two extra hearts, heavier hits and a ward, but a little slower.',ach:'slaygolem',body:'#9aa1b0',trim:'#14161d',acc:'#7d8396',acc2:'#5b6275',eye:'#ffb347',glow:1,sty:'golem',hp:2,spd:.92,dm:.5,r:13,cp:{ward:1}},
+ {id:'sunking',n:'Sun Sovereign',t:'Pharaoh\u2019s Heir',d:'Took the Pharaoh\u2019s throne. Heals over time, crits often and restores a heart after every wave.',ach:'slaysnake',body:'#fff1c4',trim:'#4a2a06',acc:'#ffb02e',acc2:'#ff6a1f',eye:'#4a2a06',glow:1,sty:'sun',dm:.25,cp:{regen:20,crit:.15,waveHeal:1}},
+ {id:'legend',n:'Legend',t:'Account Level 30',d:'The reward for sticking with it. Small bonuses everywhere: an extra heart, faster feet and swings, more coins and XP.',ach:'lv30',body:'#fff3c4',trim:'#4a3206',acc:'#ffd36b',acc2:'#ffffff',eye:'#4a3206',glow:1,sty:'ascend',hp:1,spd:1.08,cd:.92,dm:.25,coin:1.15,xp:1.15}
 ];
+const charsPlayed=()=>CHARS.filter(c=>stats.chars&&stats.chars[c.id]).length;
 const charById=id=>CHARS.find(c=>c.id===id)||CHARS[0];
 const charUnlocked=c=>!c.ach||ach[c.ach]===2;
 let curChar='ember';try{const sc=LS.getItem('cinder-char');if(sc)curChar=sc}catch(e){}
@@ -2586,6 +2600,7 @@ function drawPortrait(cv,ch,locked,t){
 function applyChar(){
   const c=CH();p.ch=c;p.spdM=c.spd||1;p.cdM=c.cd||1;p.dmgB=c.dm||0;p.reachM=c.reach||1;p.dashM=c.dash||1;p.every=c.every||0;p.coinM=c.coin||1;p.xpM=c.xp||1;
   p.cp=brMode?{}:Object.assign({},c.cp||{});p.r=c.r||11;p.rgT=0;p.hitW=false;p.wardUsed=false;
+  if(c.wb&&c.wb.w===wType){const b=c.wb;p.dmgB+=b.dm||0;p.cdM*=b.cd||1;p.reachM*=b.reach||1;if(b.crit)p.cp.crit=(p.cp.crit||0)+b.crit}
   if(diff!=='nowin'&&c.hp){p.maxhp=Math.max(1,p.maxhp+c.hp);p.hp=p.maxhp}
   if(!brMode)(c.start||[]).forEach(id=>{const a=abilById(id);if(a&&abilOk(a))applyAbility(id)});
 }
@@ -2606,6 +2621,7 @@ function kitChips(ch){
   if(ch.every)o.push(['Spin attack every '+ch.every+'nd swing',true]);
   if(ch.coin)o.push(['+'+pc(ch.coin-1)+'% coins',true]);
   if(ch.xp)o.push(['+'+pc(ch.xp-1)+'% XP',true]);
+  if(ch.wb){const b=ch.wb,n=WTAG[b.w];if(b.dm)o.push(['+'+b.dm+' damage with '+n,true]);if(b.cd)o.push(['+'+pc(1/b.cd-1)+'% attack speed with '+n,true]);if(b.reach)o.push(['+'+pc(b.reach-1)+'% '+(b.w==='b'?'blast size':b.w==='g'?'range':'reach')+' with '+n,true]);if(b.crit)o.push([pc(b.crit)+'% crit with '+n,true])}
   const cp=ch.cp||{};
   if(cp.regen)o.push(['Heals 1 heart every '+cp.regen+'s',true]);
   if(cp.waveHeal)o.push(['+1 extra heart after each wave',true]);
@@ -2635,7 +2651,7 @@ ACH.push(
  ['flaw5','Untouchable','Clear 5 waves without taking a hit',20,()=>stats.flawless>=5],
  ['flaw25','Ghost','Clear 25 waves without taking a hit',60,()=>stats.flawless>=25],
  ['rampage','Rampage','Defeat 150 enemies in a single run',40,()=>ach.rmp===1],
- ['chars5','Squad Goals','Play a run with 5 different characters',30,()=>Object.keys(stats.chars||{}).length>=5],
+ ['chars5','Squad Goals','Play a run with 5 different characters',30,()=>charsPlayed()>=5],
  ['pet','Best Friend','Equip a pet',10,()=>!!petEq]
 );
 ACH.push(
@@ -2665,8 +2681,8 @@ ACH.push(
  ['hard25','Hard Hitter','Reach wave 25 on Hard',60,()=>ach.hardw25===1],
  ['coins1k','Piggy Bank','Hold 1,000 coins at once',40,()=>wallet>=1000],
  ['coins5k','Dragon Hoard','Hold 5,000 coins at once',100,()=>wallet>=5000],
- ['chars10','Roster','Play a run with 10 different characters',60,()=>Object.keys(stats.chars||{}).length>=10],
- ['chars15','Full Roster','Play a run with 15 different characters',100,()=>Object.keys(stats.chars||{}).length>=15]
+ ['chars10','Roster','Play a run with 10 different characters',60,()=>charsPlayed()>=10],
+ ['chars15','Full Roster','Play a run with every character',100,()=>charsPlayed()>=CHARS.length]
 );
 Object.assign(PROG,{dash1000:()=>[stats.dashes,1000],gold:()=>[stats.yellow,10],w75:()=>[stats.best,75],k10000:()=>[stats.kills,10000],flaw25:()=>[stats.flawless,25],lv30:()=>[acct().L,30],lv50:()=>[acct().L,50],hot1:()=>[stats.hot,1],upg:()=>[Object.keys(UPG).reduce((n,k)=>n+(upg[k]||0),0),5]});
 /* ================= World 2: The Hollow Deep — achievements and characters ================= */
@@ -2699,6 +2715,26 @@ ACH.push(
  ['slaygolem','Golem Crusher','Defeat The Golem, the giant that smashes out of the World 2 vault',200,()=>(stats.fin2||0)>=1],
  ['slaysnake','Pharaoh\u2019s End','Defeat The Pharaoh, the undying king of the World 3 vault',250,()=>(stats.fin3||0)>=1]
 );
+/* v4.1: weapon mastery and no-hit runs. Winning a world means beating its vault final boss; "only" means you never switched weapon during the run */
+const wwin=k=>((stats.wwin||{})[k]||0)>=1;
+ACH.push(
+ ['fists1','These Hands','Beat World 1 using only Fists',0,()=>wwin('1f')],
+ ['knife1','Sharp Solution','Beat World 1 using only the Knife (and the swords it grows into)',0,()=>wwin('1k')],
+ ['gun1','Trigger Happy','Beat World 1 using only the Gun',0,()=>wwin('1g')],
+ ['bomb1','Explosive Personality','Beat World 1 using only Bombs',0,()=>wwin('1b')],
+ ['fists3','Bare-Knuckle Legend','Beat World 3 using only Fists',0,()=>wwin('3f')],
+ ['nohit1','Untouchable Run','Beat World 1 without taking a single hit',0,()=>!!stats.nohit1],
+ ['hwin1','Hard Way Home','Beat World 1 on Hard or harder',0,()=>!!stats.hwin1]
+);
+/* rewards follow difficulty: an easy one-off pays a little, beating a world without getting hit pays a fortune */
+const ACH_TIER_N=['','Easy','Normal','Tricky','Hard','Brutal','Legendary'],ACH_TIER_C=['','#9aa0b8','#5fd0a2','#4dc3ff','#ffd36b','#ff8a3d','#ff5ac8'],ACH_COIN=[0,10,25,60,150,400,1000];
+const ACH_TIER={first:1,w5:1,pet:1,hot1:1,c20:1,gold:1,green:1,dash200:1,vault:1,own5:1,
+ k100:2,w10:2,boss1:2,runs10:2,lv5:2,flaw5:2,upg:2,w2a:2,w3a:2,rampage:2,chars5:2,green2:2,own10:2,hot25:2,coins1k:2,lv10:2,vault5:2,
+ k1000:3,w25:3,w50:3,boss10:3,c60:3,gold2:3,lv15:3,own20:3,hard:3,dash1000:3,vault10:3,hotfull:3,rmp2:3,lv20:3,runs50:3,w2b:3,w3b:3,flaw25:3,boss25:3,chars10:3,coins5k:3,
+ k5000:4,w75:4,w100:4,slaydragon:4,boss50:4,lv30:4,loop:4,w2c:4,w2d:4,w3c:4,k10000:4,gold3:4,own40:4,legend:4,hard25:4,runs100:4,vault25:4,dash5000:4,w2k:4,w3k:4,w2bs:4,w3bs:4,c100:4,
+ slaygolem:5,w2e:5,w3d:5,k25000:5,loop3:5,lv50:5,mythic:5,flaw100:5,c200:5,nowin:5,boss100:5,w2k5:5,w3k5:5,chars15:5,fists1:5,knife1:5,gun1:5,bomb1:5,hwin1:5,
+ slaysnake:6,w3e:6,nohit1:6,fists3:6};
+ACH.forEach(a=>{const t=ACH_TIER[a[0]]||(a[3]<=10?1:a[3]<=30?2:a[3]<=80?3:a[3]<=150?4:a[3]<=300?5:6);a[5]=t;a[3]=ACH_COIN[t]});
 Object.assign(PROG,{slaydragon:()=>[stats.fin1||0,1],slaygolem:()=>[stats.fin2||0,1],slaysnake:()=>[stats.fin3||0,1]});
 const realCheats=()=>ACH.every(a=>ach[a[0]]===2);
 const cheatsUnlocked=()=>dev.cheats||realCheats();
@@ -2811,7 +2847,7 @@ function checkAch(){
 function renderAch(){
   const n=ACH.filter(a=>ach[a[0]]===2).length;
   $('achsum').textContent=n+' of '+ACH.length+' unlocked. Each one pays coins'+(CHARS.some(c=>c.ach)?', and '+CHARS.filter(c=>c.ach).length+' of them unlock a character':'')+'. On the hardest difficulty only Not Winning, Huh can be earned, and its runs do not count toward other achievements.';
-  $('achlist').innerHTML=ACH.map(a=>{const d=ach[a[0]]===2,ch=CHARS.find(c=>c.ach===a[0]);return '<div class="ar '+(d?'on':'off')+'"><span>'+(d?'★':'☆')+'</span><div><b>'+a[1]+'</b><small>'+a[2]+'</small>'+(ch?'<small class="unl">Unlocks character: '+ch.n+'</small>':'')+'</div><em>'+(d?'DONE':'+'+a[3]+' coins')+'</em></div>'}).join('');
+  $('achlist').innerHTML=[...ACH].sort((x,y)=>(x[5]||0)-(y[5]||0)).map(a=>{const d=ach[a[0]]===2,ch=CHARS.find(c=>c.ach===a[0]);return '<div class="ar '+(d?'on':'off')+'"><span>'+(d?'★':'☆')+'</span><div><b>'+a[1]+(a[5]?' <small style="display:inline;color:'+ACH_TIER_C[a[5]]+';font-weight:700;letter-spacing:.08em">'+ACH_TIER_N[a[5]].toUpperCase()+'</small>':'')+'</b><small>'+a[2]+'</small>'+(ch?'<small class="unl">Unlocks character: '+ch.n+'</small>':'')+'</div><em>'+(d?'DONE':'+'+a[3]+' coins')+'</em></div>'}).join('');
 }
 $('adone')?.addEventListener('click',closeSub);
 $('hach').addEventListener('click',e=>openSub('ach',e.currentTarget));
@@ -2900,8 +2936,14 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.0';
+const UPD_VER='4.1';
 const UPDATES=[
+ ['v4.1','Pixel Rush 2.0, part 2: new roster and achievements','#ffd36b',[
+  'All mobs are redrawn as crisp pixel art on the same grid as the arenas. Each world has its own builds: World 1 regular, Stone World short and armoured with glowing eyes and crystals, Sand World tall and wrapped in scarves. Projectiles match too.',
+  'A new roster of 13 fighters, each with a clear job. Brawler, Duelist, Gunslinger and Demolitionist are weapon specialists: beat World 1 using only Fists, the Knife, the Gun or Bombs to earn them, and their bonuses only work with that weapon.',
+  'Scrapper (level 5), Scholar (level 10), Veteran (level 15) and Legend (level 30) give you real reasons to level your account. Phantom is for clearing World 1 without a scratch; Stonebreaker and Sun Sovereign are for beating the Golem and the Pharaoh.',
+  'Achievement rewards now follow difficulty, from Easy (10 coins) to Legendary (1,000 coins). The list shows each tier, easiest first.',
+  'New achievements: These Hands, Sharp Solution, Trigger Happy, Explosive Personality, Bare-Knuckle Legend, Untouchable Run and Hard Way Home.']],
  ['v4.0','Pixel Rush 2.0, part 1: new mobs','#7fbf3f',[
   'Every regular enemy and mini boss is new, drawn as pixel art on the same grid as the arena: Goblins, Thieves, Wizards, Jesters and Archers, plus Lancer and Golem mini bosses.',
   'World 2 has its own Stone versions with their own looks (rock-skinned goblins with curved stone swords, hooded rock mages, a skeleton knight on a grey steed, a club golem with glowing cracks), plus the Stone Worm and the Diamond Golem mini bosses.',
@@ -3459,7 +3501,7 @@ const MOB_PAL={
 /* each world repaints the same roles: Stone World in grey rock and slate, Sand World in sandstone and ochre */
 const MOB_WPAL={
   2:{goblin:{s:'#a8906a',S:'#6e5a40',c:'#5a5048',C:'#3a342e',h:'#4a4038',m:'#b8b0a0',M:'#7a7468',e:'#ffb347'},thief:{c:'#5a6070',C:'#3a3f4a',h:'#4a4f5a',s:'#b8a890',S:'#867860',a:'#6fe8ff'},wizard:{c:'#4a5a78',C:'#2c3850',h:'#8fa8c8',a:'#c9a070'},jester:{c:'#7a7a8a',C:'#4a4f5a',h:'#7a7a8a',m:'#c9a070'},archer:{s:'#b8a890',S:'#867860',c:'#6a6458',C:'#45403a',h:'#5a5448'},lancer:{c:'#8d97a8',C:'#5a6070',h:'#7a6a5a',H:'#4a4038',a:'#6fe8ff'},golem:{c:'#5a8a6a',C:'#3a5a48'}},
-  3:{goblin:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#e8c070',e:'#12141c'},thief:{c:'#b8783a',C:'#7a4a1a',h:'#9a6028',s:'#d8a060',S:'#a06a30',a:'#ffcc4a'},wizard:{c:'#a8642a',C:'#6a3a12',h:'#e8c070',a:'#ffcc4a'},jester:{c:'#d89a40',C:'#9a5a20',h:'#d89a40',m:'#fff0c0'},archer:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#9a6028'},lancer:{c:'#d8a060',C:'#9a6028',h:'#c8945a',H:'#8a5a2a',a:'#ffcc4a',s:'#d8a060'},golem:{s:'#d8a868',S:'#9a6a30',c:'#e8c880',C:'#b8884a',e:'#6fe8ff'},worm:{s:'#c8945a',S:'#8a5a2a',c:'#e8c070',C:'#a8743a'}}
+  3:{goblin:{sc:'#c0392b',s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#e8c070',e:'#12141c'},thief:{c:'#b8783a',C:'#7a4a1a',h:'#9a6028',s:'#d8a060',S:'#a06a30',a:'#ffcc4a',sc:'#e86a2a'},wizard:{c:'#a8642a',C:'#6a3a12',h:'#e8c070',a:'#ffcc4a'},jester:{c:'#d89a40',C:'#9a5a20',h:'#d89a40',m:'#fff0c0',sc:'#8a3fa0'},archer:{s:'#d8a060',S:'#a06a30',c:'#b8783a',C:'#7a4a1a',h:'#9a6028',sc:'#2a9a8a'},lancer:{c:'#d8a060',C:'#9a6028',h:'#c8945a',H:'#8a5a2a',a:'#ffcc4a',s:'#d8a060'},golem:{s:'#d8a868',S:'#9a6a30',c:'#e8c880',C:'#b8884a',e:'#6fe8ff'},worm:{s:'#c8945a',S:'#8a5a2a',c:'#e8c070',C:'#a8743a'}}
 };
 const mobPal=(w,t)=>Object.assign({},MOB_PAL[t],(MOB_WPAL[w]||{})[t]);
 function mobCanvas(cw,ch,ax,fn){
@@ -3478,86 +3520,113 @@ function mobCanvas(cw,ch,ax,fn){
 }
 /* shared humanoid: legs, torso and head; the role draws its own hat, face and weapon on top */
 function mobLegs(d,P,x,y,st,lean){const k=st?1:0;d.r(x+lean,y,2,3-k,P.C);d.r(x+4+lean,y+k*0,2,3,P.C);d.r(x-1+lean+k,y+3-k,3,1,'#2a1c14');d.r(x+4+lean,y+3,3,1,'#2a1c14')}
-const MOB_ART={
-  /* World 1 leather-capped goblin with a short sword · bare rock-skinned Stone goblin with a curved stone sword · Sand goblin in a turban with a scimitar */
-  goblin:(P,f,w)=>mobCanvas(22,21,9,d=>{
-    const st=f==='w1',Y=1;
-    mobLegs(d,P,6,15+Y,st,0);
-    d.r(6,10+Y,7,5,P.c);d.r(6,13+Y,7,1,P.C);
-    d.el(9,6+Y,4,4,P.s);d.r(6,9+Y,7,1,P.S);d.l(5,5+Y,3,3+Y,P.s);d.p(4,4+Y,P.S);d.l(13,5+Y,15,3+Y,P.s);d.p(15,3+Y,P.S);
-    d.p(11,5+Y,P.e);d.p(12,5+Y,'#12141c');d.r(10,8+Y,3,1,'#2a1a10');d.p(11,8+Y,'#ffffff');
-    if(w===1){d.r(6,2+Y,7,2,P.h);d.r(5,3+Y,1,1,P.h);d.p(9,11+Y,P.C)}
-    if(w===2){d.p(8,3+Y,P.S);d.p(10,4+Y,P.S);d.p(7,6+Y,P.S);d.r(7,2+Y,4,1,P.S);d.el(13,11+Y,2,1,P.h);d.p(7,12+Y,P.h)}
-    if(w===3){d.el(9,3+Y,5,2,P.h);d.r(5,4+Y,9,1,P.C);d.l(4,4+Y,2,8+Y,P.h);d.p(9,2+Y,P.a||'#c0392b');d.l(8,10+Y,10,14+Y,P.h);d.p(11,11+Y,P.h)}
-    const W=f==='wind'?0:f==='act'?2:1;
-    if(w===1){
-      if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,1,2+Y,P.m);d.l(5,8+Y,2,2+Y,P.M);d.r(3,9+Y,3,1,P.M)}
-      else if(W===2){d.r(12,11+Y,4,2,P.s);d.r(15,10+Y,1,4,P.M);d.l(16,12+Y,21,12+Y,P.m);d.l(16,11+Y,20,11+Y,P.m)}
-      else{d.r(12,11+Y,2,3,P.s);d.r(13,13+Y,3,1,P.M);d.l(14,12+Y,18,7+Y,P.m);d.l(15,12+Y,19,7+Y,P.M)}}
-    if(w===2){ /* heavy curved stone sword */
-      if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,2,4+Y,P.m);d.l(5,8+Y,3,4+Y,P.m);d.l(2,4+Y,3,0+Y,P.m);d.l(3,4+Y,4,1+Y,P.M)}
-      else if(W===2){d.r(12,11+Y,4,2,P.s);d.l(16,12+Y,19,12+Y,P.m);d.l(16,13+Y,19,13+Y,P.M);d.l(19,12+Y,21,9+Y,P.m);d.l(20,13+Y,21,11+Y,P.M);d.l(18,8+Y,21,4+Y,'#e8e2d0');d.l(21,4+Y,21,16+Y,'#e8e2d0')}
-      else{d.r(12,11+Y,2,3,P.s);d.l(14,12+Y,16,8+Y,P.m);d.l(15,13+Y,17,9+Y,P.M);d.l(16,8+Y,16,5+Y,P.m);d.l(17,8+Y,17,5+Y,P.M);d.p(15,4+Y,P.m)}}
-    if(w===3){ /* curved scimitar */
-      if(W===0){d.r(4,8+Y,2,3,P.s);d.l(4,8+Y,3,4+Y,P.m);d.l(3,4+Y,3,1+Y,P.m);d.p(4,0+Y,P.m)}
-      else if(W===2){d.r(12,11+Y,4,2,P.s);d.p(15,11+Y,P.a||'#ffcc4a');d.l(16,12+Y,19,12+Y,P.m);d.l(19,11+Y,20,10+Y,P.m);d.p(21,9+Y,P.m)}
-      else{d.r(12,11+Y,2,3,P.s);d.p(14,13+Y,P.a||'#ffcc4a');d.l(15,12+Y,16,9+Y,P.m);d.l(17,8+Y,17,6+Y,P.m);d.p(16,5+Y,P.m)}}
+/* per-world body builds, so the same role never looks alike between worlds: World 1 a regular build, Stone World short and heavy with rock pauldrons and glowing eyes, Sand World tall and thin, wrapped in cloth with a trailing scarf. Returns where the head and weapon hand are */
+function mobBody(d,P,w,f){
+  const k=f==='w1'?1:0;
+  if(w===2){
+    d.r(5,16,3,3-k,P.C);d.r(10,16,3,3,P.C);d.r(4,19-k,4,1,'#1a1612');d.r(10,19,4,1,'#1a1612');
+    d.r(5,10,9,6,P.c);d.r(5,14,9,1,P.C);d.p(7,12,P.S);d.p(11,11,P.S);d.p(8,15,P.S);
+    d.el(4,10,2,2,P.h);d.el(14,10,2,2,P.h);d.p(3,9,P.S);d.p(15,9,P.S);d.p(4,11,P.S);
+    return{hx:9,hy:6,R:4,ex:'#6fe8ff',hand:[14,13]};
+  }
+  if(w===3){
+    d.l(7,13,7-k,19,P.C);d.l(8,13,8-k,19,P.C);d.l(10,13,10+k,19,P.C);d.l(11,13,11+k,19,P.C);
+    d.r(6-k,20,3,1,'#5a3a18');d.r(10+k,20,3,1,'#5a3a18');d.r(7-k,16,2,1,P.h);d.r(10+k,17,2,1,P.h);
+    d.r(7,8,5,6,P.c);d.r(7,11,5,1,P.sc||'#ffcc4a');d.r(6,13,7,1,P.C);
+    d.l(7,8,3,10+k,P.sc||'#ffcc4a');d.l(7,9,2,12+k,P.sc||'#ffcc4a');d.p(1,13+k,P.sc||'#ffcc4a');
+    return{hx:9,hy:4,R:3,ex:null,hand:[12,10]};
+  }
+  mobLegs(d,P,6,16,!!k,0);
+  d.r(6,10,7,6,P.c);d.r(6,14,7,1,P.C);
+  return{hx:9,hy:6,R:4,ex:null,hand:[13,12]};
+}
+const MOB_HUM={
+  /* World 1 capped goblin with a short sword · Stone goblin: squat, rock-browed, glowing eyes, curved stone sword · Sand goblin: lanky, turbaned, gold-hilted scimitar */
+  goblin:(P,f,w)=>mobCanvas(24,21,9,d=>{
+    const B=mobBody(d,P,w,f),x=B.hx,y=B.hy,R=B.R;
+    d.el(x,y,R,R,P.s);d.r(x-R+1,y+R-1,2*R-1,1,P.S);d.l(x-R,y-1,x-R-2,y-3,P.s);d.l(x+R,y-1,x+R+2,y-3,P.s);d.p(x+R+2,y-3,P.S);
+    d.p(x+2,y-1,B.ex||P.e);d.p(x+3,y-1,B.ex||'#12141c');d.r(x+1,y+2,3,1,'#2a1a10');d.p(x+2,y+2,'#ffffff');
+    if(w===1){d.r(x-3,y-4,7,2,P.h);d.p(x-4,y-3,P.h)}
+    if(w===2){d.r(x-3,y-3,8,1,P.S);d.p(x-2,y-1,P.S);d.p(x-1,y+1,P.S);d.p(x+1,y-4,P.h);d.p(x-1,y-4,P.h)}
+    if(w===3){d.el(x,y-3,4,2,P.h);d.p(x,y-4,'#c0392b');d.l(x-4,y-2,x-6,y+3,P.h)}
+    const hx=B.hand[0],hy=B.hand[1];
+    if(f==='wind'){d.r(x-5,y+2,2,3,P.s);
+      if(w===1){d.l(x-5,y+2,x-8,y-4,P.m);d.l(x-4,y+2,x-7,y-4,P.M)}
+      if(w===2){d.l(x-5,y+2,x-7,y-2,P.m);d.l(x-4,y+2,x-6,y-2,P.M);d.l(x-7,y-2,x-7,y-5,P.m);d.l(x-6,y-2,x-6,y-5,P.m);d.p(x-6,y-6,P.m)}
+      if(w===3){d.p(x-4,y+3,'#ffcc4a');d.l(x-5,y+2,x-6,y-1,P.m);d.l(x-6,y-2,x-4,y-4,P.m)}}
+    else if(f==='act'){d.r(hx-1,hy-1,3,2,P.s);
+      if(w===1){d.l(hx+2,hy-1,hx+9,hy-1,P.m);d.l(hx+2,hy,hx+8,hy,P.m);d.r(hx+1,hy-2,1,3,P.M)}
+      if(w===2){d.l(hx+2,hy-1,hx+6,hy-1,P.m);d.l(hx+2,hy,hx+6,hy,P.M);d.l(hx+6,hy-1,hx+8,hy-4,P.m);d.l(hx+7,hy,hx+9,hy-3,P.M);d.l(hx+9,hy-3,hx+9,hy+3,'#e8e2d0')}
+      if(w===3){d.p(hx+1,hy-1,'#ffcc4a');d.l(hx+2,hy-1,hx+6,hy-1,P.m);d.l(hx+7,hy-2,hx+9,hy-4,P.m)}}
+    else{d.r(hx-1,hy-1,2,2,P.s);
+      if(w===1){d.l(hx+1,hy,hx+5,hy-5,P.m);d.l(hx+2,hy,hx+6,hy-5,P.M);d.r(hx,hy+1,3,1,P.M)}
+      if(w===2){d.l(hx+1,hy,hx+3,hy-4,P.m);d.l(hx+2,hy,hx+4,hy-4,P.M);d.l(hx+3,hy-4,hx+3,hy-7,P.m);d.l(hx+4,hy-4,hx+4,hy-7,P.M);d.p(hx+2,hy-8,P.m)}
+      if(w===3){d.p(hx,hy+1,'#ffcc4a');d.l(hx+1,hy,hx+2,hy-3,P.m);d.l(hx+3,hy-4,hx+3,hy-6,P.m);d.p(hx+2,hy-7,P.m)}}
   }),
-  /* World 1 hooded cutpurse · Stone thief in a spiked rock cloak with twin daggers · Sand thief in a face wrap with a trailing scarf */
-  thief:(P,f,w)=>mobCanvas(22,20,9,d=>{
-    const st=f==='w1',dash=f==='dash'||f==='act',ln=dash?1:0;
-    mobLegs(d,P,6,15,st||dash,0);
-    d.r(6+ln,9,7,6,P.c);d.r(6+ln,13,7,1,P.C);
-    if(w===2){d.r(4+ln,8,9,8,P.C);d.p(4+ln,8,P.h);d.p(5+ln,7,P.h);d.p(7+ln,6,P.h);d.r(6+ln,9,7,6,P.c)}
-    else d.r(5+ln,10,2,4,P.C);
-    d.el(10+ln,6,4,4,P.h);d.r(9+ln,5,5,4,P.s);d.r(9+ln,8,5,1,P.S);d.r(7+ln,3,3,5,P.C);d.p(11+ln,6,P.e);d.p(12+ln,6,'#12141c');
-    if(w===1)d.r(10+ln,8,4,1,P.a);
-    if(w===2){d.p(8+ln,1,P.h);d.p(10+ln,1,P.h);d.p(12+ln,2,P.h);d.r(10+ln,8,4,1,P.a)}
-    if(w===3){d.r(9+ln,7,5,2,P.a);d.l(6+ln,6,2,9,P.a);d.l(6+ln,7,1,11,P.a);d.r(9+ln,4,5,1,P.C)}
-    if(f==='act'){d.r(13,10,4,2,P.s);d.l(17,10,21,9,P.m);if(w===2)d.l(16,12,20,13,P.m);if(w===3){d.el(20,10,1,1,'#ffcc4a')}}
-    else{d.r(12+ln,11,2,2,P.s);d.l(14+ln,12,16+ln,10,P.m);if(w===2)d.l(5+ln,12,3+ln,14,P.m)}
+  /* World 1 hooded cutpurse · Stone thief: a hunched boulder-cloak, face lost in shadow except two glowing eyes · Sand thief: lanky, fully wrapped, only an eye slit showing */
+  thief:(P,f,w)=>mobCanvas(24,21,9,d=>{
+    const B=mobBody(d,P,w,f==='dash'?'w1':f),x=B.hx,y=B.hy,hx=B.hand[0],hy=B.hand[1];
+    if(w===1){d.el(x+1,y,4,4,P.h);d.r(x,y-1,4,4,P.s);d.r(x,y+2,4,1,P.S);d.p(x+2,y,P.e);d.p(x+3,y,'#12141c');d.r(x+1,y+2,4,1,P.a);d.r(x-2,y-3,3,5,P.C)}
+    if(w===2){d.el(x,y+1,5,5,P.h);d.r(x+1,y-1,4,4,'#12141c');d.p(x+2,y,'#6fe8ff');d.p(x+4,y,'#6fe8ff');d.p(x-3,y-4,P.S);d.p(x,y-5,P.S);d.p(x+3,y-4,P.S);d.p(x-4,y,P.S)}
+    if(w===3){d.el(x,y,3,3,P.h);d.r(x+1,y-1,3,1,P.s);d.p(x+2,y-1,'#12141c');d.p(x-1,y-3,P.C)}
+    if(f==='act'){d.r(hx,hy-1,3,2,P.s);d.l(hx+3,hy-1,hx+7,hy-2,P.m);if(w===2)d.l(hx+2,hy+1,hx+6,hy+2,P.m);if(w===3)d.el(hx+8,hy-2,1,1,'#ffcc4a')}
+    else if(f==='dash'){d.r(hx,hy-1,2,2,P.s);d.l(hx+2,hy-1,hx+5,hy-1,P.m);for(let i=0;i<3;i++)d.p(1+i*2,hy+i,'rgba(255,255,255,.55)')}
+    else{d.r(hx-1,hy-1,2,2,P.s);d.l(hx+1,hy,hx+3,hy-2,P.m);if(w===2){d.r(3,hy-1,2,2,P.s);d.l(3,hy,1,hy-2,P.m)}if(w===3)d.el(hx-4,hy+1,1,1,'#e8c070')}
   }),
-  /* World 1 pointy-hat wizard · Stone wizard in a deep hood with a floating rock · Sand wizard in a hooded robe with a sand orb */
-  wizard:(P,f,w)=>mobCanvas(22,22,9,d=>{
+  /* World 1 pointy-hat wizard · Stone wizard: wide and armoured, rock pauldrons, glowing eyes in a hood, floating rock · Sand wizard: tall and thin in a flared robe, cone hood, face veil and gold sash */
+  wizard:(P,f,w)=>mobCanvas(24,23,9,d=>{
     const cast=f==='wind'||f==='act',sw=f==='w1'?1:0;
-    d.r(5,13,9,7,P.c);d.r(4,17,11,3,P.c);d.r(4,19,11,1,P.C);d.r(9,13,1,7,P.C);d.r(6,20,2,1,'#2a1c14');d.r(11-sw,20,2,1,'#2a1c14');
-    d.r(6,10,7,4,P.c);
-    if(w===1){d.r(8,10,3,6,P.h);d.el(9,8,3,3,P.s);d.p(11,8,P.e);d.r(7,10,5,2,'#e8e8f0');d.p(9,12,'#e8e8f0');
+    if(w===1){
+      d.r(5,13,9,7,P.c);d.r(4,17,11,3,P.c);d.r(4,19,11,1,P.C);d.r(9,13,1,7,P.C);d.r(6,20,2,1,'#2a1c14');d.r(11-sw,20,2,1,'#2a1c14');
+      d.r(6,10,7,4,P.c);d.r(8,10,3,6,P.h);d.el(9,8,3,3,P.s);d.p(11,8,P.e);d.r(7,10,5,2,'#e8e8f0');d.p(9,12,'#e8e8f0');
       d.r(5,6,9,2,P.C);d.r(6,4,6,2,P.c);d.r(7,2,4,2,P.c);d.r(8,0,2,2,P.c);d.p(10,1,P.c);d.r(5,6,9,1,P.h)}
-    if(w===2){d.el(9,7,4,4,P.c);d.r(5,9,9,2,P.c);d.el(10,8,2,2,'#12141c');d.p(10,8,P.a);d.p(11,8,P.a);d.r(5,5,2,6,P.C);d.el(5,11,2,1,P.S);d.el(13,11,2,1,P.S);d.p(4,10,P.S)}
-    if(w===3){d.el(9,7,4,4,P.c);d.r(5,9,9,2,P.c);d.el(10,8,2,2,P.S);d.p(10,8,P.s);d.p(11,8,'#12141c');d.r(5,5,2,6,P.C);d.p(9,2,P.C);d.r(6,12,7,1,P.a)}
-    const sx=cast?16:14,sy=cast?2:5;d.l(sx,sy+2,sx-1,20,P.m);d.l(sx+1,sy+2,sx,20,P.M);
+    if(w===2){
+      d.r(3,12,13,8,P.c);d.r(3,19,13,1,P.C);d.r(9,12,1,8,P.C);d.r(4,20,3,1,'#1a1612');d.r(12-sw,20,3,1,'#1a1612');
+      d.el(9,8,5,5,P.c);d.el(10,9,3,3,'#12141c');d.p(10,9,'#6fe8ff');d.p(12,9,'#6fe8ff');d.r(4,4,2,6,P.C);
+      d.el(3,12,3,2,P.S);d.el(15,12,3,2,P.S);d.p(2,11,P.C);d.p(16,11,P.C);d.p(6,16,P.S);d.p(13,15,P.S)}
+    if(w===3){
+      d.l(7,10,4,21,P.c);d.l(11,10,14,21,P.c);d.r(7,10,5,12,P.c);for(let yy=14;yy<22;yy++){const e=Math.round((yy-10)*.35);d.r(7-e,yy,5+2*e,1,P.c)}d.r(4,21,11,1,P.C);
+      d.r(7,13,5,1,'#ffcc4a');d.p(9,14,'#ffcc4a');d.p(9,15,'#ffcc4a');
+      d.l(9,0,6,7,P.c);d.l(9,0,12,7,P.c);d.r(7,4,5,5,P.c);d.r(6,7,7,3,P.c);d.r(8,6,4,3,P.s);d.p(10,6,'#12141c');d.r(8,8,4,2,'#f4e8d0');d.p(9,0,'#ffcc4a')}
+    const sx=cast?17:15,sy=cast?2:5,ty=21;d.l(sx,sy+2,sx-1,ty,P.m);d.l(sx+1,sy+2,sx,ty,P.M);
     if(w===1){d.el(sx+.5,sy+1,1.5,1.5,P.a);d.p(sx,sy,'#ffffff')}
-    if(w===2){d.el(sx+.5,sy-1+(f==='w1'?1:0),2,2,'#8a8478');d.p(sx,sy-2,'#c9c2b0');d.p(sx+1,sy,'#5f5a50')}
-    if(w===3){d.el(sx+.5,sy,2,2,'#e8b860');d.p(sx,sy-1,'#fff0c0');d.p(sx+2,sy+1,'#a8743a')}
-    d.r(12,cast?10:12,sx-12,2,P.s);
-    if(f==='act'){d.el(19,3,2,2,w===2?'#c9a070':'#ffd36b');d.p(19,3,'#ffffff')}
+    if(w===2){d.el(sx+.5,sy-1+(f==='w1'?1:0),2,2,'#8a8478');d.p(sx,sy-2,'#c9c2b0');d.p(sx+1,sy,'#5f5a50');d.p(sx+2,sy-2,'#6fe8ff')}
+    if(w===3){d.l(sx-1,sy+1,sx+2,sy+1,'#ffcc4a');d.el(sx+.5,sy-1,1.5,1.5,'#e8b860');d.p(sx,sy-1,'#fff0c0')}
+    const ay=w===3?11:cast?10:12;d.r(w===2?14:12,ay,sx-(w===2?14:12),2,P.s);
+    if(f==='act'){d.el(20,3,2,2,w===2?'#c9a070':w===3?'#e8b860':'#ffd36b');d.p(20,3,'#ffffff')}
   }),
-  /* World 1 two-point jester · Stone jester with one long drooping stone hat · Sand jester with three points, coin bells and a veil */
-  jester:(P,f,w)=>mobCanvas(22,20,9,d=>{
-    const st=f==='w1',thr=f==='act';
-    d.r(6,15,2,3-(st?1:0),P.C);d.r(10,15,2,3,P.c);d.r(5,18-(st?1:0),3,1,'#2a1c14');d.r(10,18,3,1,'#2a1c14');
-    d.r(6,10,6,5,P.c);d.r(9,10,3,5,P.C);d.p(7,12,P.m);d.p(10,12,P.m);d.r(6,9,6,1,P.m);
-    d.el(9,6,3,3,P.s);d.p(10,6,P.e);d.l(9,8,11,8,'#d8304a');
-    if(w===1){d.r(6,2,3,2,P.h);d.l(6,2,3,5,P.h);d.el(3,6,1,1,P.m);d.r(9,2,4,2,P.a);d.l(12,2,15,4,P.a);d.el(16,5,1,1,P.m);d.r(5,3,9,1,P.m)}
-    if(w===2){d.r(6,2,7,2,P.h);d.l(7,1,3,1,P.h);d.l(3,1,1,4,P.h);d.l(1,4,1,7,P.h);d.el(1,8,1,1,P.m);d.r(5,3,9,1,P.C);d.p(8,2,P.S)}
-    if(w===3){d.r(6,2,7,2,P.h);d.l(6,2,3,0,P.h);d.p(2,0,P.m);d.l(9,2,9,0,P.C);d.p(9,0,P.m);d.l(12,2,15,0,P.h);d.p(16,0,P.m);d.r(5,3,9,1,P.m);d.r(9,7,4,2,'rgba(255,240,200,.85)')}
-    if(thr){d.r(12,10,4,2,P.s);d.r(16,8,3,4,w===2?'#b8b0a0':'#ffffff');d.p(17,10,'#d8304a')}
-    else{d.r(12,11,2,3,P.s);d.r(13,13,3,4,w===2?'#b8b0a0':'#ffffff');d.p(14,15,'#d8304a')}
+  /* World 1 two-point jester · Stone jester: squat, stone-plated, one heavy drooping hat · Sand jester: lanky, three-point hat with coin bells, veiled */
+  jester:(P,f,w)=>mobCanvas(24,21,9,d=>{
+    const thr=f==='act';let x=9,y=6,hx=12,hy=12;
+    if(w===1){const st=f==='w1';d.r(6,15,2,3-(st?1:0),P.C);d.r(10,15,2,3,P.c);d.r(5,18-(st?1:0),3,1,'#2a1c14');d.r(10,18,3,1,'#2a1c14');
+      d.r(6,10,6,5,P.c);d.r(9,10,3,5,P.C);d.p(7,12,P.m);d.p(10,12,P.m);d.r(6,9,6,1,P.m);
+      d.el(9,6,3,3,P.s);d.p(10,6,P.e);d.l(9,8,11,8,'#d8304a');
+      d.r(6,2,3,2,P.h);d.l(6,2,3,5,P.h);d.el(3,6,1,1,P.m);d.r(9,2,4,2,P.a);d.l(12,2,15,4,P.a);d.el(16,5,1,1,P.m);d.r(5,3,9,1,P.m)}
+    else{const B=mobBody(d,P,w,f);x=B.hx;y=B.hy;hx=B.hand[0];hy=B.hand[1];
+      d.el(x,y,B.R,B.R,P.s);d.p(x+1,y,B.ex||P.e);d.l(x,y+2,x+2,y+2,'#d8304a');
+      if(w===2){d.r(5,8,9,2,P.m);d.p(7,9,P.C);d.p(11,9,P.C);d.r(x-4,y-4,9,3,P.h);d.l(x-4,y-3,x-7,y,P.h);d.l(x-7,y,x-7,y+6,P.h);d.el(x-7,y+7,1,1,P.m);d.p(x-1,y-3,P.S);d.p(x+2,y-4,P.S)}
+      if(w===3){d.r(x-3,y-3,7,2,P.h);d.l(x-3,y-3,x-6,y-6,P.h);d.p(x-7,y-7,P.m);d.l(x,y-3,x,y-7,P.C);d.p(x,y-8,P.m);d.l(x+3,y-3,x+6,y-6,P.h);d.p(x+7,y-7,P.m);d.r(x,y+1,4,2,'rgba(255,240,200,.9)')}}
+    const cc=w===2?'#b8b0a0':w===3?'#f0d890':'#ffffff';
+    if(thr){d.r(hx,hy-2,4,2,P.s);d.r(hx+4,hy-4,3,4,cc);d.p(hx+5,hy-2,'#d8304a')}
+    else{d.r(hx,hy-1,2,3,P.s);d.r(hx+1,hy+1,3,4,cc);d.p(hx+2,hy+3,'#d8304a')}
   }),
-  /* World 1 hooded longbow archer · Stone archer in a rock-grey hood · Sand archer in a headwrap with a short recurve */
-  archer:(P,f,w)=>mobCanvas(22,20,9,d=>{
-    const st=f==='w1',draw=f==='wind',rel=f==='act';
-    mobLegs(d,P,6,15,st,0);
-    d.r(6,9,7,6,P.c);d.r(6,13,7,1,P.M);d.r(4,8,3,6,P.M);d.l(4,7,6,5,'#e8e8e8');
-    if(w!==3){d.el(9,6,4,4,P.h);d.r(9,5,4,4,P.s);d.r(9,8,4,1,P.S);d.p(11,6,P.e);d.r(6,2,3,4,P.c)}
-    if(w===3){d.el(9,6,3,3,P.s);d.p(11,6,P.e);d.el(9,3,4,2,P.h);d.r(9,7,4,2,P.h);d.l(5,4,3,8,P.h)}
-    {
-      const bx=draw?16:15,top=w===3?6:4,bot=w===3?14:16;d.l(bx,top,bx+2,top+3,P.m);d.l(bx+2,top+3,bx+2,bot-3,P.m);d.l(bx+2,bot-3,bx,bot,P.m);d.l(bx+1,top,bx+3,top+3,P.M);
-      d.l(bx,top,draw?11:bx,draw?10:bot,P.a);if(draw)d.l(11,10,bx,bot,P.a);
-      d.r(12,10,draw?2:4,2,P.s);if(draw){d.l(11,10,18,10,P.m);d.p(19,10,'#ffffff')}
-      if(rel){d.p(19,9,'#ffffff');d.p(20,11,'#ffffff')}}
-  }),
+  /* World 1 hooded longbow archer · Stone archer: squat, horned stone hood with glowing eyes, a heavy stone bow tipped with crystal · Sand archer: lanky, headwrap, short recurve and a quiver */
+  archer:(P,f,w)=>mobCanvas(24,21,9,d=>{
+    const draw=f==='wind',rel=f==='act';
+    const B=mobBody(d,P,w,f),x=B.hx,y=B.hy,hy=B.hand[1];
+    if(w===1){d.r(4,9,3,6,P.M);d.l(4,8,6,6,'#e8e8e8');d.el(x,y,4,4,P.h);d.r(x,y-1,4,4,P.s);d.r(x,y+2,4,1,P.S);d.p(x+2,y,P.e);d.r(x-3,y-4,3,4,P.c)}
+    if(w===2){d.el(x,y,4,4,P.h);d.r(x,y-1,4,3,'#12141c');d.p(x+1,y,'#6fe8ff');d.p(x+3,y,'#6fe8ff');d.l(x-3,y-3,x-5,y-6,P.S);d.l(x+2,y-3,x+4,y-6,P.S)}
+    if(w===3){d.r(3,7,2,6,P.M);d.l(3,6,5,4,'#e8e8e8');d.el(x,y,3,3,P.s);d.p(x+2,y,'#12141c');d.el(x,y-2,4,2,P.h);d.r(x,y+1,3,2,P.h);d.l(x-3,y-1,x-5,y+3,P.h)}
+    const bx=(draw?16:15)+(w===2?0:0),top=w===3?hy-6:hy-8,bot=w===3?hy+4:hy+5,bc=w===2?'#8a8478':P.m,th=w===2?2:1;
+    for(let t=0;t<th;t++){d.l(bx+t,top,bx+2+t,top+3,bc);d.l(bx+2+t,top+3,bx+2+t,bot-3,bc);d.l(bx+2+t,bot-3,bx+t,bot,bc)}
+    if(w===2){d.p(bx,top-1,'#6fe8ff');d.p(bx,bot+1,'#6fe8ff')}else d.l(bx+1,top,bx+3,top+3,P.M);
+    d.l(bx,top,draw?bx-5:bx,draw?hy-2:bot,P.a);if(draw)d.l(bx-5,hy-2,bx,bot,P.a);
+    d.r(B.hand[0]-1,hy-2,draw?2:4,2,P.s);if(draw){d.l(bx-5,hy-2,bx+3,hy-2,P.m);d.p(bx+4,hy-2,'#ffffff')}
+    if(rel){d.p(bx+4,hy-3,'#ffffff');d.p(bx+5,hy-1,'#ffffff')}
+  })
+};
+const MOB_ART={
+  goblin:MOB_HUM.goblin,thief:MOB_HUM.thief,wizard:MOB_HUM.wizard,jester:MOB_HUM.jester,archer:MOB_HUM.archer,
   lizard:(P,f)=>mobCanvas(26,13,13,d=>{
     const st=f==='w1',sp=f==='act';
     d.l(0,8,6,6,P.s);d.l(0,9,6,7,P.S);
@@ -3583,7 +3652,8 @@ const MOB_ART={
       d.r(5,21+Y-k,3,1,'#2a1c14');d.r(9,21+Y,3,1,'#2a1c14');d.r(16,21+Y,3,1,'#2a1c14');d.r(20,21+Y-k,3,1,'#2a1c14');
       d.el(14,13+Y,9,3,P.h);d.r(6,15+Y,17,1,P.H);d.l(3,11+Y,0,17+Y,P.H);d.l(4,11+Y,1,17+Y,P.H);
       d.l(21,10+Y,25,5+Y,P.h);d.r(22,6+Y,3,5,P.h);d.r(24,4+Y,5,3,P.h);d.r(27,6+Y,2,1,P.H);d.p(26,5+Y,w===2?'#6fe8ff':'#12141c');d.p(23,4+Y,P.H);d.l(21,6+Y,22,4+Y,P.H);
-      if(w===2){d.l(11,12+Y,14,15+Y,P.H);d.l(14,12+Y,16,14+Y,P.H);d.r(9,11+Y,10,1,'#4a4038')}}
+      if(w===2){d.r(6,11+Y,16,5,'#6a7080');d.r(6,15+Y,16,1,'#3a3f4a');for(let i=7;i<22;i+=3)d.p(i,13+Y,'#8d97a8');d.r(22,5+Y,4,3,'#6a7080');d.p(25,3+Y,'#8d97a8');d.p(26,2+Y,'#8d97a8');d.p(26,5+Y,'#6fe8ff')}
+      if(w===3){d.r(9,10+Y,9,4,'#c0392b');d.r(9,11+Y,9,1,'#ffcc4a');d.r(9,13+Y,9,1,'#ffcc4a');d.l(2,11+Y,0,20+Y,P.H);d.l(3,12+Y,1,21+Y,P.h);d.l(22,5+Y,20,9+Y,'#5a3a18')}}
     /* rider */
     d.r(11,9+Y,6,5,P.c);d.r(11,12+Y,6,1,P.C);d.r(10,13+Y,8,2,P.C);
     if(w===1){d.el(14,6+Y,3,3,P.m);d.r(15,5+Y,3,2,P.c);d.r(16,6+Y,2,1,'#12141c');d.r(13,2+Y,3,2,P.a);d.p(14,1+Y,P.a)}
@@ -3610,7 +3680,7 @@ const MOB_ART={
     d.el(6,11,4,4,P.s);d.el(22,11,4,4,P.s);d.r(3,13,7,1,P.S);d.r(19,13,7,1,P.S);
     d.el(14,7,4,4,P.s);d.r(11,5,7,1,P.S);d.r(15,7,2,1,P.e);d.p(18,7,P.e);d.r(14,10,4,1,'#2a2420');
     if(w===1){d.r(9,18,3,2,P.c);d.r(16,13,4,2,P.c);d.r(4,9,3,1,P.c);d.r(12,3,3,1,P.c);d.p(21,19,P.C);d.p(10,14,P.C)}
-    if(w===2){d.l(10,13,12,20,P.e);d.l(12,20,11,22,P.e);d.l(17,14,19,18,P.e);d.l(5,9,7,13,P.e);d.p(14,3,P.e);d.p(13,4,P.e);d.p(9,7,'#8a8478');d.p(19,6,'#8a8478')}
+    if(w===2){d.r(6,13,16,9,P.s);d.r(6,21,16,1,P.S);const cr=(cx,cy,h)=>{d.l(cx,cy,cx,cy-h,'#6fe8ff');d.l(cx+1,cy,cx+1,cy-h+1,'#3fa8d8');d.p(cx,cy-h,'#dff8ff')};cr(4,8,4);cr(7,7,3);cr(21,8,4);cr(24,9,3);cr(13,3,3);cr(16,2,2);d.l(10,13,12,20,P.e);d.l(12,20,11,22,P.e);d.l(17,14,19,18,P.e);d.l(5,9,7,13,P.e);d.p(14,3,P.e);d.p(13,4,P.e);d.p(9,7,'#8a8478');d.p(19,6,'#8a8478')}
     d.el(4,18,3,4,P.s);d.el(4,23,2,2,P.S);
     {
       if(up){d.el(24,6,3,3,P.s);d.l(24,4,30,0,P.m);d.l(25,4,31,0,P.m);d.el(31,1,2,2,P.M)}
@@ -3905,6 +3975,7 @@ function reset(){
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
   $('panel').hidden=true;$('shop').hidden=true;
   p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
+  p.runW=wType;p.runMix=false;p.runHurt=false;
   applyChar();
   if(p.cp.startHot&&!brMode){const hp=HOT.filter(hotOk);giveHot(hp[(R()*hp.length)|0].id)}
   buildHp();
@@ -4900,7 +4971,7 @@ $('wpnback').addEventListener('click',closeSub);
 function cycleWeapon(){
   const ts=WTYPES.map(x=>x[0]).filter(t=>wpnTypeSkin(t));
   if(ts.length<2){sfx(110,.1,'square',.05,.7);return false}
-  wType=ts[(ts.indexOf(wType)+1)%ts.length];syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);return true;
+  wType=ts[(ts.indexOf(wType)+1)%ts.length];if(state!=='menu')p.runMix=true;syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);return true;
 }
 function weaponRowHtml(){
   if(!eq[wType]||!typeOpen(wType))wType='f';
@@ -5329,7 +5400,7 @@ function kill(e){
     for(const o of enemies)if(o!==e&&!o.dead){o.dead=true;spark(o.x,o.y,o.c,10,240)}
     bullets=[];hitstop=.25;shake=22;rumble(500,1,1);if(wave<LOOP_WAVES&&!brMode)dropKey(e);
     for(let i=0;i<6;i++)spark(e.x+(R()-.5)*50,e.y+(R()-.5)*50,i%2?'#ffd36b':'#ff8a3d',14,380);
-    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
+    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;if(!brMode&&!cheatsOn()){if(!stats.wwin||typeof stats.wwin!=='object')stats.wwin={};if(!p.runMix){const wk=e.fk+p.runW;stats.wwin[wk]=(stats.wwin[wk]||0)+1}if(!p.runHurt)stats['nohit'+e.fk]=1;if(diff==='hard'||diff==='nowin')stats['hwin'+e.fk]=1}for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
     else if(wave===LOOP_WAVES)spawnFinal(); /* the room boss falls, the vault guardian wakes */
   }
   if(world===3&&e.t!=='boss'&&R()<.3){for(let i=0;i<5;i++){const a=R()*TAU;bullets.push({x:e.x,y:e.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,r:4,l:2.5,c:'#ffcc4a'})}}
@@ -5365,7 +5436,7 @@ function dashDodge(x,y){
 function hurtP(e,ux,uy){
   if(cheat.god||dev.god){p.inv=.4;return}
   if(p.cp.ward&&!p.wardUsed){p.wardUsed=true;p.inv=.9;p.blink=.5;spark(p.x,p.y,'#bfe9ff',16,260);floatTxt(p.x,p.y-22,'WARD','#bfe9ff');sfx(700,.12,'triangle',.06,1.4);return}
-  p.hitW=true;
+  p.hitW=true;p.runHurt=true;
   p.hp-=Math.max(1,e.dmg-(p.mods.firon?1:0));p.inv=.9+(p.cp.invX||0);p.blink=.9+(p.cp.invX||0);p.ix=ux*360;p.iy=uy*360;rumble(220,.9,.6);
   shake=14;hitstop=.08;combo=0;comboT=0;
   spark(p.x,p.y,'#ff4d5e',14,280);sfx(80,.25,'sawtooth',.09,.5);
