@@ -41,7 +41,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 
 ### 2. Weapon evolution overhaul
 - [x] Rename/redraw lines exactly as the table above (WLINES punch/gun/bomb; new art wrap, dbarrel, grenade, cball, bigger bomb, brass bar; weapon-box skins use the exact stage names, their look stays on the final stage). Each form visually distinct; the in-hand sprite matches the evolution.
-- [ ] New families: Boomerang (thrown, returns, pierces), Magic (homing bolt), Bow (charged arrows that pierce), Mace (slow heavy spin smash with knockback). Each with mastery track, unlock chain after Bomb (Bomb → Boomerang → Magic → Bow → Mace), shop/upgrade tabs only when unlocked.
+- [x] New families (tabs r/m/a/c, WLINES boomer/magic/bow/mace, starters st_boom/st_magic/st_bow/st_mace, mastery WM_* + specials, 1 cosmetic box each, achievements wmr/wmm/wma/wmc; tested damage + unlock chain + shop): Boomerang (thrown, returns, pierces), Magic (homing bolt), Bow (charged arrows that pierce), Mace (slow heavy spin smash with knockback). Each with mastery track, unlock chain after Bomb (Bomb → Boomerang → Magic → Bow → Mace), shop/upgrade tabs only when unlocked.
 - [x] Evolution animation (Pokémon-like) (playEvo; triggered by mastery Evolve steps and in-run evolutions; tested, skip works): old weapon shown big, flashing silhouette, transform burst, new weapon revealed, evolution jingle. Short, skippable by click.
 
 ### 3. Fist combat fix
@@ -135,6 +135,7 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - Export/import: format 'pixel-rush-save' fv1 {data:{cinder-*}}; backup in pxr-backup-prev + RESTORE button; invalid/oversized files rejected; quota failure restores old data.
 - Shotgun fires pellets (w.pel); Cannonball rolls along the ground (w.roll), bursts on the first enemy it touches, quiet roll rumble.
 - User requests mid-0.5: Easy keeps name EASY; save screen button says CONTINUE for saves with data (START for empty); save loading screen on save switch reload (#bootld, html.booting set in <head>).
+- New families mechanics: boomers[] (out/back, pierce, max 1 or 2 in flight, hidden in hand while thrown); magic = pbul kind 'magic' with homing; bow = pbul kind 'arrow' (every 3rd = charged, Volley spec); mace = wide arc, knockback x kb, Earthshaker spec. Title fighter only uses f/k/g/b mythics.
 
 ## Known bugs
 (append as found)
