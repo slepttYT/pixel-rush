@@ -2522,6 +2522,21 @@ const CHARS=[
  {id:'sunking',n:'Sun Sovereign',t:'Pharaoh\u2019s Heir',d:'Took the Pharaoh\u2019s throne. Heals over time, crits often and restores a heart after every wave.',ach:'slaysnake',body:'#fff1c4',trim:'#4a2a06',acc:'#ffb02e',acc2:'#ff6a1f',eye:'#4a2a06',glow:1,sty:'sun',dm:.25,cp:{regen:20,crit:.15,waveHeal:1}},
  {id:'weaponmaster',n:'Weaponmaster',t:'Jack of All Trades',d:'Has won with every weapon. Faster swings and shots, more reach and a little more damage with all of them.',ach:'allw1',body:'#d8c9a8',trim:'#1c1608',acc:'#c9a070',acc2:'#5b3a1a',eye:'#1c1608',sty:'ronin',cd:.88,reach:1.1,dm:.25},
  {id:'champion',n:'Bare-Knuckle Champion',t:'Fists of Legend',d:'Beat the last world with bare hands. Monstrous Fists: much more damage and speed with them, plus an extra heart.',ach:'fists3',body:'#f0c9a0',trim:'#2b1a0a',acc:'#ffd36b',acc2:'#b3122d',eye:'#2b1a0a',glow:1,sty:'mohawk',hp:1,wb:{w:'f',dm:1,cd:.8,reach:1.1}},
+ /* v0.3: World 2 and World 3 fighters. Each one can only be earned in those worlds */
+ {id:'emberk',n:'Ember Knight',t:'Dragon\u2019s Bane',d:'Took down the Dragon. Hits harder up close with Fists and the Knife, and takes an extra hit, but walks a little slower.',ach:'slaydragon',body:'#4a3b36',trim:'#1a1210',acc:'#ff8a3d',acc2:'#ffd36b',eye:'#ffb347',sty:'knight',hp:1,spd:.92,mel:.5},
+ {id:'frostw',n:'Frostwalker',t:'Ice in the Veins',d:'Cleared the Stone World. Fast feet, a quick dash with a longer dodge, and the cold of World 2 can never slow it, but it is frail.',ach:'w2e',body:'#dff4ff',trim:'#1b4a6a',acc:'#7fd6ff',acc2:'#ffffff',eye:'#1b6a96',sty:'frost',hp:-1,spd:1.15,dash:.8,cp:{dashInv:.15,noChill:1}},
+ {id:'exec',n:'Executioner',t:'Finisher',d:'Hunted 500 enemies in the Stone World. Deals 60% more damage to anything below a third of its health, but swings a little slower.',ach:'w2k500',body:'#2a2a30',trim:'#0e0e12',acc:'#c0392b',acc2:'#8a1a12',eye:'#ff4d5e',sty:'exec',cd:1.1,cp:{exec:.6}},
+ {id:'voidr',n:'Void Runner',t:'Between Worlds',d:'Cleared the Sand World. Fast, with a very quick dash and hotbar abilities that recharge 25% sooner, but frail.',ach:'w3e',body:'#2a1a5a',trim:'#05030f',acc:'#b58cff',acc2:'#ff7ac8',eye:'#e8d8ff',sty:'void',hp:-1,spd:1.1,dash:.7,cp:{hotCd:.75}},
+ {id:'lastst',n:'Last Stand',t:'Never Falls',d:'Beat the Pharaoh without dying once in that run. An extra heart, and at 2 hearts or less every hit deals 40% more damage, but a little slow.',ach:'laststand',body:'#8a6a4a',trim:'#2a1a0a',acc:'#e8e0c8',acc2:'#b3122d',eye:'#2a1a0a',sty:'laststand',hp:1,spd:.94,cp:{lastStand:.4}},
+ {id:'worldb',n:'Worldbreaker',t:'Master of Arms',d:'Beat all three worlds, each with a different weapon. A little better at everything, but earns 15% fewer coins.',ach:'worldbreaker',body:'#3a3f52',trim:'#14161d',acc:'#ffd36b',acc2:'#7fe3ff',eye:'#ffd36b',sty:'worldbreaker',dm:.25,cd:.92,reach:1.08,coin:.85},
+ /* returning fighters from the old roster, rebalanced, each unlocked deeper in World 2 or World 3 */
+ {id:'ashling',n:'Ashling',t:'Spark of Speed',d:'A flickering ember. Fast, with a small hitbox, and every dash scorches anything close, but one heart fewer.',ach:'w2b',body:'#c9c4c0',trim:'#1c1410',acc:'#ff7a2d',acc2:'#ffd36b',eye:'#ff7a2d',sty:'ash',hp:-1,spd:1.12,r:10,cp:{dashNova:1}},
+ {id:'dancer',n:'Blade Dancer',t:'Whirling Steel',d:'Never stops spinning. Every second swing is a full spin attack, but the reach is a little shorter.',ach:'w2c',body:'#f2c6c9',trim:'#3a0d16',acc:'#e8344a',eye:'#3a0d16',sty:'dancer',every:2,reach:.9},
+ {id:'druid',n:'Druid',t:'Forest Healer',d:'Nature mends wounds: heals a heart every 25 seconds and earns 15% more XP, but swings a little slower.',ach:'w2a',body:'#bfe8a3',trim:'#14301b',acc:'#3fae5a',acc2:'#ff9ec7',eye:'#14301b',sty:'druid',cd:1.08,xp:1.15,cp:{regen:25}},
+ {id:'monk',n:'Rhythm Monk',t:'Inner Peace',d:'Swings 18% faster, but with a shorter reach.',ach:'w2bs',body:'#f0c9a0',trim:'#2b1a0a',acc:'#ff8a1f',eye:'#2b1a0a',sty:'monk',cd:.82,reach:.88},
+ {id:'arsenal',n:'Arsenal',t:'Loaded Belt',d:'Hotbar abilities recharge 30% faster and every run starts with a free random hotbar ability, but it is a little slow on its feet.',ach:'w3b',body:'#d8c9a8',trim:'#1c1608',acc:'#c9a070',acc2:'#5b3a1a',eye:'#1c1608',sty:'arsenal',spd:.95,cp:{hotCd:.7,startHot:1}},
+ {id:'vamp',n:'Vampire Lord',t:'Night Noble',d:'Feeds on every strike: starts with the Vampire Sword, healing from the damage it deals, but has one heart fewer.',ach:'w3c',body:'#e9e0ea',trim:'#1a0509',acc:'#b3122d',eye:'#ff3050',sty:'vamp',hp:-1,start:['vampsw']},
+ {id:'storm',n:'Stormcaller',t:'Thunder Caller',d:'Lightning follows every cut: starts with the Thunder Sword and Arc Lightning, but has one heart fewer and walks a little slower.',ach:'w3k',body:'#ffe97a',trim:'#33290a',acc:'#ffd21f',acc2:'#ffffff',eye:'#33290a',sty:'storm',hp:-1,spd:.95,start:['thundersw','chain']},
  {id:'legend',n:'Legend',t:'Account Level 30',d:'The reward for sticking with it. Small bonuses everywhere: an extra heart, faster feet and swings, more coins and XP.',ach:'lv30',body:'#fff3c4',trim:'#4a3206',acc:'#ffd36b',acc2:'#ffffff',eye:'#4a3206',glow:1,sty:'ascend',hp:1,spd:1.08,cd:.92,dm:.25,coin:1.15,xp:1.15}
 ];
 const charsPlayed=()=>CHARS.filter(c=>stats.chars&&stats.chars[c.id]).length;
@@ -2556,12 +2571,12 @@ p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.sto
 /* --- character art: drawn facing +x. phase 0 = body and gear, phase 1 = face (drawn after the sword) --- */
 /* ---------- character pixel sprites: every fighter is a side-view pixel sprite (like the mobs) that faces where you aim, with idle and walk frames.
    The weapon still swings around them. Skins (gold, diamond, galaxy) repaint the outfit ---------- */
-const CHS_SKIN=[null,{b:'#ffd36b',t:'#7a5206'},{b:'#9fe8ff',t:'#1f6a9a'},{b:'#9a7bff',t:'#2a1a5a'}];
+const CHS_SKIN=[null,{b:'#ffd36b',t:'#7a5206'},{b:'#9fe8ff',t:'#1f6a9a'},{b:'#241650',t:'#0b0826'}]; /* gold, diamond, galaxy (deep space, not just purple) */
 function charSprite(ch,pose,sk){
   const k=(ch.id||'x')+'|'+pose+'|'+(sk||0),C=CHS_CACHE;if(C[k])return C[k];
   const S=CHS_SKIN[sk||0],body=S?S.b:ch.body,trim=S?S.t:ch.trim,acc=ch.acc,acc2=ch.acc2||mixHex(ch.acc,'#000000',.35),eye=ch.eye||'#12141c',sty=ch.sty||'plain';
   const skin=sty==='golem'?body:sty==='phantom'?'#e8eeff':'#f2c9a0',dk=mixHex(body,'#000000',.3);
-  return C[k]=mobCanvas(18,22,8,d=>{
+  const out=mobCanvas(18,22,8,d=>{
     const w1=pose==='w1',w2=pose==='w2';
     if(sty==='cape'||sty==='ascend'||sty==='sun'){d.r(2,9,3,9,acc);d.l(2,18,4,18,mixHex(acc,'#000000',.3))}
     if(sty==='phantom'){d.el(8,16,4,3,body);d.l(5,18,3,21,body);d.l(8,19,8,21,body);d.l(11,18,13,20,body)}
@@ -2587,14 +2602,59 @@ function charSprite(ch,pose,sk){
     else if(sty==='phantom'){d.r(5,2,8,2,'#c8d4ff')}
     else if(sty==='sun'){for(let i=0;i<7;i++){const an=Math.PI+i*Math.PI/6;d.p(9+Math.round(Math.cos(an)*6),4+Math.round(Math.sin(an)*5),'#ffd36b')}d.r(6,1,7,2,acc)}
     else if(sty==='ascend'){d.r(6,-1,7,1,'#fff3b0');d.p(5,0,'#fff3b0');d.p(13,0,'#fff3b0');d.r(5,1,8,2,trim)}
+    /* v0.3 fighters */
+    else if(sty==='knight'){d.el(9,5,5,5,body);d.r(9,4,5,1,'#12141c');d.p(11,4,acc);d.p(12,4,acc);d.l(4,2,3,-1,'#e8e0c8');d.l(14,2,15,-1,'#e8e0c8');d.r(8,-1,2,2,acc);d.p(8,-2,acc2);d.r(4,9,9,2,dk);d.p(3,9,acc);d.p(13,9,acc)}
+    else if(sty==='frost'){d.el(9,4,5,4,'#f4fbff');d.r(5,6,9,2,'#f4fbff');d.r(9,4,4,4,skin);d.p(11,5,eye);d.p(12,5,eye);d.p(4,3,acc);d.p(14,2,acc);d.p(9,0,acc);d.r(4,13,9,1,acc)}
+    else if(sty==='exec'){d.el(9,5,5,5,'#1a1a20');d.r(10,4,3,1,acc);d.p(10,4,eye);d.p(12,4,eye);d.r(7,0,4,2,'#1a1a20');d.p(8,-1,'#1a1a20');d.r(4,9,9,6,'#2a2a30');d.r(4,12,9,1,acc)}
+    else if(sty==='void'){d.el(9,5,5,5,body);d.r(9,4,5,3,'#05030f');d.p(10,5,eye);d.p(12,5,eye);d.p(7,1,acc2);d.p(12,0,acc);d.p(5,3,acc);d.l(4,9,2,17,body);d.l(3,10,1,17,acc)}
+    else if(sty==='laststand'){d.r(5,1,8,3,trim);d.r(5,3,9,1,acc);d.p(4,4,acc);d.r(10,6,3,1,'#e8e0c8');d.r(4,10,8,1,'#e8e0c8');d.p(7,11,'#b3122d');d.l(3,9,1,18,acc2);d.l(2,10,0,16,acc2);d.p(1,18,acc2)}
+    else if(sty==='worldbreaker'){d.r(5,1,8,3,trim);d.r(5,0,9,1,acc);d.p(6,-1,'#ff4d5e');d.p(9,-1,'#7fe3ff');d.p(12,-1,'#9be04a');d.r(4,9,8,1,acc);d.r(11,9,1,6,acc2)}
+    else if(sty==='ash'){d.r(5,1,8,3,'#ff7a2d');d.p(6,0,'#ffd36b');d.p(9,-1,'#ff7a2d');d.p(10,0,'#ffd36b');d.p(12,0,'#ff7a2d');d.p(4,2,'#ffd36b')}
+    else if(sty==='dancer'){d.r(5,1,8,3,trim);d.r(4,8,9,1,acc);d.l(4,8,0,11,acc);d.l(4,9,1,13,acc);d.p(0,12,acc)}
+    else if(sty==='druid'){d.r(5,1,8,3,trim);d.p(5,0,acc);d.p(8,-1,acc);d.p(11,-1,acc);d.p(13,0,acc);d.p(9,0,acc2);d.l(4,0,3,-2,'#8a6a3a');d.l(14,0,15,-2,'#8a6a3a');d.r(4,13,8,2,acc)}
+    else if(sty==='monk'){d.p(6,3,'#d8a880');d.r(5,9,8,1,'#5a3a1a');for(let i=5;i<12;i+=2)d.p(i,9,acc);d.r(4,10,3,6,acc)}
+    else if(sty==='arsenal'){d.r(5,1,8,3,trim);d.r(5,3,8,1,acc);d.l(4,9,11,14,acc2);d.p(6,10,'#ffd36b');d.p(8,11,'#ffd36b');d.p(10,13,'#ffd36b');d.r(1,9,3,6,acc2)}
+    else if(sty==='vamp'){d.r(5,1,8,3,trim);d.p(9,4,trim);d.r(3,7,3,4,acc);d.r(12,7,2,3,acc);d.p(12,7,'#ffffff');d.r(4,9,8,6,trim);d.r(7,9,2,6,'#e9e0ea')}
+    else if(sty==='storm'){d.r(5,1,8,3,trim);d.l(9,-1,7,2,acc);d.l(7,2,10,2,acc);d.l(10,2,8,5,acc);d.p(13,0,acc2);d.p(4,1,acc2)}
     else{d.r(5,1,8,3,trim)}
   });
+  {const m=document.createElement('canvas');m.width=out.c.width;m.height=out.c.height;const g=m.getContext('2d');g.drawImage(out.c,0,0);const D=g.getImageData(0,0,m.width,m.height),A=D.data;const keep=[skin,mixHex(skin,'#000000',.2),eye,'#a0603a'].filter(x=>sty!=='golem'&&sty!=='phantom'||x===eye).map(hx=>[parseInt(hx.slice(1,3),16),parseInt(hx.slice(3,5),16),parseInt(hx.slice(5,7),16)]);
+    for(let i=0;i<A.length;i+=4){if(A[i]===10&&A[i+1]===10&&A[i+2]===16){A[i+3]=0;continue}for(const q of keep)if(Math.abs(A[i]-q[0])<3&&Math.abs(A[i+1]-q[1])<3&&Math.abs(A[i+2]-q[2])<3){A[i+3]=0;break}} /* faces and eyes stay clear of skin effects */g.putImageData(D,0,0);out.m=m}
+  return C[k]=out;
 }
 const CHS_CACHE={};
+/* premium skin effects, drawn per frame at sprite resolution and masked to the inside of the sprite */
+const SKFX={c:null,g:null},hsh=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+function skinFx(s,sk,t,seed){
+  const w=s.c.width,h=s.c.height;if(!SKFX.c){SKFX.c=document.createElement('canvas');SKFX.c.width=48;SKFX.c.height=48;SKFX.g=SKFX.c.getContext('2d')}
+  const g=SKFX.g;g.globalCompositeOperation='source-over';g.globalAlpha=1;g.clearRect(0,0,48,48);
+  if(sk===1){ /* gold: a polished shine sweeps across, and now and then a glint */
+    const x=-8+((t*.38+seed)%1.4)*(w+16);
+    for(let y=0;y<h;y++){g.fillStyle='rgba(255,255,225,.8)';g.fillRect(Math.round(x+y*.5),y,2,1);g.fillStyle='rgba(255,236,170,.3)';g.fillRect(Math.round(x+y*.5)+2,y,2,1)}
+    if(((t*1.5+seed*9)|0)%5===0){const gx=3+((hsh(seed+((t*1.5)|0))*(w-6))|0),gy=4+((hsh(seed*3+((t*1.5)|0))*(h-8))|0);g.fillStyle='#fffbe0';g.fillRect(gx,gy,1,1);g.fillStyle='rgba(255,251,224,.55)';g.fillRect(gx-1,gy,1,1);g.fillRect(gx+1,gy,1,1);g.fillRect(gx,gy-1,1,1);g.fillRect(gx,gy+1,1,1)}
+  }else if(sk===2){ /* diamond: cut facets and glints that blink in turn */
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){if((x+y*2)%5===0){g.fillStyle='rgba(255,255,255,.26)';g.fillRect(x,y,1,1)}else if((x*2+y)%7===0){g.fillStyle='rgba(20,70,130,.2)';g.fillRect(x,y,1,1)}}
+    for(let i=0;i<3;i++){const b=Math.sin(t*3.6+i*2.1+seed*6);if(b>.55){const a=(b-.55)/.45,gx=2+((hsh(seed+i*7)*(w-4))|0),gy=3+((hsh(seed*2+i*3)*(h-6))|0);g.fillStyle='rgba(255,255,255,'+a+')';g.fillRect(gx,gy,1,1);g.fillStyle='rgba(255,255,255,'+(a*.5)+')';g.fillRect(gx-1,gy,1,1);g.fillRect(gx+1,gy,1,1);g.fillRect(gx,gy-1,1,1);g.fillRect(gx,gy+1,1,1)}}
+  }else if(sk===3){ /* galaxy: a drifting nebula glow with stars that slowly travel and twinkle inside the body */
+    const sy=((t*.22+seed)%1.6-.3)*h,gr=g.createLinearGradient(0,sy-6,0,sy+6);gr.addColorStop(0,'rgba(80,110,255,0)');gr.addColorStop(.45,'rgba(90,120,255,.32)');gr.addColorStop(.6,'rgba(230,110,230,.22)');gr.addColorStop(1,'rgba(230,110,230,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);
+    for(let i=0;i<10;i++){
+      const x=(hsh(seed+i)*w+t*(.6+hsh(i*5)*.9))%w,y=(hsh(seed*3+i*2)*h+t*(.3+hsh(i*9)*.5))%h,tw=.25+.75*Math.max(0,Math.sin(t*(2.2+hsh(i)*2)+i*1.7+seed*5));
+      const col=i%3===0?'255,205,255':i%3===1?'175,205,255':'255,255,255';g.fillStyle='rgba('+col+','+tw.toFixed(2)+')';g.fillRect(x|0,y|0,1,1);
+      if(tw>.93){g.fillStyle='rgba('+col+',.45)';g.fillRect((x|0)-1,y|0,1,1);g.fillRect((x|0)+1,y|0,1,1);g.fillRect(x|0,(y|0)-1,1,1);g.fillRect(x|0,(y|0)+1,1,1)}
+    }
+  }
+  g.globalCompositeOperation='destination-in';g.drawImage(s.m,0,0);g.globalCompositeOperation='source-over';
+  return SKFX.c;
+}
 /* draw a fighter with its feet near (x, y+r): facing right unless flip */
 function drawCharSpr(c,ch,x,y,U,pose,flip,sk,alpha){
   const s=charSprite(ch,pose,sk);c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);if(alpha!==undefined)c.globalAlpha*=alpha;else if(ch.alpha)c.globalAlpha*=ch.alpha;
-  c.drawImage(s.c,-s.ax*U,-s.c.height*U*.62,s.c.width*U,s.c.height*U);c.restore();
+  const dx=-s.ax*U,dy=-s.c.height*U*.62,dw=s.c.width*U,dh=s.c.height*U;
+  c.drawImage(s.c,dx,dy,dw,dh);
+  if(sk){const t=performance.now()/1000,seed=hsh((ch.id||'').length*7.3+(ch.id||'x').charCodeAt(0));c.drawImage(skinFx(s,sk,t,seed),0,0,s.c.width,s.c.height,dx,dy,dw,dh);
+    /* galaxy: a faint star now and then twinkles just outside the body */
+    if(sk===3){const k=(t*1.2)|0,f=t*1.2-k,a=Math.sin(f*Math.PI)*.85;if(hsh(k+seed)<.55&&a>.05){const ox=dx+hsh(k*3+seed)*dw,oy=dy+hsh(k*5+seed)*dh*.8;c.globalAlpha*=a;c.fillStyle='#e8dcff';c.fillRect(Math.round(ox),Math.round(oy),U,U);c.fillStyle='rgba(200,180,255,.6)';c.fillRect(Math.round(ox)-U,Math.round(oy),U,U);c.fillRect(Math.round(ox)+U,Math.round(oy),U,U);c.fillRect(Math.round(ox),Math.round(oy)-U,U,U);c.fillRect(Math.round(ox),Math.round(oy)+U,U,U)}}}
+  c.restore();
 }
 const charPose=(moving,t)=>moving?(((t*9)|0)%2?'w1':'w2'):'w0';
 function drawChar(c,ch,r,t,ph){
@@ -2723,6 +2783,7 @@ function applyChar(){
   const c=CH();p.ch=c;p.spdM=c.spd||1;p.cdM=c.cd||1;p.dmgB=c.dm||0;p.reachM=c.reach||1;p.dashM=c.dash||1;p.every=c.every||0;p.coinM=c.coin||1;p.xpM=c.xp||1;
   p.cp=brMode?{}:Object.assign({},c.cp||{});p.r=c.r||11;p.rgT=0;p.hitW=false;p.wardUsed=false;
   if(!isDevId(eq[wType])){p.cdM/=1+wmSum(wType,'spd');p.reachM*=1+wmSum(wType,'reach')}
+  if(c.mel&&(wType==='f'||wType==='k'))p.dmgB+=c.mel; /* melee specialists */
   if(c.wb&&c.wb.w===wType){const b=c.wb;p.dmgB+=b.dm||0;p.cdM*=b.cd||1;p.reachM*=b.reach||1;if(b.crit)p.cp.crit=(p.cp.crit||0)+b.crit}
   if(diff!=='nowin'&&c.hp){p.maxhp=Math.max(1,p.maxhp+c.hp);p.hp=p.maxhp}
   if(!brMode)(c.start||[]).forEach(id=>{const a=abilById(id);if(a&&abilOk(a))applyAbility(id)});
@@ -2742,10 +2803,14 @@ function kitChips(ch){
   if(ch.dash)o.push(['Dash recharges '+pc(1-ch.dash)+'% faster',true]);
   if(ch.r)o.push([ch.r<11?'Smaller hitbox':'Bigger hitbox',ch.r<11]);
   if(ch.every)o.push(['Spin attack every '+ch.every+'nd swing',true]);
-  if(ch.coin)o.push(['+'+pc(ch.coin-1)+'% coins',true]);
+  if(ch.coin)o.push([(ch.coin>1?'+':'\u2212')+pc(ch.coin-1)+'% coins',ch.coin>1]);
   if(ch.xp)o.push(['+'+pc(ch.xp-1)+'% XP',true]);
   if(ch.wb){const b=ch.wb,n=WTAG[b.w];if(b.dm)o.push(['+'+b.dm+' damage with '+n,true]);if(b.cd)o.push(['+'+pc(1/b.cd-1)+'% attack speed with '+n,true]);if(b.reach)o.push(['+'+pc(b.reach-1)+'% '+(b.w==='b'?'blast size':b.w==='g'?'range':'reach')+' with '+n,true]);if(b.crit)o.push([pc(b.crit)+'% crit with '+n,true])}
+  if(ch.mel)o.push(['+'+ch.mel+' damage with Fists and Knife',true]);
   const cp=ch.cp||{};
+  if(cp.exec)o.push(['+'+pc(cp.exec)+'% damage to enemies under 35% health',true]);
+  if(cp.lastStand)o.push(['+'+pc(cp.lastStand)+'% damage at 2 hearts or less',true]);
+  if(cp.noChill)o.push(['Immune to chill',true]);
   if(cp.regen)o.push(['Heals 1 heart every '+cp.regen+'s',true]);
   if(cp.waveHeal)o.push(['+1 extra heart after each wave',true]);
   if(cp.ward)o.push(['First hit each wave is blocked',true]);
@@ -2863,7 +2928,11 @@ ACH.push(
  ['wmb','Big Boom','Master the Bomb',0,()=>wmLv('b')>=WM_MAX],
  ['wmall','Arsenal Master','Master every weapon',0,()=>EVO_T.every(t=>wmLv(t)>=WM_MAX)],
  ['nohit2','Stone Ghost','Beat World 2 without taking a single hit',0,()=>!!stats.nohit2],
- ['nohit3','Mirage','Beat World 3 without taking a single hit',0,()=>!!stats.nohit3]
+ ['nohit3','Mirage','Beat World 3 without taking a single hit',0,()=>!!stats.nohit3],
+ /* v0.3 */
+ ['w2k500','Headsman','Defeat 500 enemies in World 2',0,()=>(stats.w2k||0)>=500],
+ ['laststand','Last Stand','Beat the World 3 final boss without dying once in that run',0,()=>!!stats.laststand],
+ ['worldbreaker','Worldbreaker','Beat World 1, World 2 and World 3, each with a different weapon',0,()=>{const ws=['f','k','g','b'];for(const a of ws)for(const b of ws)for(const c of ws)if(a!==b&&b!==c&&a!==c&&wwin('1'+a)&&wwin('2'+b)&&wwin('3'+c))return true;return false}]
 );
 /* rewards follow difficulty: an easy one-off pays a little, beating a world without getting hit pays a fortune */
 const ACH_TIER_N=['','Easy','Normal','Tricky','Hard','Brutal','Legendary'],ACH_TIER_C=['','#9aa0b8','#5fd0a2','#4dc3ff','#ffd36b','#ff8a3d','#ff5ac8'],ACH_COIN=[0,10,25,60,150,400,1000];
@@ -2873,7 +2942,7 @@ const ACH_TIER={first:1,w5:1,pet:1,hot1:1,c20:1,gold:1,green:1,dash200:1,vault:1
  k5000:4,w75:4,w100:4,slaydragon:4,boss50:4,lv30:4,loop:4,w2c:4,w2d:4,w3c:4,k10000:4,gold3:4,own40:4,legend:4,hard25:4,runs100:4,vault25:4,dash5000:4,w2k:4,w3k:4,w2bs:4,w3bs:4,c100:4,
  slaygolem:5,w2e:5,w3d:5,k25000:5,loop3:5,lv50:5,mythic:5,flaw100:5,c200:5,nowin:5,boss100:5,w2k5:5,w3k5:5,chars15:5,fists1:5,knife1:5,gun1:5,bomb1:5,hwin1:5,
  slaysnake:6,w3e:6,nohit1:6,fists3:6,
- wmf:3,wmk:3,wmg:4,wmb:4,wmall:5,allw1:5,fists2:5,knife2:5,gun2:5,bomb2:5,knife3:6,gun3:6,bomb3:6,nohit2:6,nohit3:6};
+ w2k500:3,laststand:6,worldbreaker:6,wmf:3,wmk:3,wmg:4,wmb:4,wmall:5,allw1:5,fists2:5,knife2:5,gun2:5,bomb2:5,knife3:6,gun3:6,bomb3:6,nohit2:6,nohit3:6};
 ACH.forEach(a=>{const t=ACH_TIER[a[0]]||(a[3]<=10?1:a[3]<=30?2:a[3]<=80?3:a[3]<=150?4:a[3]<=300?5:6);a[5]=t;a[3]=ACH_COIN[t]});
 Object.assign(PROG,{slaydragon:()=>[stats.fin1||0,1],slaygolem:()=>[stats.fin2||0,1],slaysnake:()=>[stats.fin3||0,1]});
 const realCheats=()=>ACH.every(a=>ach[a[0]]===2);
@@ -4156,7 +4225,7 @@ function reset(){
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
   $('panel').hidden=true;$('shop').hidden=true;
   p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
-  p.runW=wType;p.runMix=false;p.runHurt=false;
+  p.runW=wType;p.runMix=false;p.runHurt=false;p.runDied=false;
   applyChar();
   if(p.cp.startHot&&!brMode){const hp=HOT.filter(hotOk);giveHot(hp[(R()*hp.length)|0].id)}
   buildHp();
@@ -4560,7 +4629,9 @@ function w1AI(e,dt,ux,uy,d){
     if(s==='idle'){if(e.w1t<=0)go('aim',.7)}
     else if(s==='aim'){if(e.w1t>.25){e.cx=ux;e.cy=uy}if(e.w1t<=0){go('charge',1);sfx(110,.5,'sawtooth',.06,1.5)}}
     else if(s==='charge'){e.mx=e.cx;e.my=e.cy;e.msp=560;w1dust(e.x-e.cx*e.r,e.y+e.r*.9,2);for(const f of[1.3,2.3,3.4])hit(e.x+e.cx*e.r*f,e.y+e.cy*e.r*f,e.r*(f>2?.6:.9),2);
-      if(e.w1t<=0||e.x<=M+e.r+1||e.x>=W-M-e.r-1||e.y<=M+e.r+1||e.y>=H-M-e.r-1){e.ln++;shake=Math.max(shake,8);w1dust(e.x,e.y+e.r*.9,14);
+      /* a wall only stops the charge he is heading into, and every charge runs a moment: standing against the wall after the last charge no longer cancels the next one */
+      const into=(e.x<=M+e.r+1&&e.cx<0)||(e.x>=W-M-e.r-1&&e.cx>0)||(e.y<=M+e.r+1&&e.cy<0)||(e.y>=H-M-e.r-1&&e.cy>0);
+      if(e.w1t<=0||(into&&e.w1t<.85)){e.ln++;shake=Math.max(shake,8);w1dust(e.x,e.y+e.r*.9,14);
         if(e.ln>=3){e.mounted=false;e.horse={x:e.x,y:e.y,d:e.x<W/2?-1:1};banner('DUEL!');spark(e.x,e.y,'#c8ccd8',12,240);go('chase',1)}else go('idle',.9)}}
   }else if(k==='giant'&&s==='idle'){
     e.pt+=dt;if(R()<dt*5)parts.push({x:e.x+(R()-.5)*14,y:e.y-e.r*.2,vx:(R()-.5)*20,vy:60,l:.7,m:.7,c:'#8ee8ff',s:2.5});
@@ -5286,7 +5357,7 @@ function aimAngle(){
 function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=TAU;while(d<-Math.PI)d+=TAU;return Math.abs(d)}
 function poisonP(t){if(cheat.god||dev.god)return;if(!(p.poisT>0)){p.poisA=0;floatTxt(p.x,p.y-30,'POISONED','#8aff4d')}p.poisT=Math.max(p.poisT>0?p.poisT:0,t||4)}
 function igniteP(t){if(cheat.god||dev.god)return;if(!(p.burnT>0)){p.burnA=0;floatTxt(p.x,p.y-30,'ON FIRE','#ff8a3d')}p.burnT=Math.max(p.burnT>0?p.burnT:0,t||3)}
-function chillP(t){if(cheat.god||dev.god)return;if(!(p.chillT>0))floatTxt(p.x,p.y-30,'CHILLED','#6fe8ff');p.chillT=Math.max(p.chillT>0?p.chillT:0,t)}
+function chillP(t){if(cheat.god||dev.god||(p.cp&&p.cp.noChill))return;if(!(p.chillT>0))floatTxt(p.x,p.y-30,'CHILLED','#6fe8ff');p.chillT=Math.max(p.chillT>0?p.chillT:0,t)}
 const MOB_ELEM=['','#ff6a1a','#6fe8ff','#9be04a'];
 function applyElem(w,ev){const t=ev>=2?2.1:1.1;if(w===2)chillP(t*1.5);else if(w===3)poisonP(t*1.2);else igniteP(t)}
 function floatTxt(x,y,t,c){floats.push({x,y,t,c,l:1.1})}
@@ -5465,6 +5536,8 @@ function swordHit(e,dmg,a,heavy,aim,rad,arc){
   const m=p.mods,n=++p.hits;let mult=1,pierce=false;
   const wmS=wmSpec(wType)&&!isDevId(eq[wType]); /* mastery step 9 special for the weapon in hand */
   mult*=1+wmSum(wType,'dmg');
+  if(p.cp.exec&&e.hp<=e.maxhp*.35){mult*=1+p.cp.exec;if(ok('exec',120))spark(e.x,e.y,'#ff4d5e',5,180)}
+  if(p.cp.lastStand&&p.hp<=2)mult*=1+p.cp.lastStand;
   if(((p.cp.crit||0)+(wmS&&wType==='k'?.1:0))>0&&R()<(p.cp.crit||0)+(wmS&&wType==='k'?.1:0)){mult*=2;spark(e.x,e.y,'#ffe56b',8,240)}
   if(wmS&&wType==='g'&&(e.t==='boss'||(TYPES[e.t]&&TYPES[e.t].mb)))mult*=1.25;
   if(wmS&&wType==='f'&&heavy&&e.t!=='boss'&&!(e.stcd>0)){e.frz=Math.max(e.frz||0,.35);e.stcd=1.2}
@@ -5592,7 +5665,7 @@ function kill(e){
     for(const o of enemies)if(o!==e&&!o.dead){o.dead=true;spark(o.x,o.y,o.c,10,240)}
     bullets=[];hitstop=.25;shake=22;rumble(500,1,1);if(wave<LOOP_WAVES&&!brMode)dropKey(e);
     for(let i=0;i<6;i++)spark(e.x+(R()-.5)*50,e.y+(R()-.5)*50,i%2?'#ffd36b':'#ff8a3d',14,380);
-    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;if(!brMode&&!cheatsOn()){if(!stats.wwin||typeof stats.wwin!=='object')stats.wwin={};if(!p.runMix){const wk=e.fk+p.runW;stats.wwin[wk]=(stats.wwin[wk]||0)+1}if(!p.runHurt)stats['nohit'+e.fk]=1;if(diff==='hard'||diff==='nowin')stats['hwin'+e.fk]=1}for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
+    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;if(!brMode&&!cheatsOn()){if(!stats.wwin||typeof stats.wwin!=='object')stats.wwin={};if(!p.runMix){const wk=e.fk+p.runW;stats.wwin[wk]=(stats.wwin[wk]||0)+1}if(!p.runHurt)stats['nohit'+e.fk]=1;if(e.fk===3&&!p.runDied)stats.laststand=1;if(diff==='hard'||diff==='nowin')stats['hwin'+e.fk]=1}for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
     else if(wave===LOOP_WAVES)spawnFinal(); /* the room boss falls, the vault guardian wakes */
   }
   if(world===3&&e.t!=='boss'&&R()<.3){for(let i=0;i<5;i++){const a=R()*TAU;bullets.push({x:e.x,y:e.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,r:4,l:2.5,c:'#ffcc4a'})}}
@@ -5633,6 +5706,7 @@ function hurtP(e,ux,uy){
   shake=14;hitstop=.08;combo=0;comboT=0;
   spark(p.x,p.y,'#ff4d5e',14,280);sfx(80,.25,'sawtooth',.09,.5);
   if(p.hp<=0){
+    p.runDied=true; /* even a revive counts as dying for Last Stand */
     const phx=p.mods.phxsw>0&&p.phxCd<=0;
     if(phx||p.mods.phoenix>0){
       if(phx){p.phxCd=60;p.inv=3;p.blink=3}else{p.mods.phoenix=0;p.inv=1.8;p.blink=1.8}
