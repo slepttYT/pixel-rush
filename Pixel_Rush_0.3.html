@@ -7338,7 +7338,7 @@ function drawBossBase(e,fl){
     ctx.globalAlpha=.12+.25*Math.min(1,e.st/.7);ctx.strokeStyle='#ff4d5e';ctx.lineWidth=e.r*1.6;ctx.lineCap='butt';
     ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+e.cx*520,e.y+e.cy*520);ctx.stroke();ctx.globalAlpha=1;
   }
-  if(!e.fin&&e.bs==='breath'&&e.st<e.fireAt){const k=Math.min(1,e.st/e.fireAt);ctx.save();ctx.globalAlpha=.08+.2*k;ctx.fillStyle='#ff6a3a';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,400,e.rot,e.rot+1.4);ctx.closePath();ctx.fill();ctx.restore()}
+  if(e.bs==='breath'&&e.st<e.fireAt){const k=Math.min(1,e.st/e.fireAt);ctx.save();ctx.globalAlpha=.08+.2*k;ctx.fillStyle='#ff6a3a';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,400,e.rot,e.rot+1.4);ctx.closePath();ctx.fill();ctx.restore()}
   if(e.bs==='firering'){ctx.save();if(e.sub===0){const k=Math.min(1,e.st/.8);ctx.globalAlpha=.2+.5*k;ctx.strokeStyle='#ff7a2a';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(e.x,e.y,e.r+10+k*60,0,TAU);ctx.stroke();ctx.setLineDash([])}
     else for(const g of(e.frs||[])){ctx.lineCap='round';ctx.globalAlpha=.95;ctx.strokeStyle='#ff6a1a';ctx.lineWidth=12;ctx.beginPath();ctx.arc(e.x,e.y,g.R,g.g+.55,g.g+TAU-.55);ctx.stroke();ctx.strokeStyle='#ffd36b';ctx.lineWidth=5;ctx.stroke()}
     ctx.restore()}
