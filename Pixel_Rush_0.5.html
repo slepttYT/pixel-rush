@@ -677,6 +677,7 @@ summary:hover{color:var(--bone)}
         <button class="btn gold big cont" id="pcont" type="button" hidden><span>CONTINUE RUN</span><small id="pcontsub"></small></button>
         <button class="btn gold big" id="play" type="button">NEW RUN</button>
         <button class="btn ghost mi" id="hdiff" type="button" aria-label="Change difficulty"><span class="ddot"></span><span class="dtxt"><small>DIFFICULTY</small><b id="hdname"></b></span><span class="dsub" id="hdsub"></span><span class="dchg">&#9654;</span></button>
+        <button class="btn ghost mi" id="hdaily" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16v15H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 6h16v4H4z"/><path d="M8 3v5M16 3v5" stroke="currentColor" stroke-width="2"/><path d="M8 14h3v3H8z"/></svg>DAILY CHALLENGE<span class="dlyst" id="hdlyst"></span></button>
         <button class="btn ghost mi" id="hchar" type="button"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4.2"/><path d="M3.5 21c.6-5 4-7.6 8.5-7.6s7.9 2.6 8.5 7.6z"/></svg>CHARACTERS</button>
         <button class="btn ghost mi" id="hcos" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h16l-1.4 12.2a1.5 1.5 0 0 1-1.5 1.3H6.9a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>SHOP</button>
         <button class="btn ghost mi" id="hach" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M7 3h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H3.5c0 3.2 1.6 5 4 5.4M17 5h3.5c0 3.2-1.6 5-4 5.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 13h2v4h3v3H8v-3h3z"/></svg>ACHIEVEMENTS<span class="cnt" id="hachc"></span></button>
@@ -861,6 +862,15 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="daily" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="dlyt">
+    <button class="btn ghost backtl" type="button">&#9664; BACK</button>
+    <div class="box">
+      <h2 id="dlyt">Daily challenge</h2>
+      <div id="dlybody"></div>
+      <div class="row"><button class="btn gold" id="dlygo" type="button">PLAY TODAY'S CHALLENGE</button><button class="btn ghost" id="dlyclaim" type="button" hidden>CLAIM REWARD</button></div>
+      <p class="note" id="dlynote"></p>
+    </div>
+  </div>
   <div id="cfg" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="cfgt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -3594,7 +3604,7 @@ let savesDraw=null;
 function openSub(k,opener){
   document.body.classList.add('insub');
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
-  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('help').hidden=k!=='help';plisten=null;
+  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('daily').hidden=k!=='daily';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
   else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent=''}
   else if(k==='ach'){renderAch()}
@@ -3604,6 +3614,7 @@ function openSub(k,opener){
   else if(k==='chars'){skinView=null;chHover=null;$('chtip').hidden=true;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
+  else if(k==='daily'){renderDaily();setTimeout(()=>$('dlygo').focus(),0)}
   else if(k==='cfg'){renderCfg();setTimeout(()=>$('cfggo').focus(),0)}
   else if(k==='mail'){renderMail()}
   else if(k==='help'){}
@@ -3616,7 +3627,7 @@ function openSub(k,opener){
 }
 function closeSub(){
   document.body.classList.remove('insub');
-  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('help').hidden=true;
+  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('daily').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
   if(was==='cfg'&&runFlow&&state==='menu'&&!worldGo){openSub('chars',subOpener);return} /* back from Configure Run goes to the fighters */
@@ -4458,7 +4469,7 @@ function homeEvo(){
   }catch(e){return ''}
 }
 function refreshHome(){
-  renderSlots();try{refreshMailDot()}catch(e){}
+  renderSlots();try{refreshMailDot()}catch(e){}try{refreshDailyBtn()}catch(e){}
   {const r=loadRun(),b=$('pcont');b.hidden=!r;if(r){const c=charById(r.ch);$('pcontsub').textContent='World '+r.world+' \u00b7 Wave '+(r.loop*LOOP_WAVES+r.resume)+' \u00b7 '+c.n+' \u00b7 '+fmtT(r.runT)}}
   $('hstats').innerHTML='<div><svg class="si" viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.7 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><span><dt>Best score</dt><dd>'+fmtK(best)+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5c-4.7 0-8 3.2-8 7.6 0 2.6 1.2 4.4 3 5.6V20h2.5v-2.2h1.3V20h2.4v-2.2h1.3V20H17v-4.3c1.8-1.2 3-3 3-5.6 0-4.4-3.300-7.6-8-7.6zM8.4 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM15.6 8.5a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2zM12 13.2l1.2 2.4h-2.4z"/></svg><span><dt>Best wave</dt><dd>'+bestWave+'</dd></span></div><div><svg class="si" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#ffd36b"/></svg><span><dt>Coins</dt><dd>'+fmtK(wallet)+'</dd></span></div>'+(bestLoop?'<div><span><dt>Loops</dt><dd>'+bestLoop+'</dd></span></div>':'')+'';
   $('hxp').innerHTML=xpHtml(acct())+'<small class="ahint">VIEW REWARDS &#9654;</small>';renderDiffs();homeExtras();
@@ -4479,7 +4490,7 @@ $('slots').addEventListener('click',e=>{
 function showHome(){
   lowHp=false;stage.classList.remove('lowhp');cine=null;cam.x=0;cam.y=0;
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
-  brWant=false;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
+  brWant=false;dailyMode=false;setWorld(1);bossIn=null;try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){} /* a continued run plays at its own difficulty; the save's setting comes back here */{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
 }
 
@@ -5714,6 +5725,48 @@ $('cfgworld').addEventListener('click',e=>{const b=e.target.closest('[data-wd]')
 $('cfgmods').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const k=b.dataset.m;if(cfgMods[k])delete cfgMods[k];else cfgMods[k]=1;
   try{LS.setItem('cinder-mods',JSON.stringify(cfgMods))}catch(x){}sfx(cfgMods[k]?660:420,.08,'triangle',.05,1.4);renderCfg()});
 $('cfggo').addEventListener('click',()=>{if(!wpnTypeSkin(wType)||!worldOpen(selWorld))return;worldGo=true;closeSub();worldGo=false;beginRun()});
+/* ---------- 0.5: daily challenge. A new one every day at 07:00 in the player's own time zone; the same challenge for everyone that day.
+   Play it from the main menu: a fixed world, two modifiers and a target wave. Reach it to unlock a gold + XP reward, claimable once per day.
+   Daily runs are kept apart from normal runs: they never set best score, best wave or world times, and cannot be saved mid-run ---------- */
+let dailyWant=false,dailyMode=false;
+function dailyKey(now){const n=now||new Date(),d=new Date(n.getFullYear(),n.getMonth(),n.getDate());if(n.getHours()<7)d.setDate(d.getDate()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dailyNext(now){const n=now||new Date(),r=new Date(n.getFullYear(),n.getMonth(),n.getDate(),7,0,0,0);if(n>=r)r.setDate(r.getDate()+1);return r}
+function dailyOf(key){
+  let h=2166136261;for(const ch of key){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}
+  const rnd=()=>{h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%100000)/100000};
+  const top=w3Open()?3:w2Open()?2:1,world=1+Math.floor(rnd()*top),target=[10,15,20,25][Math.floor(rnd()*4)];
+  const pool=MODS.map(m=>m[0]),mods={};for(let i=0;i<2;i++){const k=pool.splice(Math.floor(rnd()*pool.length),1)[0];mods[k]=1}
+  return {key,world,target,mods,gold:100+target*10+(world-1)*60,xp:150+target*14+(world-1)*80};
+}
+function dailyState(){const k=dailyKey(),d=stats.daily;if(d&&d.key===k&&d.ch&&d.ch.key===k)return d;
+  const nd={key:k,done:0,claimed:0,ch:dailyOf(k)};stats.daily=nd;try{saveMeta()}catch(e){}return nd} /* today's challenge is fixed the first time it is seen, so unlocking a world mid-day never changes it */
+const dailyNow=()=>dailyState().ch;
+function renderDaily(){
+  const d=dailyNow(),st=dailyState(),ms=dailyNext()-Date.now(),hh=Math.floor(ms/3600e3),mm=Math.floor(ms%3600e3/60e3);
+  $('dlybody').innerHTML='<div class="dlycard"><div class="dlyrow"><span>WORLD</span><b>World '+d.world+' \u00b7 '+WNAME[d.world]+'</b></div><div class="dlyrow"><span>GOAL</span><b>Clear wave '+d.target+'</b></div>'
+    +'<div class="dlyrow"><span>MODIFIERS</span><b>'+modNames(d.mods).join(' + ')+'</b></div><div class="dlymods">'+MODS.filter(m=>d.mods[m[0]]).map(m=>'<small>'+m[1]+': '+m[2]+'</small>').join('')+'</div>'
+    +'<div class="dlyrow"><span>REWARD</span><b class="dgold">'+d.gold+' coins + '+d.xp+' XP</b></div>'
+    +'<div class="dlyrow"><span>STATUS</span><b>'+(st.claimed?'Claimed. Come back tomorrow!':st.done?'Complete! Claim your reward.':'Not done yet')+'</b></div>'
+    +'<div class="dlyrow"><span>NEW CHALLENGE IN</span><b>'+hh+'h '+String(mm).padStart(2,'0')+'m (07:00 your time)</b></div></div>';
+  $('dlyclaim').hidden=!(st.done&&!st.claimed);$('dlygo').textContent=st.done?'PLAY AGAIN (NO EXTRA REWARD)':'PLAY TODAY\u2019S CHALLENGE';
+  $('dlynote').textContent='You play as '+CH().n+' with your '+EVO_NAME[wType].toLowerCase()+'. Change them on the Characters screen or the Configure Run screen.';
+}
+function dailyMark(){const st=dailyState();if(st.done)return;st.done=1;stats.daily=st;saveMeta();banner('DAILY CHALLENGE COMPLETE!');sfx(784,.2,'triangle',.07,1.3);setTimeout(()=>sfx(1176,.3,'triangle',.06,1.2),140)}
+function dailyClaim(){
+  const st=dailyState();if(!st.done||st.claimed)return;const d=dailyNow();
+  st.claimed=1;stats.daily=st;wallet+=d.gold;xpTotal+=d.xp;try{LS.setItem('cinder-xp',String(xpTotal))}catch(e){}grantLevelCoins();saveMeta();saveOwn();
+  sfx(880,.2,'triangle',.07,1.4);setTimeout(()=>sfx(1320,.25,'triangle',.06,1.3),120);renderDaily();refreshHome();
+  $('dlynote').textContent='+'+d.gold+' coins and +'+d.xp+' XP added.';
+}
+function refreshDailyBtn(){const b=$('hdlyst');if(!b)return;const st=dailyState();b.textContent=st.claimed?'DONE':st.done?'CLAIM!':'NEW';b.className='dlyst'+(st.claimed?' done':st.done?' claim':'')}
+$('hdaily').addEventListener('click',e=>{if(state==='menu')openSub('daily',e.currentTarget)});
+$('dlyclaim').addEventListener('click',dailyClaim);
+$('dlygo').addEventListener('click',()=>{
+  if(state!=='menu')return;
+  const go=()=>{const d=dailyNow();if(!eq[wType]||!typeOpen(wType))wType='f';syncEq();selWorld=d.world;dailyWant=true;worldGo=true;closeSub();worldGo=false;nwGo=true;try{beginRun()}finally{nwGo=false;dailyWant=false}};
+  if(hasRun()){const r=loadRun();pxAsk({t:'Start the daily challenge?',b:'<p>You have a saved run (World '+r.world+', wave '+(r.loop*LOOP_WAVES+r.resume)+'). Starting a new run deletes it.</p>',ok:'START',no:'CANCEL',danger:1},v=>{if(v){try{LS.removeItem(RUN_KEY)}catch(e){}go()}});return}
+  go();
+});
 function startGame(){
   if(sub||(state!=='menu'&&state!=='over'))return;
   if(state==='menu'&&!$('ask').hidden)return;
@@ -5726,8 +5779,8 @@ let nwGo=false; /* set while the WORLD 2 button on the win screen starts the nex
 function beginRun(){
   runFlow=false;
   setWorld((w3Open()||nwGo)&&selWorld===3?3:(w2Open()||nwGo)&&selWorld===2?2:1);
-  $('home').hidden=true;reset();runMods=brMode?{}:Object.assign({},cfgMods);if(modOn('glass')){p.maxhp=1;p.hp=1;buildHp()}
-  {const mn=modNames(runMods);$('modhud').textContent=mn.length?mn.join(' \u00b7 ').toUpperCase():''}
+  $('home').hidden=true;reset();dailyMode=!brMode&&dailyWant;runMods=brMode?{}:Object.assign({},dailyMode?dailyNow().mods:cfgMods);if(modOn('glass')){p.maxhp=1;p.hp=1;buildHp()}
+  {const mn=modNames(runMods);$('modhud').textContent=(dailyMode?'DAILY \u00b7 GOAL WAVE '+dailyNow().target+(mn.length?' \u00b7 ':''):'')+(mn.length?mn.join(' \u00b7 ').toUpperCase():'')}
   stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
   juke.paused=false;if(!muted)musicStart();
 }
@@ -6276,9 +6329,9 @@ function hurtP(e,ux,uy){
 const clearedWaves=()=>loop*LOOP_WAVES+Math.max(0,wave-(waveActive?1:0));
 function finalize(){
   checkAch();saveMeta();
-  if(!cheatsOn()&&!brMode&&score>best){best=score;try{LS.setItem('cinder-best',String(best))}catch(e){}}
+  if(!cheatsOn()&&!brMode&&!dailyMode&&score>best){best=score;try{LS.setItem('cinder-best',String(best))}catch(e){}}
   const tw=totalWave();
-  if(!cheatsOn()&&!brMode&&tw>bestWave){bestWave=tw;try{LS.setItem('cinder-bestwave',String(bestWave))}catch(e){}}
+  if(!cheatsOn()&&!brMode&&!dailyMode&&tw>bestWave){bestWave=tw;try{LS.setItem('cinder-bestwave',String(bestWave))}catch(e){}}
   lastRun=bankXp(clearedWaves());
   saveCard();
 }
@@ -6412,7 +6465,7 @@ function openWin(){
   $('pstats').innerHTML='<div><dt>Score</dt><dd>'+score+'</dd></div><div><dt>Loop</dt><dd>'+(loop+1)+'</dd></div><div><dt>Kills</dt><dd>'+kills+'</dd></div><div><dt>Time</dt><dd>'+fmtT(runT)+'</dd></div><div><dt>XP this run</dt><dd>+'+pend+'</dd></div>';$('prew').innerHTML='';$('pach').innerHTML='';
   $('pxp').innerHTML=xpHtml(L);
   $('pnote').textContent='End the run to bank your XP and coins, or loop back to wave 1. Enemies get tougher, your build carries over, and XP gets ×'+xpMul(loop+1).toFixed(2)+' (stacks every loop).';
-  if(!brMode&&loop===0&&!cheatsOn()&&!devWarp&&!tut){stats.pbt=stats.pbt||{};const old=stats.pbt[world],tt=Math.round(runT);
+  if(!brMode&&!dailyMode&&loop===0&&!cheatsOn()&&!devWarp&&!tut){stats.pbt=stats.pbt||{};const old=stats.pbt[world],tt=Math.round(runT);
     if(!old||tt<old){stats.pbt[world]=tt;saveMeta();$('prew').innerHTML='<div class="pbnew">&#9733; NEW BEST TIME &middot; WORLD '+world+' &middot; '+fmtT(tt)+(old?' <small>(was '+fmtT(old)+')</small>':'')+'</div>';sfx(1046,.2,'triangle',.06,1.2)}
     else $('prew').innerHTML='<div class="pbnew old">TIME '+fmtT(tt)+' <small>&middot; BEST '+fmtT(old)+'</small></div>'}
   if(w2New){$('pnote').textContent+=' World 2: Golem\u2019s Hideout is now unlocked.';w2New=false}
@@ -6511,7 +6564,7 @@ addEventListener('keydown',e=>{if($('ask').hidden)return;if(e.key==='Escape'){e.
 let runSnap=null;
 const RUN_KEY='cinder-run';
 function snapRun(resume){
-  if(tut||brMode||devWarp)return;
+  if(tut||brMode||devWarp||dailyMode)return;
   try{runSnap={v:1,ch:CH().id,wt:wType,eq:equip||'',diff,world,loop,resume,score,kills,coins,runWallet,runXp,dynS,runAch:runAch.slice(),mods:Object.assign({},runMods),
     p:JSON.parse(JSON.stringify(p,(k,v)=>k==='ch'?undefined:v))}}catch(e){runSnap=null}
 }
@@ -6559,7 +6612,7 @@ function continueRun(){
 function pauseGame(){
   if(state!=='play'||sub)return;
   state='pause';for(const k in keys)keys[k]=false;for(const k in mdown)mdown[k]=false;btnAtk=false;joy.x=joy.y=0;
-  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
+  $('pause').hidden=false;$('pcheat').hidden=!cheatsUnlocked();$('psave').hidden=!!(tut||brMode||dailyMode);$('ptime').textContent=tut?'':'RUN TIME '+fmtT(runT)+' \u00b7 WAVE '+totalWave();$('presume').focus();$('bossintro').classList.add('paused');
 }
 function resumeGame(){if(state!=='pause')return;state='play';$('pause').hidden=true;$('bossintro').classList.remove('paused')}
 function quitRun(){
@@ -6759,6 +6812,7 @@ function update(dt){
       if(p.cp.waveHeal)healP(p.cp.waveHeal)}
       banner(bw?'BOSS DOWN':'WAVE CLEAR');
       if(wave<LOOP_WAVES)snapRun(wave+1);
+      if(dailyMode&&!cheatsOn()&&totalWave()>=dailyNow().target)dailyMark();
     }
     else if(winT>0){winT-=dt;if(winT<=0)openWin()}
     else if(vault.stage){/* the vault comes first on boss waves; the shop opens when you walk back out */}
@@ -9949,5 +10003,12 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 #modhud{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.12em;color:#ff9a5a;text-align:center;text-shadow:1px 1px 0 #000}
 @media (max-width:760px),(max-height:480px){.cfgwrap{grid-template-columns:150px minmax(0,1fr);gap:12px}#cfgprev{width:150px;height:150px}.cfgm{grid-template-columns:1fr 1fr}.cmod small{display:none}.cw canvas{width:48px;height:30px}}
 @media (max-height:480px){#achpops{transform:translateX(-50%) scale(.6);transform-origin:bottom center;gap:4px}} /* 0.5: smaller achievement toasts on phones so they never cover a menu */
+/* ===== 0.5: daily challenge ===== */
+#daily .box{max-width:min(620px,94vw)}
+.dlycard{background:#0d1a10;box-shadow:inset 0 0 0 3px #1e6b2c;padding:12px 14px;display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.dlyrow{display:flex;justify-content:space-between;gap:12px;font-family:'Silkscreen',monospace;font-size:11px;letter-spacing:.06em}.dlyrow span{color:#9ec8a0;letter-spacing:.14em}.dlyrow b{color:#e9ffe0;text-align:right}.dlyrow b.dgold{color:#ffd36b}
+.dlymods{display:flex;flex-direction:column;gap:2px;padding-left:8px;border-left:3px solid #ff8a3d}.dlymods small{font-family:'Silkscreen',monospace;font-size:10px;color:#ffb36b}
+.dlyst{margin-left:auto;font-family:'Silkscreen',monospace;font-size:9px;letter-spacing:.12em;padding:2px 6px;background:#1e6b2c;color:#e9ffe0}.dlyst.claim{background:#ffd36b;color:#1a1204}.dlyst.done{background:#2a2f3a;color:#9aa0b8}
+#home .menulist #hdaily{grid-column:1/-1} /* its own row so the two-column phone menu keeps its pairs */
 </style>
 </body></html>

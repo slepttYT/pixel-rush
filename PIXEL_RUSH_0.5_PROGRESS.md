@@ -77,7 +77,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [x] Pause menu "Save & Exit" stores run state (character, weapon + evolution, world, wave, health, score, coins/XP earned, upgrades/abilities, modifiers, hotbar, etc) in localStorage; main menu "Continue Run" restores it. Never overwrites permanent progression. Validate/guard against corrupted saves. Works the same in the EXE.
 
 ### 12. Daily challenges
-- [ ] Refresh at 07:00 in the player's LOCAL time. Available until next local 07:00. Gold + XP reward. Uses existing mechanics/modifiers. One claim per day. Separate from normal runs.
+- [x] (dailyKey/dailyNext/dailyOf seeded, frozen per day in stats.daily.ch; #daily screen + home button #hdaily; dailyMode excludes best score/wave/PB times/Save&Exit; tested key boundary, completion, single claim) Refresh at 07:00 in the player's LOCAL time. Available until next local 07:00. Gold + XP reward. Uses existing mechanics/modifiers. One claim per day. Separate from normal runs.
 
 ### 13. Game over screen
 - [x] Pixel-art framing, animation, consistent type, clear stats (fighter portrait, run time, world; buttons sticky on phones; toasts cleared). Keep existing post-run info and buttons.
