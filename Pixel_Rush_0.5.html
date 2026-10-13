@@ -618,7 +618,7 @@ summary:hover{color:var(--bone)}
     <div id="bossbar" hidden><span id="bossname"></span><div class="bb"><i id="bossfill"></i></div></div>
     <div class="hrow">
       <div class="hl"><div id="hp"></div><div id="owned"></div></div>
-      <div class="hc"><div id="wave"></div><div id="goal"></div></div>
+      <div class="hc"><div id="wave"></div><div id="goal"></div><div id="modhud"></div></div>
       <div class="hr"><span id="score">0</span><span id="coins"></span><span id="xphud"></span><span id="combo"></span><span id="keyhud" hidden>VAULT KEY</span><button id="snd" type="button">SOUND ON</button><button id="pz" type="button">PAUSE</button></div>
     </div>
   </div>
@@ -861,6 +861,21 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="cfg" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="cfgt">
+    <button class="btn ghost backtl" type="button">&#9664; BACK</button>
+    <div class="box">
+      <h2 id="cfgt">Configure run</h2>
+      <div class="cfgwrap">
+        <div class="cfgl"><canvas id="cfgprev" width="240" height="240"></canvas><div id="cfgwho"></div></div>
+        <div class="cfgr">
+          <h3 class="pdh">Weapon</h3><div id="cfgwpn" class="cfgw"></div><p id="cfgwnote" class="note"></p>
+          <h3 class="pdh">World</h3><div id="cfgworld" class="cfgwd"></div>
+          <h3 class="pdh">Challenge modifiers <small id="cfgrew"></small></h3><div id="cfgmods" class="cfgm"></div>
+          <div class="row"><button class="btn gold" id="cfggo" type="button">START RUN</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="world" class="ov sub" hidden role="dialog" aria-modal="true" aria-labelledby="worldt">
     <button class="btn ghost backtl" type="button">&#9664; BACK</button>
     <div class="box">
@@ -1359,10 +1374,11 @@ function xpHtml(a,pct){const w=pct===undefined?Math.min(100,a.x/a.need*100):pct;
 const RUN_COIN=6; /* coins per 5 waves cleared in a run */
 function bankXp(cleared){
   if(brMode){runXp=0;runWallet=0;cleared=0}
+  {const mr=1+modRew(runMods)/100;runXp*=mr;runWallet*=mr} /* challenge modifier bonus */
   const before=acct(),gained=Math.round(runXp);runXp=0;
   xpTotal+=gained;try{LS.setItem('cinder-xp',String(xpTotal))}catch(e){}
   const cid=curCid(),clB=clvl(cid);stats.cxp[cid]=cxpOf(cid)+gained;const clA=clvl(cid);saveMeta();
-  const lk=1+.1*(upg.coin||0),rc=Math.round(Math.floor((cleared||0)/5)*RUN_COIN*DF().coin*lk*(loop>0?2:1)),yc=Math.round(runWallet);runWallet=0;wallet+=rc+yc;stats.runs++;if(!devWarp&&!brMode&&totalWave()>stats.best)stats.best=totalWave();if(!devWarp&&!brMode&&world===3&&totalWave()>(stats.w3best||0))stats.w3best=totalWave();if(!devWarp&&!brMode&&world===2&&totalWave()>(stats.w2best||0))stats.w2best=totalWave();const lc=grantLevelCoins();
+  const lk=1+.1*(upg.coin||0),rc=Math.round(Math.floor((cleared||0)/5)*RUN_COIN*DF().coin*lk*(loop>0?2:1)*(1+modRew(runMods)/100)),yc=Math.round(runWallet);runWallet=0;wallet+=rc+yc;stats.runs++;if(!devWarp&&!brMode&&totalWave()>stats.best)stats.best=totalWave();if(!devWarp&&!brMode&&world===3&&totalWave()>(stats.w3best||0))stats.w3best=totalWave();if(!devWarp&&!brMode&&world===2&&totalWave()>(stats.w2best||0))stats.w2best=totalWave();const lc=grantLevelCoins();
   return {cid:cid,clB:clB,clA:clA,gained:gained,before:before,after:acct(),coins:rc+lc+yc,runCoins:rc+yc,lvCoins:lc};
 }
 /* ---------- menu coins, cosmetics and loot boxes ---------- */
@@ -3578,7 +3594,7 @@ let savesDraw=null;
 function openSub(k,opener){
   document.body.classList.add('insub');
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
-  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('help').hidden=k!=='help';plisten=null;
+  $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('mail').hidden=k!=='mail';$('cfg').hidden=k!=='cfg';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
   else if(k==='set'){renderSet();$('sundo').hidden=!localStorage.getItem(SAVE_BAK);$('sdmsg').textContent=''}
   else if(k==='ach'){renderAch()}
@@ -3588,6 +3604,7 @@ function openSub(k,opener){
   else if(k==='chars'){skinView=null;chHover=null;$('chtip').hidden=true;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
+  else if(k==='cfg'){renderCfg();setTimeout(()=>$('cfggo').focus(),0)}
   else if(k==='mail'){renderMail()}
   else if(k==='help'){}
   else if(k==='saves'){if(savesDraw)savesDraw()}
@@ -3599,9 +3616,10 @@ function openSub(k,opener){
 }
 function closeSub(){
   document.body.classList.remove('insub');
-  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('help').hidden=true;
+  const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('mail').hidden=true;$('cfg').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
+  if(was==='cfg'&&runFlow&&state==='menu'&&!worldGo){openSub('chars',subOpener);return} /* back from Configure Run goes to the fighters */
   if(was==='chars'&&runFlow&&charMode==='play')runFlow=false;
   if(was==='dsel')runFlow=false;
   if(was==='keys'&&fromSet){fromSet=false;openSub('set',subOpener);return}
@@ -4372,6 +4390,7 @@ function renderShop(){
   }).join('')||'<p class="empty">Everything is maxed out.</p>';
 }
 function openShop(){
+  if(modOn('thrifty')&&shopMode!=='loot'){pickT=0;clearT=.6;return} /* Thrifty: no ability shop between waves */
   state='shop';shopMode='shop';rerolls=0;shopSel=0;rollOffers();
   $('reroll').hidden=true;$('go').hidden=false;$('go').textContent='SKIP →';$('thp').textContent=TIP_P;$('thg').textContent=TIP_G;
   const bw=wave%10===0;
@@ -4493,6 +4512,7 @@ function nextWave(){
   waveTL=0;spawn0=0;
   if(wave%10===0){toSpawn=0;spawnBoss();bossIntroStart()}
   else{toSpawn=Math.max(2,Math.round(Math.min(Math.round((32+loop*6+Math.round((dynS-1)*10))*WORLD_CROWD()),Math.round((3+wave*2.2)*(1+.2*loop)*WORLD_CROWD()*(1+(dynS-1)*.5)))*(DF().cw||1)*paceK()));banner(wave%10===1?zoneOf(wave).n.toUpperCase():loop?'LOOP '+(loop+1)+' · WAVE '+wave:'WAVE '+wave)}
+  if(wave%10!==0&&modOn('swarm'))toSpawn=Math.round(toSpawn*1.5);
   if(wave%10!==0&&!brMode){waveTL=WAVE_LIMIT;spawn0=Math.max(1,toSpawn)}
 }
 /* which stage a new mob spawns at: basic early, evolved through the middle of a world, elite late. Loops, a strong build (dynS) and later worlds push it along. Evolving never adds health: it adds speed, faster recovery, better attack patterns and an element */
@@ -4500,8 +4520,8 @@ function mobEvo(){const s=wave+loop*50+(dynS-1)*20+(world-1)*10,q2=Math.max(0,Ma
 function addEnemy(t,x,y){
   const T=TYPES[t];
   const e={t,x,y,r:T.r,hp:hpS(T.hp),maxhp:hpS(T.hp),zc:1,sp:T.sp*(1+Math.min(wave,60)*.018+loop*.05),dmg:T.dmg+(loop>=4?1:0)+DF().ed+(world===3&&t!=='boss'?1:0),pts:T.pts,c:T.c,kb:T.kb,kx:0,ky:0,flash:0,spawnT:.75,ph:R()*TAU,chargeT:2+R()*2,charging:0,wind:0,cx:0,cy:0,dead:false,kcd:0,fuse:0,ws:0,wt:1.5+R()*2,ghost:false};
-  e.sp*=DF().es*WORLD_SPD();
-  if(t!=='boss'){e.ev=mobEvo();e.sp*=[1,1.1,1.2][e.ev];e.pts=Math.round(e.pts*[1,1.3,1.7][e.ev])}
+  e.sp*=DF().es*WORLD_SPD();if(modOn('fast'))e.sp*=1.25;
+  if(t!=='boss'){e.ev=modOn('evolved')?2:mobEvo();e.sp*=[1,1.1,1.2][e.ev];e.pts=Math.round(e.pts*[1,1.3,1.7][e.ev])}
   if(t==='worm'){e.st='under';e.stT=1.5+R();e.burrowed=true;e.ghost=true}
   if(t!=='boss'&&!T.mb&&wave>=2){const q=R()*paceK();e.el=q<.06?'g':q<.16?'y':null;if(e.el){e.hp=e.maxhp=Math.ceil(e.hp*1.4)}}
   enemies.push(e);spawnSfx(e);return e;
@@ -5652,19 +5672,63 @@ $('dselgrid').addEventListener('click',e=>{
   sfx(520,.08,'triangle',.05,1.4);renderDiffs();
   charMode='play';openSub('chars',$('play'));
 });
+/* ---------- 0.5: Configure Run (after picking a fighter): weapon, world and challenge modifiers, with a big preview of the fighter holding the weapon ---------- */
+const MODS=[
+ ['glass','Glass Cannon','You deal double damage, but you only have 1 heart.',60],
+ ['swarm','Swarm','50% more enemies every wave.',25],
+ ['fast','Fast Forward','Enemies move 25% faster.',20],
+ ['nodash','No Dash','You cannot dash.',20],
+ ['evolved','Evolved','Every enemy spawns fully evolved.',30],
+ ['thrifty','Thrifty','No ability shop between waves.',40],
+ ['iron','Iron Body','No healing when a wave is cleared.',30]];
+let cfgMods={};try{const o=JSON.parse(LS.getItem('cinder-mods')||'{}');if(o&&typeof o==='object')for(const m of MODS)if(o[m[0]])cfgMods[m[0]]=1}catch(e){}
+let runMods={};
+const modOn=k=>!!runMods[k];
+const modRew=o=>MODS.reduce((a,m)=>a+(o&&o[m[0]]?m[3]:0),0); /* bonus % on the XP and coins you bank */
+const modNames=o=>MODS.filter(m=>o&&o[m[0]]).map(m=>m[1]);
+const worldOpen=w=>w===1||(w===2&&w2Open())||(w===3&&w3Open());
+const formOf=t=>{const b=wpnTypeSkin(t);if(!b)return null;return b.forms?b.forms[Math.min(isDevId(eq[t])?2:evoLv(t),b.forms.length-1)]:b};
+function renderCfg(){
+  if(!eq[wType]||!typeOpen(wType))wType='f';syncEq();
+  if(!worldOpen(selWorld))selWorld=1;
+  $('cfgwpn').innerHTML=WTYPES.map(x=>{const s=formOf(x[0]);return '<button type="button" class="cw'+(x[0]===wType?' on':'')+(s?'':' lock')+'" data-w="'+x[0]+'" aria-label="'+x[1]+(s?'':' (locked)')+'"><canvas width="64" height="40"></canvas><b>'+x[1]+'</b></button>'}).join('');
+  [...$('cfgwpn').children].forEach(b=>{const s=formOf(b.dataset.w)||STARTERS.find(z=>z.tab===b.dataset.w);const c=b.firstChild.getContext('2d');c.imageSmoothingEnabled=false;if(!s)return;const k=Math.min(1.5,50/(s.len+18));c.save();c.globalAlpha=b.classList.contains('lock')?.25:1;c.translate(32-((s.len-12)/2)*k,22);c.scale(k,k);try{weaponShape(c,s,1,true)}catch(e){}c.restore()});
+  const f=formOf(wType),b=wpnTypeSkin(wType);
+  $('cfgwnote').textContent=b?(b.n+' \u00b7 '+(f.fn||f.n)+(b.wl?' \u00b7 path: '+b.wl.join(' \u2192 '):'')):'';
+  $('cfgworld').innerHTML=[1,2,3].map(w=>{const o=worldOpen(w);return '<button type="button" class="cwd'+(w===selWorld?' on':'')+(o?'':' lock')+'" data-wd="'+w+'"><small>WORLD '+w+(o?'':' \u00b7 LOCKED')+'</small><b>'+WNAME[w]+'</b></button>'}).join('');
+  $('cfgmods').innerHTML=MODS.map(m=>'<button type="button" class="cmod'+(cfgMods[m[0]]?' on':'')+'" data-m="'+m[0]+'" aria-pressed="'+!!cfgMods[m[0]]+'"><b>'+m[1]+'</b><small>'+m[2]+'</small><em>+'+m[3]+'%</em></button>').join('');
+  const rw=modRew(cfgMods);$('cfgrew').textContent=rw?'\u00b7 rewards +'+rw+'% XP and coins':'\u00b7 optional, each one adds a reward bonus';
+  const ch=CH();$('cfgwho').innerHTML='<b style="color:'+ch.acc+'">'+ch.n+'</b><small>'+(f?(f.fn||f.n):'')+' \u00b7 World '+selWorld+'</small>';
+}
+function drawCfgPrev(now){
+  const cv=$('cfgprev'),g=cv.getContext('2d'),t=now/1000,ch=CH(),f=formOf(wType)||DEFSK,W2=cv.width,H2=cv.height;g.imageSmoothingEnabled=false;
+  try{pcSky(g,selWorld,W2,H2,t)}catch(e){g.fillStyle='#0a140c';g.fillRect(0,0,W2,H2)}
+  try{drawFighter(g,ch,cSkin(ch.id),f,W2/2-10,H2-34,6,t,selWorld)}catch(e){}
+}
+$('cfgwpn').addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const t=b.dataset.w;
+  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('cfgwnote').textContent='Locked. Master the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)-1]].toLowerCase()+' (all 10 steps in Shop > Upgrades) to unlock the '+EVO_NAME[t].toLowerCase()+'.';return}
+  wType=t;syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);renderCfg()});
+$('cfgworld').addEventListener('click',e=>{const b=e.target.closest('[data-wd]');if(!b)return;const w=+b.dataset.wd;
+  if(!worldOpen(w)){sfx(110,.1,'square',.05,.7);$('cfgwnote').textContent='World '+w+' is locked. Beat wave 100 in World '+(w-1)+' to open it.';return}
+  selWorld=w;sfx(520,.08,'triangle',.05,1.4);renderCfg()});
+$('cfgmods').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const k=b.dataset.m;if(cfgMods[k])delete cfgMods[k];else cfgMods[k]=1;
+  try{LS.setItem('cinder-mods',JSON.stringify(cfgMods))}catch(x){}sfx(cfgMods[k]?660:420,.08,'triangle',.05,1.4);renderCfg()});
+$('cfggo').addEventListener('click',()=>{if(!wpnTypeSkin(wType)||!worldOpen(selWorld))return;worldGo=true;closeSub();worldGo=false;beginRun()});
 function startGame(){
   if(sub||(state!=='menu'&&state!=='over'))return;
   if(state==='menu'&&!$('ask').hidden)return;
   if(state==='menu'&&hasRun()){const r=loadRun();pxAsk({t:'Start a new run?',b:'<p>You have a saved run (World '+r.world+', wave '+(r.loop*LOOP_WAVES+r.resume)+'). Starting a new run deletes it.</p>',ok:'NEW RUN',no:'CANCEL',danger:1},v=>{if(v){try{LS.removeItem(RUN_KEY)}catch(e){}refreshHome();startGame()}});return}
   /* the difficulty is the one this save was made with (picked on the save screen), so NEW RUN goes straight to the fighters */
   if(state==='menu'){runFlow=true;charMode='play';openSub('chars',$('play'));return}
-  openSub('wpn',$('pbtn'));
+  openSub('cfg',$('pbtn'));
 }
 let nwGo=false; /* set while the WORLD 2 button on the win screen starts the next run, so it works even on a test run that did not unlock World 2 */
 function beginRun(){
   runFlow=false;
   setWorld((w3Open()||nwGo)&&selWorld===3?3:(w2Open()||nwGo)&&selWorld===2?2:1);
-  $('home').hidden=true;reset();stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
+  $('home').hidden=true;reset();runMods=brMode?{}:Object.assign({},cfgMods);if(modOn('glass')){p.maxhp=1;p.hp=1;buildHp()}
+  {const mn=modNames(runMods);$('modhud').textContent=mn.length?mn.join(' \u00b7 ').toUpperCase():''}
+  stats.chars[CH().id]=1;saveMeta();sfx(260,.2,'triangle',.07,2);
   juke.paused=false;if(!muted)musicStart();
 }
 $('play').addEventListener('click',()=>{if(state==='menu')brWant=false;if(state==='menu'&&!sub&&acct().L===1&&!stats.tutAsk){tutAsk(true);return}startGame()});
@@ -6116,7 +6180,7 @@ function hurtE(e,dmg,a,heavy,pierce){
   if(e.burrowed)return; /* the Serpent cannot be hurt while it is underground */
   if(world>=2&&e.shell>0&&!pierce){spark(e.x,e.y,'#e8d8a0',3,140);if(ok('block',60)){sfx(500,.05,'square',.05,.6)}return}
   hitSfx(e);
-  const dealt=(cheat.onehit?99999:dmg)*DF().pd;e.hp-=dealt;e.flash=.1;if(set.dmgN)dmgNum(e,dealt,heavy);
+  const dealt=(cheat.onehit?99999:dmg)*DF().pd*(modOn('glass')?2:1);e.hp-=dealt;e.flash=.1;if(set.dmgN)dmgNum(e,dealt,heavy);
   const k=e.kb*(heavy?1.4:1);e.kx=Math.cos(a)*k;e.ky=Math.sin(a)*k;
   if(heavy&&e.wind>0){e.wind=0;e.chargeT=1.5}
   spark(e.x,e.y,e.c,6,200);
@@ -6166,7 +6230,7 @@ function kill(e){
 }
 const DASH_INV=.6; /* seconds you are untouchable after a dash: long enough to dash through an attack that closes in all around you */
 function dash(){
-  if(state!=='play'||p.dashCd>0)return;
+  if(state!=='play'||p.dashCd>0||modOn('nodash'))return;
   let dx=mvx,dy=mvy;
   if(!dx&&!dy){dx=p.dx;dy=p.dy}
   const l=Math.hypot(dx,dy)||1;
@@ -6224,7 +6288,7 @@ function saveCard(){
   if(tut||devWarp){endHow=null;return}
   try{const fs=skinOf(equip)||DEFSK,base=skinBase(equip),tw=totalWave();
     const cleared=wave>=100||(brMode&&brIdx>=29),res=endHow||(cleared?'clear':'quit');endHow=null;
-    const pc={v:1,ch:CH().id,eq:equip||'',fi:base&&base.forms?Math.max(0,base.forms.indexOf(fs)):-1,wn:fs.fn||fs.n||'',world,wave:tw,loop,score,kills,t:Math.round(runT),res,br:brMode?1:0,diff:DF().n,at:Date.now(),cheat:cheatsOn()?1:0};
+    const pc={v:1,ch:CH().id,eq:equip||'',fi:base&&base.forms?Math.max(0,base.forms.indexOf(fs)):-1,wn:fs.fn||fs.n||'',world,wave:tw,loop,score,kills,t:Math.round(runT),res,br:brMode?1:0,diff:DF().n,mods:modNames(runMods),at:Date.now(),cheat:cheatsOn()?1:0};
     LS.setItem('cinder-postcard',JSON.stringify(pc));stats.mailNew=1;saveMeta();
   }catch(e){}
 }
@@ -6240,7 +6304,7 @@ function renderMail(){
   const row=(k,v)=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>';
   mb.innerHTML='<div class="pcard w'+wl+'"><div class="pcart"><canvas id="pccv" width="160" height="120"></canvas><span class="pcgreet">Greetings from<br><b>World '+wl+'</b></span></div>'
     +'<div class="pcside"><div class="pcstamp"><b>'+wl+'</b><small>'+WNAME[wl]+'</small></div><div class="pcpost">'+d.toLocaleDateString()+'</div>'
-    +'<p class="pcres">'+res+'</p><dl class="pcst">'+row('Fighter',ch.n)+row('Weapon',c.wn||ws.fn||ws.n||'')+row('World reached','World '+wl+(c.loop?' &middot; loop '+(c.loop+1):''))+row('Highest wave',c.wave)+row('Final score',c.score)+row('Run time',fmtT(c.t))+(pb?row('Best W'+wl+' time',fmtT(pb)):'')+row('Difficulty',c.diff||'')+'</dl>'
+    +'<p class="pcres">'+res+'</p><dl class="pcst">'+row('Fighter',ch.n)+row('Weapon',c.wn||ws.fn||ws.n||'')+row('World reached','World '+wl+(c.loop?' &middot; loop '+(c.loop+1):''))+row('Highest wave',c.wave)+row('Final score',c.score)+row('Run time',fmtT(c.t))+(pb?row('Best W'+wl+' time',fmtT(pb)):'')+row('Difficulty',c.diff||'')+(c.mods&&c.mods.length?row('Modifiers',c.mods.join(', ')):'')+'</dl>'
     +(c.cheat?'<small class="pcnote">Cheats were on for this run.</small>':'')+'</div></div>';
   const cv=$('pccv'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;const t0=performance.now(),sk=cSkin(ch.id);
   const f=n=>{if($('mail').hidden)return;const t=(n-t0)/1000,W2=cv.width,H2=cv.height;
@@ -6304,7 +6368,7 @@ function showRunPanel(title,note,btnA,btnB,lose){
   $('pstats').innerHTML=st('Score',score)+st('Wave',wave)+(loop?st('Loop',loop+1):'')+st('Kills',kills)+'<div><dt>Time</dt><dd>'+fmtT(runT)+'</dd></div>'+'<div><dt>World</dt><dd>'+world+'</dd></div>';
   $('prew').innerHTML='<div class="rwi xp"><small>XP</small><b data-n="'+L.gained+'" data-p="+" data-d="800" data-t="1">+0</b></div><div class="rwi cn"><small>COINS</small><b data-n="'+L.coins+'" data-p="+" data-d="800" data-t="1">+0</b><i class="coin"></i></div>';
   $('pxp').innerHTML=(lv?'<div class="lvup">LEVEL UP · '+L.before.L+' → '+a.L+(L.lvCoins?' · +'+L.lvCoins+' coins':'')+'</div>':'')+xpHtml(a,start)+'<div class="clnote" style="margin-top:6px">'+clUp(L)+'</div>';
-  $('pnote').textContent=(note?note+' ':'')+'Coins: '+L.runCoins+' from this run (waves and gold enemies)'+(L.lvCoins?', '+L.lvCoins+' from level ups':'')+'. You now have '+wallet+'.';
+  $('pnote').textContent=(note?note+' ':'')+(modRew(runMods)?'Modifiers (+'+modRew(runMods)+'% XP and coins): '+modNames(runMods).join(', ')+'. ':'')+'Coins: '+L.runCoins+' from this run (waves and gold enemies)'+(L.lvCoins?', '+L.lvCoins+' from level ups':'')+'. You now have '+wallet+'.';
   $('pbtn').textContent=btnA;$('hbtn').textContent=btnB;$('wbtn').style.display='none';
   $('panel').hidden=false;$('pbtn').focus();portLoop(lose);{const ap=$('achpops');if(ap)ap.innerHTML=''} /* the panel lists them; no toasts left floating over the menus */
   $('pstats').querySelectorAll('dd[data-n]').forEach(el=>{el.dataset.d=600;countUp(el)});
@@ -6448,7 +6512,7 @@ let runSnap=null;
 const RUN_KEY='cinder-run';
 function snapRun(resume){
   if(tut||brMode||devWarp)return;
-  try{runSnap={v:1,ch:CH().id,wt:wType,eq:equip||'',diff,world,loop,resume,score,kills,coins,runWallet,runXp,dynS,runAch:runAch.slice(),
+  try{runSnap={v:1,ch:CH().id,wt:wType,eq:equip||'',diff,world,loop,resume,score,kills,coins,runWallet,runXp,dynS,runAch:runAch.slice(),mods:Object.assign({},runMods),
     p:JSON.parse(JSON.stringify(p,(k,v)=>k==='ch'?undefined:v))}}catch(e){runSnap=null}
 }
 function loadRun(){
@@ -6485,6 +6549,7 @@ function continueRun(){
     p.hot=Array.isArray(p.hot)&&p.hot.length===4?p.hot:[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=Array.isArray(p.hotMx)&&p.hotMx.length===4?p.hotMx:[1,1,1,1];
     ABIL.forEach(a=>{if(typeof p.mods[a.id]!=='number')p.mods[a.id]=0});
     p.maxhp=Math.max(1,p.maxhp|0);p.hp=Math.max(1,Math.min(p.maxhp,r.hp|0));buildHp();hudC={};
+    runMods=r.mods&&typeof r.mods==='object'?r.mods:{};{const mn=modNames(runMods);$('modhud').textContent=mn.length?mn.join(' \u00b7 ').toUpperCase():''}
     loop=r.loop;score=r.score;kills=r.kills;coins=r.coins;runWallet=r.runWallet||0;runXp=r.runXp;dynS=r.dynS||1;runAch=Array.isArray(r.runAch)?r.runAch:[];runT=r.runT;
     wave=r.resume-1;toSpawn=0;waveActive=false;clearT=1.6;pickT=0;winT=0;
     LS.removeItem(RUN_KEY);
@@ -6690,8 +6755,8 @@ function update(dt){
       waveActive=false;if(!p.hitW)stats.flawless++;const bw=wave%10===0;pickT=(bw||(wave%5&&wave!==1))?0:WAVE_BREAK; /* the break comes before the shop opens */
       gain=Math.round((30+wave*12+(bw?40+60*Math.floor(wave/10):0))*2*DF().coin*(p.coinM||1)*(world===3?2:world===2?1.5:1)*(1+(dynS-1)*.6));coins+=gain;const xg=Math.round(waveXp()*(brMode?1:WAVE_XP_K));runXp+=xg;waveEndFx(bw,xg);clearT=WAVE_BREAK;if(brMode)clearT=3.2;
       if(wave>=LOOP_WAVES&&(!brMode||brIdx>=29)){winT=1.8;if(devWarp||brMode){/* test run: no unlocks */}else if(world===1&&!stats.w2){stats.w2=1;w2New=true;saveMeta()}else if(world===2&&!stats.w3){stats.w3=1;w3New=true;saveMeta()}}
-      if(bw)p.hp=p.maxhp;else if(p.hp<p.maxhp)p.hp++;
-      if(p.cp.waveHeal)healP(p.cp.waveHeal);
+      if(!modOn('iron')){if(bw)p.hp=p.maxhp;else if(p.hp<p.maxhp)p.hp++;
+      if(p.cp.waveHeal)healP(p.cp.waveHeal)}
       banner(bw?'BOSS DOWN':'WAVE CLEAR');
       if(wave<LOOP_WAVES)snapRun(wave+1);
     }
@@ -8843,6 +8908,7 @@ function frame(now){
     stage.classList.toggle('pad',pad.on);
     if(sub==='cos')drawPrev(now,dt);
     if(sub==='chars')drawCharPrev(now);
+    if(sub==='cfg')drawCfgPrev(now);
     const mk=musicFor();if(mk!==mus.cur)setSong(mk);
     if(state==='menu'){menuTick(dt);drawMenu()}
     else{update(dt);hud();draw()}
@@ -8874,7 +8940,7 @@ $('chgrid').addEventListener('focusout',e=>{if(!$('chgrid').contains(e.relatedTa
 $('chgrid').addEventListener('click',e=>{const b=e.target.closest('.chc');if(!b)return;
   if(chPtr==='touch'&&chHover!==b.dataset.i&&b.dataset.i!==chSel){chPeek(b.dataset.i);chTip(b.dataset.i);[...$('chgrid').children].forEach(x=>x.classList.toggle('peek',x===b));sfx(520,.06,'triangle',.04,1.4);return}
   chPtr='mouse';chHover=null;const c=charById(b.dataset.i);chSel=c.id;
-  if(charUnlocked(c)){curChar=c.id;try{LS.setItem('cinder-char',curChar)}catch(x){}sfx(620,.1,'triangle',.06,1.5);if(charMode==='play'){openSub('wpn',$('play'));return}}else sfx(150,.12,'square',.05,.7);renderChars()});
+  if(charUnlocked(c)){curChar=c.id;try{LS.setItem('cinder-char',curChar)}catch(x){}sfx(620,.1,'triangle',.06,1.5);if(charMode==='play'){openSub('cfg',$('play'));return}}else sfx(150,.12,'square',.05,.7);renderChars()});
 $('hcheat').addEventListener('click',e=>{fromAch=false;if(cheatsUnlocked())openSub('cheat',e.currentTarget);else sfx(150,.12,'square',.05,.7)});
 /* cheats from the pause menu: the pause menu steps aside (never both on screen), the game stays paused,
    and closing the cheat menu brings the pause menu back. Only RESUME resumes */
@@ -9864,5 +9930,24 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 #chtip{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:45;width:min(420px,92vw);background:#0b0d12;padding:10px 12px;box-shadow:0 0 0 3px #1e6b2c,0 0 0 6px #0b3a15,0 0 0 9px #3cb04c,0 10px 30px rgba(0,0,0,.6);font-family:'Silkscreen',monospace;pointer-events:none}
 #chtip b{font-family:'Press Start 2P',monospace;font-size:12px}#chtip small{display:block;color:#9ec8a0;font-size:10px;margin:2px 0 6px}#chtip p{margin:6px 0 0;color:#ffd36b;font-size:10px;letter-spacing:.12em}
 #chtip .tipst .srw{display:grid;grid-template-columns:86px auto 1fr;gap:6px;align-items:center;font-size:9px;color:#b8c4b8}#chtip .sbar{display:inline-flex;gap:2px}#chtip .sbar i{width:6px;height:6px;background:#1a2a1e}#chtip .sbar i.on{background:#5fd07a}#chtip em{font-style:normal;color:#e9ffe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===== 0.5: Configure Run ===== */
+#cfg .box{max-width:min(980px,96vw)}
+.cfgwrap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
+.cfgl{display:flex;flex-direction:column;gap:8px;position:sticky;top:0}
+#cfgprev{width:260px;height:260px;image-rendering:pixelated;box-shadow:0 0 0 3px #3cb04c,0 0 0 6px #0b3a15}
+#cfgwho{display:flex;flex-direction:column;align-items:center;gap:3px}#cfgwho b{font-family:'Press Start 2P',monospace;font-size:12px}#cfgwho small{font-family:'Silkscreen',monospace;font-size:10px;color:#b4f7a8}
+.cfgr .pdh{margin:4px 0 6px}.cfgr .pdh small{font-family:'Silkscreen',monospace;letter-spacing:.04em;color:#ffd36b;text-transform:none}
+.cfgw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.cw,.cwd,.cmod{background:#0d1a10;border:0;color:#e9ffe0;box-shadow:inset 0 0 0 2px #1e6b2c;cursor:pointer;font-family:'Silkscreen',monospace;padding:6px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.cw canvas{width:64px;height:40px;image-rendering:pixelated}.cw b{font-size:10px;letter-spacing:.06em}
+.cw.on,.cwd.on{box-shadow:inset 0 0 0 3px #ffd36b;background:#1c1a0a}.cw.lock,.cwd.lock{opacity:.45}
+.cw:hover,.cwd:hover,.cmod:hover,.cw:focus-visible,.cwd:focus-visible,.cmod:focus-visible{box-shadow:inset 0 0 0 3px #b4f7a8;outline:none}
+.cfgwd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cwd small{font-size:9px;color:#9ec8a0;letter-spacing:.1em}.cwd b{font-size:11px}
+.cfgm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:8px}
+.cmod{align-items:flex-start;text-align:left;position:relative;padding:7px 46px 7px 9px}.cmod b{font-size:11px;letter-spacing:.06em}.cmod small{font-size:9px;line-height:1.35;color:#b8c4b8}.cmod em{position:absolute;right:8px;top:8px;font-style:normal;font-size:10px;color:#ffd36b}
+.cmod.on{box-shadow:inset 0 0 0 3px #ff8a3d;background:#2a1408}.cmod.on b{color:#ffb36b}
+#modhud{font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.12em;color:#ff9a5a;text-align:center;text-shadow:1px 1px 0 #000}
+@media (max-width:760px),(max-height:480px){.cfgwrap{grid-template-columns:150px minmax(0,1fr);gap:12px}#cfgprev{width:150px;height:150px}.cfgm{grid-template-columns:1fr 1fr}.cmod small{display:none}.cw canvas{width:48px;height:30px}}
+@media (max-height:480px){#achpops{transform:translateX(-50%) scale(.6);transform-origin:bottom center;gap:4px}} /* 0.5: smaller achievement toasts on phones so they never cover a menu */
 </style>
 </body></html>

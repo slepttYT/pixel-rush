@@ -35,9 +35,9 @@ Legend: [ ] todo, [~] in progress, [x] done and tested.
 
 ### 1. New Run screen overhaul
 Flow: New Run → Select Character → Configure Run → Start Game.
-- [ ] Config screen: LEFT large animated idle preview of the character HOLDING the selected weapon (weapon changes instantly). RIGHT: weapon select, world select, challenge modifiers, confirm button.
-- [ ] Keep unlock rules (characters, weapons, worlds). Locked content not selectable. No world skipping.
-- [ ] Challenge modifiers: clearly described before the run. Decision (recommended set): Glass Cannon (x2 dmg dealt, 1 heart), Swarm (+50% enemies, +25% coins), Fast Forward (enemies +25% speed, +20% XP), No Dash, Elites Only-ish "Evolved" (all mobs evolved), Pacifist Shop (no ability shop, +50% coins), Iron Body (no healing between waves, +30% XP). Modifiers give reward multipliers; shown on HUD; saved with run; runs with modifiers still count for records unless the modifier makes the run easier (none of them do).
+- [x] Config screen (#cfg, renderCfg/drawCfgPrev; Fighter -> Configure -> Start; GO AGAIN also opens it; tested desk+phone): LEFT large animated idle preview of the character HOLDING the selected weapon (weapon changes instantly). RIGHT: weapon select, world select, challenge modifiers, confirm button.
+- [x] Keep unlock rules (characters, weapons, worlds). Locked content not selectable. No world skipping.
+- [x] Challenge modifiers (MODS, cfgMods saved in cinder-mods, runMods saved with Save&Exit, on HUD #modhud, postcard, panel note; effects tested): clearly described before the run. Decision (recommended set): Glass Cannon (x2 dmg dealt, 1 heart), Swarm (+50% enemies, +25% coins), Fast Forward (enemies +25% speed, +20% XP), No Dash, Elites Only-ish "Evolved" (all mobs evolved), Pacifist Shop (no ability shop, +50% coins), Iron Body (no healing between waves, +30% XP). Modifiers give reward multipliers; shown on HUD; saved with run; runs with modifiers still count for records unless the modifier makes the run easier (none of them do).
 
 ### 2. Weapon evolution overhaul
 - [x] Rename/redraw lines exactly as the table above (WLINES punch/gun/bomb; new art wrap, dbarrel, grenade, cball, bigger bomb, brass bar; weapon-box skins use the exact stage names, their look stays on the final stage). Each form visually distinct; the in-hand sprite matches the evolution.
