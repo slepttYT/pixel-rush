@@ -957,6 +957,23 @@ function noise(d,v){
     sfxN++;s.onended=()=>{sfxN--};
   }catch(e){}
 }
+/* short filtered noise burst: footsteps and other soft textures */
+function fnoise(d,v,ft,fq){
+  if(muted||sfxN>14)return;
+  try{
+    const A=ac(),n=Math.max(1,(A.sampleRate*d)|0),b=A.createBuffer(1,n,A.sampleRate),ch=b.getChannelData(0);
+    for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+    const s=A.createBufferSource(),f=A.createBiquadFilter(),g=A.createGain();f.type=ft;f.frequency.value=fq;g.gain.value=v*set.sv;s.buffer=b;s.connect(f);f.connect(g);g.connect(A.destination);s.start();
+    sfxN++;s.onended=()=>{sfxN--};
+  }catch(e){}
+}
+/* player footsteps: one soft step per stride, sounding like the ground of the world you are in (grass, stone, sand) */
+function stepSfx(){
+  const alt=(p.stepN=(p.stepN||0)+1)%2;
+  if(world===2){fnoise(.05,.05,'bandpass',alt?2600:2200);sfx(alt?190:170,.04,'triangle',.018,.6)}
+  else if(world===3){fnoise(.09,.04,'highpass',alt?3200:2800)}
+  else{fnoise(.07,.05,'lowpass',alt?900:750);sfx(alt?95:85,.05,'sine',.02,.7)}
+}
 /* each mob has its own voice: base pitch and waveform */
 const SND={goblin:[150,'square'],thief:[420,'triangle'],wizard:[520,'square'],jester:[700,'sine'],archer:[760,'square'],lizard:[240,'sine'],crab:[110,'square'],lancer:[95,'sawtooth'],golem:[70,'sawtooth'],worm:[80,'triangle'],diamond:[880,'sine'],phoenix:[330,'triangle'],boss:[55,'sawtooth']};
 function hitSfx(e){
@@ -5746,7 +5763,8 @@ function update(dt){
     }
     enemies=enemies.filter(e=>!e.dead);
   }
-  p.x+=(p.vx+p.ix)*dt;p.y+=(p.vy+p.iy)*dt;
+  {const ox=p.x,oy=p.y;p.x+=(p.vx+p.ix)*dt;p.y+=(p.vy+p.iy)*dt;
+   if(state==='play'&&p.dashT<=0){p.stepD=(p.stepD||0)+Math.hypot(p.x-ox,p.y-oy);if(p.stepD>=34){p.stepD=0;stepSfx()}}}
   const g=Math.exp(-dt*9);p.ix*=g;p.iy*=g;
   p.x=Math.min(Math.max(p.x,M+p.r),W-M-p.r);p.y=Math.min(Math.max(p.y,M+p.r),H-M-p.r);
   if(!isFinite(p.x)||!isFinite(p.y)){p.x=W/2;p.y=H/2;p.vx=p.vy=p.ix=p.iy=0}
