@@ -1,1 +1,6 @@
-releases/PixelRushServer.exe
+# made when the EXEs run (server settings and data, Neutralino storage and logs)
+online_config.json
+pixel-rush-data/
+.storage/
+neutralinojs.log
+*.log

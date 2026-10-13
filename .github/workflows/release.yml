@@ -1,0 +1,22 @@
+# Publishes a GitHub Release with the game and server EXEs whenever a version tag (v0.5.1, v0.6, ...) is pushed.
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" Pixel-Rush-Game.exe Pixel-Rush-Server.exe --clobber
+          else
+            gh release create "$TAG" Pixel-Rush-Game.exe Pixel-Rush-Server.exe --title "Pixel Rush ${TAG#v}" --notes-file details/RELEASE_NOTES.md --latest
+          fi

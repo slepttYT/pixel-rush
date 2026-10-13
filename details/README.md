@@ -1,0 +1,14 @@
+# Pixel Rush (details)
+
+The two EXEs at the top of the repository are all players need. Everything else lives here.
+
+| Path | What it is |
+|---|---|
+| `Pixel_Rush_0.5.html` | The whole game (one HTML file). The EXE wraps this same file. |
+| `desktop/` | Builds `Pixel-Rush-Game.exe` with Neutralino: `details/desktop/build.sh 0.5` |
+| `online/` | The online server (`pixel-rush-server.js`), its README, and `build-exe.sh` for `Pixel-Rush-Server.exe` |
+| `docs/` | Design notes (abilities). |
+| `RELEASE_NOTES.md` | Text for the GitHub release. |
+| `PIXEL_RUSH_0.5_PROGRESS.md` | The 0.5 checklist and request log. |
+
+A GitHub Release with both EXEs is published automatically when a version tag is pushed (see `.github/workflows/release.yml`).
