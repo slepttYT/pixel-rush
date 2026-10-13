@@ -166,3 +166,11 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - [x] W4/W5 projectiles (P45 pixel sprites per boss, k45 tag; mob shots bolt/spore; homing b.home).
 - [x] Bosses redrawn from real shapes (vecSpr: vector shapes -> palette snap -> top-left light -> ink outline): all 20 W4/W5 + 10 W3 incl. The Pharaoh (final scale 1.05). Hot glow follows outline (no disc).
 - [x] "Fix dragon boss attack lines and fire ring not fully showing": boss warnings were drawn inside the boss's pixel box (clipped); all of drawBossBase's warnings now draw on the arena (ctx=_pc moved down); fire ring warning thicker with fill.
+
+## User requests (release + enemies, after 0.5.1)
+- Make a release on the GitHub main branch with the game exe and server exe as the names.
+- Server: launch server.exe, set it up, and it gives an ENCRYPTED address (join code) so you are not just giving away your IP.
+- Online: 2x enemies.
+- Enemies revamp: Archer shoots a cross (straight up, down, left and right). Jester starts by throwing only 1 card and slowly progresses.
+- Dropped hearts use the heart texture from the HUD (top left).
+- Clear up clutter: the game exe and server exe sit at the top of the repo; everything else goes in a folder called "details".

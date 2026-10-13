@@ -4734,6 +4734,7 @@ function nextWave(){
   if(wave%10===0){toSpawn=0;spawnBoss();bossIntroStart()}
   else{toSpawn=Math.max(2,Math.round(Math.min(Math.round((32+loop*6+Math.round((dynS-1)*10))*WORLD_CROWD()),Math.round((3+wave*2.2)*(1+.2*loop)*WORLD_CROWD()*(1+(dynS-1)*.5)))*(DF().cw||1)*paceK()));banner(wave%10===1?zoneOf(wave).n.toUpperCase():loop?'LOOP '+(loop+1)+' · WAVE '+wave:'WAVE '+wave)}
   if(wave%10!==0&&modOn('swarm'))toSpawn=Math.round(toSpawn*1.5);
+  if(wave%10!==0&&raceMode)toSpawn*=2; /* 0.5.1: online races have twice the enemies */
   if(wave%10!==0&&!brMode){waveTL=WAVE_LIMIT;spawn0=Math.max(1,toSpawn)}
 }
 /* which stage a new mob spawns at: basic early, evolved through the middle of a world, elite late. Loops, a strong build (dynS) and later worlds push it along. Evolving never adds health: it adds speed, faster recovery, better attack patterns and an element */
@@ -5144,15 +5145,16 @@ function mobAI(e,dt,ux,uy,d,o){
   else if(t==='jester'){ /* throws a fan of cards; the Sand Jester throws a full circle, then blinks away */
     keep(180,290,.7);
     if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;const cc=w===1?'#f4f4f4':w===2?'#b89a70':'#ffcc4a';
-      if(w===3){ring(8+ev*2,200,{card:1,c:cc,l:3},R()*TAU);const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}
-      else{const n=2+ev;for(let i=-n;i<=n;i++)shot(a0+i*.2,230,{card:1,c:cc,l:3});if(ev>=2){const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}}sfx(880,.08,'square',.03,.8)}}
+      const nc=Math.min(7,1+Math.floor((((wave||1)-1)%LOOP_WAVES)/15)+ev); /* 0.5.1: starts with one card and slowly throws more */
+      if(w===3){ring(Math.max(3,nc*2),200,{card:1,c:cc,l:3},R()*TAU);const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}
+      else{for(let i=0;i<nc;i++)shot(a0+(i-(nc-1)/2)*.22,230,{card:1,c:cc,l:3});if(ev>=2){const a=R()*TAU;e.x=cx(e.x+Math.cos(a)*130);e.y=cy(e.y+Math.sin(a)*130);spark(e.x,e.y,cc,8,170)}}sfx(880,.08,'square',.03,.8)}}
     else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
     else{e.chargeT-=cdt;if(e.chargeT<=0&&d<480){wind(700,.4);e.chargeT=2.6+R()*.8}}
   }
-  else if(t==='archer'){ /* stands back, draws, and looses a ring of arrows */
+  else if(t==='archer'){ /* 0.5.1: stands back, draws, and looses a cross of arrows: straight up, down, left and right. Evolved archers follow up with more crosses */
     keep(260,420,.5);
-    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;{const o0=R()*TAU;ring(12+ev*4,210,{arrow:1,r:4,l:3.2,c:'#c9a070'},o0);if(ev>=2)ring(16,150,{arrow:1,r:4,l:3.6,c:'#c9a070'},o0+TAU/32)}sfx(420,.1,'triangle',.04,.5)}}
-    else if(e.st==='act'){o.sp=0;if(tick())e.st=''}
+    if(e.st==='wind'){o.sp=0;if(tick()){e.st='act';e.stT=.3;ring(4,230,{arrow:1,r:4,l:3.2,c:'#c9a070'},0);e.vq=ev;sfx(420,.1,'triangle',.04,.5)}}
+    else if(e.st==='act'){o.sp=0;if(e.vq>0&&e.stT<.12){e.vq--;e.stT=.3;ring(4,230,{arrow:1,r:4,l:3.2,c:'#c9a070'},0);sfx(460,.08,'triangle',.035,.5)}if(tick())e.st=''}
     else{e.chargeT-=cdt;if(e.chargeT<=0&&d<600){wind(240,.6);e.chargeT=3.4+R()}}
   }
   else if(t==='lizard'){ /* spits acid that leaves a poison pool */
@@ -6790,6 +6792,9 @@ function hurtE(e,dmg,a,heavy,pierce){
 }
 /* coins and XP from gold and green enemies spill on the floor: walk over them to pick them up (they fade after 25 s) */
 const LOOT_PX={gold:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffb347',H:'#fff0c2',D:'#b8661c'}],coin:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffd36b',H:'#fff4c2',D:'#c98a1c'}],xp:[['..G..','.GHG.','GHGGD','.GGD.','..D..'],{G:'#5dff7a',H:'#e2ffe6',D:'#1f9a3a'}]};
+const HEART_PX=['.AA...AA.','ABCA.ACCA','ABCCCCCDA','ACCCCCCDA','.ACCCCDA.','..ACCDA..','...ADA...','....A....'],HEART_C={A:'#2a0a10',B:'#ffc2c2',C:'#ff3b4f',D:'#b0182c'};
+function drawHeartPx(x,y,u){ctx.save();ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(Math.round(x-12),Math.round(y+u*4.5),24,4);
+  const pulse=1+.08*Math.sin(time*6),U=u*pulse,x0=Math.round(x-4.5*U),y0=Math.round(y-4*U);for(let r=0;r<8;r++)for(let c=0;c<9;c++){const k=HEART_PX[r][c];if(k==='.')continue;ctx.fillStyle=HEART_C[k];ctx.fillRect(x0+Math.floor(c*U),y0+Math.floor(r*U),Math.ceil(U),Math.ceil(U))}ctx.restore()}
 function drawLoot(h){
   const L=LOOT_PX[h.k],g=L[0],c=L[1],u=2.4,sx=h.k!=='xp'?Math.max(.25,Math.abs(Math.cos(time*3+h.sd))):1,bob=h.vx||h.vy?0:Math.sin(time*4+h.sd)*1.5;
   ctx.save();ctx.translate(h.x,h.y+bob);ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(-5,6,10,3);ctx.scale(sx,1);
@@ -9829,8 +9834,7 @@ function draw(){
   for(const h of drops){
     if(h.k){if(h.life<4&&((h.life*8)|0)%2)continue;drawLoot(h);continue}
     if(h.life<2&&((h.life*8)|0)%2)continue;
-    ctx.save();ctx.translate(h.x,h.y+Math.sin(time*4)*2);ctx.rotate(Math.PI/4);
-    ctx.fillStyle='#ff4d5e';ctx.fillRect(-7,-7,14,14);ctx.strokeStyle='#ffd36b';ctx.lineWidth=2;ctx.strokeRect(-7,-7,14,14);ctx.restore();
+    drawHeartPx(h.x,h.y+Math.round(Math.sin(time*4)*2),3); /* 0.5.1: the same pixel heart as the HUD */
   }
   drawKeyItem();
   for(const z of lava){
