@@ -3233,7 +3233,8 @@ const UPDATES=[
   'A new title screen: a blue sky with drifting clouds, and your fighter cutting down mobs that walk in over the grass.',
   'The difficulty achievements (Hard Knock, Hard Hitter, Not Winning Huh and Hard Way Home) are gone. The cheat menu scrolls.',
   'Every boss gets tired: the 1st boss of a world attacks twice, the 2nd three times, the 3rd four times and so on, then is staggered for 3 seconds. The Rage Goblin King is slower, and his club stays stuck longer.',
-  'On the title screen your fighter shows off a different mythic weapon every 10 seconds: swords swing, guns shoot and bombs get thrown.',
+  'On the title screen your fighter shows off a different mythic weapon every 10 seconds: swords swing, guns shoot, and bombs (the real bomb skin) get thrown and explode.',
+  'A pixel-block wipe plays when you move between the title screen, the save screen and the main menu.',
   'Final boss entrances are now cinematics: the camera looks up and follows the Dragon down, pans into the vault as the Golem wakes and smashes through the wall, and the Pharaoh rises out of the sand.',
   'New looks for the Catfish (a real princess until you walk up), the Lake Hydra, and the Keeper (an armoured vault warden). The Dark King and the Rogue have arms and legs.',
   'The main menu battle shows at most 3 enemies at a time. Text no longer overlaps: menu footers hide behind menu screens, and the hotbar no longer shows over the pause menu.',
@@ -8435,7 +8436,7 @@ requestAnimationFrame(frame);
       dev.skin=true;saveDev();eq.k='dev_rainbow';eq.g='dev_gun';eq.b='dev_bomb';eq.f='dev_fist';syncEq();saveOwn();
       say('Prism fists, knife, gun and bomb granted and equipped.');
     }else if(cmd==='dev_home'){ /* DEV_HOME: back to the title screen (before picking a save). Remove this branch to remove the command */
-      closeAdmin();if(sub)closeSub();if(state!=='menu')showHome();if(window.__title)window.__title.show(1);
+      closeAdmin();pxWipe(()=>{if(sub)closeSub();if(state!=='menu')showHome();if(window.__title)window.__title.show(1)});
       return;
     }else if(cmd==='dev_phone'){ /* DEV_PHONE: preview the phone screen and touch controls on a computer. Type it again to turn it off */
       devPhone=!devPhone;stage.classList.toggle('touch',devPhone||matchMedia('(pointer:coarse)').matches);if(devPhone)aimMode='auto';
@@ -8626,6 +8627,24 @@ function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.las
 function tsStart(){if(tScene.on)return;tScene.on=true;tsSize();tScene.last=performance.now();requestAnimationFrame(tsFrame)}
 addEventListener('resize',()=>{if(tScene.on)setTimeout(tsSize,60)});
 
+/* pixel wipe between the title, the save screen and the main menu: dark blocks sweep in on a diagonal, the screen
+   changes underneath, then the blocks clear the same way. hold keeps the blocks up (for a reload) */
+function pxWipe(mid,hold){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||document.querySelector('.pxwipe')){mid();return}
+  const C=16,RW=9,ST=16,el=document.createElement('div');el.className='pxwipe';el.style.gridTemplateColumns='repeat('+C+',1fr)';el.style.gridTemplateRows='repeat('+RW+',1fr)';
+  for(let y=0;y<RW;y++)for(let x=0;x<C;x++){const c=document.createElement('i');c.style.transitionDelay=((x+y)*ST)+'ms';el.appendChild(c)}
+  stage.appendChild(el);void el.offsetWidth;el.classList.add('in');sfx(180,.18,'square',.03,2.2);
+  const full=(C+RW)*ST+200;
+  setTimeout(()=>{try{mid()}catch(e){}if(hold)return;requestAnimationFrame(()=>{el.classList.remove('in');el.classList.add('out');setTimeout(()=>el.remove(),full+60)})},full);
+}
+
+/* after switching saves the game reloads behind the blocks: start covered, then clear */
+function pxReveal(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const C=16,RW=9,ST=16,el=document.createElement('div');el.className='pxwipe in';el.style.gridTemplateColumns='repeat('+C+',1fr)';el.style.gridTemplateRows='repeat('+RW+',1fr)';
+  for(let y=0;y<RW;y++)for(let x=0;x<C;x++){const c=document.createElement('i');c.style.transition='none';el.appendChild(c)}
+  stage.appendChild(el);setTimeout(()=>{[...el.children].forEach((c,i)=>{c.style.transition='';c.style.transitionDelay=(((i%C)+((i/C)|0))*ST)+'ms'});el.classList.remove('in');el.classList.add('out');setTimeout(()=>el.remove(),(C+RW)*ST+300)},120);
+}
 /* ---------- title screen: PLAY, then choose a save and a difficulty, then the main menu ---------- */
 const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs per world',nowin:'~10 hrs per world'};
 {
@@ -8688,8 +8707,8 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
     if(selSlot===n)selSlot=0;
     drawSlots();drawDiffs();
   }
-  $('tplay').addEventListener('click',()=>{sfx(260,.2,'triangle',.07,2);show(2)});
-  $('tback').addEventListener('click',()=>{show(1)});
+  $('tplay').addEventListener('click',()=>{sfx(260,.2,'triangle',.07,2);pxWipe(()=>show(2))});
+  $('tback').addEventListener('click',()=>{pxWipe(()=>show(1))});
   sbox.addEventListener('click',e=>{
     const c=e.target.closest('.tsl');if(!c)return;
     const n=+c.dataset.n,a=e.target.closest('[data-act]');
@@ -8714,11 +8733,11 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
     if(n!==SLOT){
       /* another save: bank this one, write the new save's difficulty, then reload straight into its main menu */
       try{saveMeta();saveOwn();localStorage.setItem(slotKey('cinder-diff',n),selDiff);localStorage.setItem('cinder-slot',String(n));sessionStorage.setItem('cinder-boot','home')}catch(x){}
-      location.reload();return;
+      pxWipe(()=>location.reload(),true);return;
     }
     diff=selDiff;try{LS.setItem('cinder-diff',diff)}catch(x){}
     sfx(660,.15,'triangle',.07,1.5);
-    hide();refreshHome();
+    pxWipe(()=>{hide();refreshHome()});
   });
   
   /* keep keys from reaching the game while the title is up; Esc goes back one step */
@@ -8731,7 +8750,7 @@ const PACE_TXT={easy:'~1 hr per world',medium:'~3 hrs per world',hard:'~5 hrs pe
   window.__title={show:show,hide:hide,slotKeysOf:slotKeysOf};
   let boot=null;try{boot=sessionStorage.getItem('cinder-boot');sessionStorage.removeItem('cinder-boot')}catch(e){}
   /* the game opens on the title screen (the menu battle plays behind it); switching saves reloads straight into the main menu */
-  if(boot==='home')hide();else show(boot==='select'?2:1);
+  if(boot==='home'){hide();pxReveal()}else show(boot==='select'?2:1);
 
   /* ---------- save switcher + manager (very top right of the main menu) ---------- */
   {
@@ -9167,5 +9186,11 @@ body.insub #home .hfoot,body.insub #home #slots{visibility:hidden}
 #oddsnote{margin:4px 0 6px;line-height:1.5}
 body:has(#pause:not([hidden])) #hotbar,body:has(#pause:not([hidden])) #dashwrap,body:has(#shop:not([hidden])) #dashwrap,body:has(#shop:not([hidden])) #hotbar{visibility:hidden}
 @container (max-height:480px){#chars .box{padding-top:40px!important}}
+
+/* the pixel wipe between title, save screen and main menu */
+.pxwipe{position:absolute;inset:0;z-index:95;display:grid;pointer-events:all}
+.pxwipe i{display:block;background:#0b130e;box-shadow:inset 0 0 0 2px #133a1c;transform:scale(0);transition:transform .2s steps(4)}
+.pxwipe.in i{transform:scale(1.04)}
+.pxwipe.out i{transform:scale(0)}
 </style>
 </body></html>
