@@ -1,6 +1,6 @@
 # Pixel Rush 2.0: characters and abilities
 
-Generated from the game data in `Pixel_Rush_v2_phase1.html` (v4.7).
+Generated from the game data in `Pixel_Rush_0.1.html` (v4.7).
 
 ## Characters
 
