@@ -53,9 +53,9 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [ ] New animated pixel backgrounds for World 4 (robot/cyber) and World 5 (spooky swamp).
 
 ### 5. Save select & difficulty screen
-- [ ] Pixel-art borders, consistent type, clear slot selection, character preview per slot, better spacing.
-- [ ] Remove "45 minutes per world" text.
-- [ ] Easy renamed "Lucky" (keep its description). Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
+- [x] Pixel-art borders, consistent type, clear slot selection, character preview per slot, better spacing. (desktop + landscape phone checked)
+- [x] Remove "45 minutes per world" text.
+- [x] Easy renamed "Lucky" (keep its description). Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
 
 ### 6. Audio overhaul (procedural, no files)
 - [ ] Distinct SFX per weapon family and evolution: gun fire, sword swing, punch, boomerang throw + return, bow, magic, mace, explosive throw, explosive roll, explosion.
@@ -71,7 +71,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [ ] New original tracks; show BPM for every track; browse sorted by BPM; keep old tracks; even loudness.
 
 ### 10. Cheat menu / pause fix
-- [ ] Pause → Cheats hides pause menu, shows cheat menu, game stays paused. Never overlap. Closing cheats returns to pause. Only Resume resumes.
+- [x] Pause → Cheats hides pause menu, shows cheat menu, game stays paused. Never overlap. Closing cheats returns to pause. Only Resume resumes.
 
 ### 11. Save & Exit / Continue Run
 - [ ] Pause menu "Save & Exit" stores run state (character, weapon + evolution, world, wave, health, score, coins/XP earned, upgrades/abilities, modifiers, hotbar, etc) in localStorage; main menu "Continue Run" restores it. Never overwrites permanent progression. Validate/guard against corrupted saves. Works the same in the EXE.
@@ -117,6 +117,8 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 
 ## Done in this version
 (append as items complete)
+- Hotfix pushed to 0.3/main: an unescaped apostrophe in the changelog stopped the game loading (build.sh now syntax-checks every build).
+- Save select redesign; Lucky/Average Joe text; cheat menu from pause (tested: stays paused, Esc/back return to pause, focus loss stays paused, only Resume resumes); run HUD hidden under menus.
 
 ## Known bugs
 (append as found)
