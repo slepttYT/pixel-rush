@@ -111,6 +111,16 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 - [ ] Report the progression simulation results to the user (sim tooling: scratchpad/sim/bot.js, tools/simall.js).
 - [ ] "Make getting new ability progression good": ability rarities gated by fighter level (Rare L2, Epic L4, Legendary L6, Mythic L8) and wave (4/8/14/20). Re-check with sim XP numbers and smooth it.
 
+## User requests log (verbatim, newest last). ALWAYS re-check this list after compaction
+1. "auto go with your recommended one if theres 3 options you want me to pick from dont ask just pick the recomended one"
+2. "change lucky to easy in difficulty select" -> DONE (Easy name kept).
+3. "make it say continue instead of start if theres alr save data and make a loading screen so it doesnt have to take you back to the saves screen" -> DONE (CONTINUE label, #bootld save loading screen).
+4. "make it so when you hover over a character in the select screen it shows it stats" -> TODO (hover/focus on a character card shows its stats; touch: tap shows them).
+5. "rember to add the droped xp and coins you have to pick up after killing a mob" -> TODO: EVERY mob kill must drop XP and coins on the floor that you walk over to pick up (not just gold/green mobs). Must also work in Worlds 4 and 5 and with all 8 weapon families. Check kill() and spillLoot.
+6. "make sure before shrink down the context window you save all that i said in a md file make sure to check the md file to make sure you got everything" -> this log + the full 0.5 checklist above. Re-read this file after every compaction and before reporting done.
+
+Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on every difficulty with wave timer only on normal waves + 3 s break; "make getting new abbility progression good"; "fix all overlapping text"; dash gives 0.6 s invulnerability; boss attack tiers (boss n does n+1 attacks then staggers).
+
 ## Decisions log
 - 0.4 skipped as a release name; its boss overhaul items (cinematic entrances, boss polish) already shipped in 0.3 work.
 - Brutal = the existing hardest difficulty "You're Not Winning Bro" (keep its name and description).
