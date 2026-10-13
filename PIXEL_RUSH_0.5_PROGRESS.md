@@ -1,0 +1,122 @@
+# Pixel Rush 0.5 — The Expansion & Polish Update — Progress
+
+This file is the single source of truth for 0.5. Re-read it after any context compaction.
+Quality over speed. Never claim something works unless it was tested.
+
+## Ground rules (from the 0.5 brief)
+- Inspect code before changing it. Preserve existing systems unless told to change them.
+- Never remove enemies, bosses, animations, cosmetics or mechanics.
+- Original pixel art in the game's style. Test features alone and together. Fix regressions.
+- Do not silently skip hard features. If a choice has options, pick the recommended one (user's standing instruction: don't ask, choose the recommended option).
+- Do NOT add: a loading screen, rotating gameplay tips, loading-screen hints, new animated main-menu icons, world-skipping mechanics.
+- Keep the main menu's existing animations.
+
+## Versioning / delivery
+- Branch: `pixel-rush-0.5`. Game file: `Pixel_Rush_0.5.html` (git mv from 0.3; 0.4 was a planning list and is folded into 0.5). `main` must always hold the newest version.
+- Release has BOTH: Pixel Rush 0.5 HTML and Pixel Rush 0.5 EXE (Windows).
+- From now on every update ships BOTH (0.6 HTML + 0.6 EXE etc). One shared codebase: the EXE wraps the same HTML file.
+- Commit trailer: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` + `Claude-Session: https://claude.ai/code/session_015yUFKQD8b9Fm2HypkTXkfA`. No model ids in pushed files.
+- Playable copy for the user is published as a Claude artifact: https://claude.ai/artifact/58r36B8qAFcDmcB5x3Berm (republish same file path).
+
+## EXACT weapon evolution paths (must match exactly)
+| Family | Stage 1 | Stage 2 | Final |
+|---|---|---|---|
+| Blade | Knife | Machete | Sword |
+| Gun | Pistol | Shotgun | Rifle |
+| Explosive | Grenade | Cannonball | Bomb |
+| Fist | Bare Fist | Knuckle Wrap | Brass Knuckles |
+| Boomerang | Default Boomerang | Metal Boomerang | Three-Prong Boomerang |
+| Magic | Stick | Magic Wand | Staff |
+| Bow | Bow and Arrow | Compact Bow | Crossbow |
+| Mace | Mace | Two-Headed Mace | Three-Headed Mace |
+
+## Feature checklist
+Legend: [ ] todo, [~] in progress, [x] done and tested.
+
+### 1. New Run screen overhaul
+Flow: New Run → Select Character → Configure Run → Start Game.
+- [ ] Config screen: LEFT large animated idle preview of the character HOLDING the selected weapon (weapon changes instantly). RIGHT: weapon select, world select, challenge modifiers, confirm button.
+- [ ] Keep unlock rules (characters, weapons, worlds). Locked content not selectable. No world skipping.
+- [ ] Challenge modifiers: clearly described before the run. Decision (recommended set): Glass Cannon (x2 dmg dealt, 1 heart), Swarm (+50% enemies, +25% coins), Fast Forward (enemies +25% speed, +20% XP), No Dash, Elites Only-ish "Evolved" (all mobs evolved), Pacifist Shop (no ability shop, +50% coins), Iron Body (no healing between waves, +30% XP). Modifiers give reward multipliers; shown on HUD; saved with run; runs with modifiers still count for records unless the modifier makes the run easier (none of them do).
+
+### 2. Weapon evolution overhaul
+- [ ] Rename/redraw lines exactly as the table above. Each form visually distinct; the in-hand sprite matches the evolution.
+- [ ] New families: Boomerang (thrown, returns, pierces), Magic (homing bolt), Bow (charged arrows that pierce), Mace (slow heavy spin smash with knockback). Each with mastery track, unlock chain after Bomb (Bomb → Boomerang → Magic → Bow → Mace), shop/upgrade tabs only when unlocked.
+- [ ] Evolution animation (Pokémon-like): old weapon shown big, flashing silhouette, transform burst, new weapon revealed, evolution jingle. Short, skippable by click.
+
+### 3. Fist combat fix
+- [ ] Punch = forward jab: arm visibly extends, narrow short hitbox in front only (no sweep). Distinct from slash. Holds through Bare Fist → Knuckle Wrap → Brass Knuckles (each stronger).
+
+### 4. Main menu rotating worlds
+- [ ] Menu background cycles W1 → W2 → W3 → W4 → W5 → W1 every 30 s with a smooth pixel transition. Keep menu animations.
+- [ ] Button theme per world: W1 grass green, W2 stone gray, W3 sandy tan, W4 electric blue, W5 dark swamp green.
+- [ ] New animated pixel backgrounds for World 4 (robot/cyber) and World 5 (spooky swamp).
+
+### 5. Save select & difficulty screen
+- [ ] Pixel-art borders, consistent type, clear slot selection, character preview per slot, better spacing.
+- [ ] Remove "45 minutes per world" text.
+- [ ] Easy renamed "Lucky" (keep its description). Medium description: "The way Pixel Rush was meant to be played. Just your average Joe experience." Keep Hard and Brutal descriptions ("You're Not Winning Bro" = Brutal tier: keep its description). Do not change balancing.
+
+### 6. Audio overhaul (procedural, no files)
+- [ ] Distinct SFX per weapon family and evolution: gun fire, sword swing, punch, boomerang throw + return, bow, magic, mace, explosive throw, explosive roll, explosion.
+- [ ] Balancing: throw quiet, roll quiet, explosion louder but never painful; master limiter/compressor to stop peaks when many sounds overlap.
+
+### 7. Enemy spawn sounds
+- [ ] One spawn sound per enemy type, each type with its own 3 s cooldown. Bosses exempt (keep entrance audio).
+
+### 8. World ambience (extremely quiet)
+- [ ] W1 birds + breeze, W2 drips + cave echo, W3 desert wind, W4 electrical/mechanical hum, W5 insects + swamp wildlife. Below music and SFX, varied (not a constant loop), changes with world, respects settings/mute.
+
+### 9. Jukebox expansion
+- [ ] New original tracks; show BPM for every track; browse sorted by BPM; keep old tracks; even loudness.
+
+### 10. Cheat menu / pause fix
+- [ ] Pause → Cheats hides pause menu, shows cheat menu, game stays paused. Never overlap. Closing cheats returns to pause. Only Resume resumes.
+
+### 11. Save & Exit / Continue Run
+- [ ] Pause menu "Save & Exit" stores run state (character, weapon + evolution, world, wave, health, score, coins/XP earned, upgrades/abilities, modifiers, hotbar, etc) in localStorage; main menu "Continue Run" restores it. Never overwrites permanent progression. Validate/guard against corrupted saves. Works the same in the EXE.
+
+### 12. Daily challenges
+- [ ] Refresh at 07:00 in the player's LOCAL time. Available until next local 07:00. Gold + XP reward. Uses existing mechanics/modifiers. One claim per day. Separate from normal runs.
+
+### 13. Game over screen
+- [ ] Pixel-art framing, animation, consistent type, clear stats. Keep existing post-run info and buttons.
+
+### 14. Run postcards & mailbox
+- [ ] Small mailbox icon near Updates/Tutorial. Opens a pixel postcard of the latest completed run: character, weapon, world reached, highest wave, final score, total run time, with character + weapon art. Updated after each completed run, stored locally.
+
+### 15. Personal bests
+- [ ] Best completion time per world, kept separate, shown in a stats/progression screen. Run time on the postcard.
+
+### 16. Small QoL (recommended set, keep it modest)
+- [ ] Damage numbers toggle in Settings. [ ] Pause when the window loses focus. [ ] Run timer shown in pause menu. [ ] Confirm before abandoning a run from pause.
+
+### Save data management (Settings)
+- [ ] "Save Data Management" section: Export Save Data (downloads a JSON backup of all progress incl. unfinished run) and Import Save Data (file picker).
+- [ ] Import shows pixel popup: "WARNING: Overwrite Save Data?" / "Importing this file will overwrite your current save data and replace it with the progress stored in the selected file." / "Are you sure you want to continue?" / [Cancel] [Import & Overwrite]. Cancel = no change. Import backs up current save first. Invalid file = keep existing save.
+- [ ] Same format in HTML and EXE (cross import/export). Autosave stays on.
+
+### 17. HTML + EXE release
+- [ ] `Pixel_Rush_0.5.html` standalone.
+- [ ] Windows EXE wrapping the same HTML (shared code). Saves work in the EXE (its own storage) and transfer via export/import.
+
+### 18. Final QA (all must pass)
+Five worlds work; menu rotation 30 s; button colors per world; previews show weapon; exact evolution paths; evolution animation; punches front-only; spawn cooldowns per type; ambience balanced; BPM sort; cheat/pause never overlap and never resume; Save & Exit restores; daily resets at local 07:00; postcards accurate; PBs save; existing bosses/enemies/progression/cosmetics/achievements intact; HTML + EXE work; keyboard, mouse, controller, touch.
+
+### Worlds 4 and 5 (needed by sections 4, 8, 18)
+- [ ] World 4 "Robot/Cyber" and World 5 "Spooky Swamp" are playable: arena backgrounds, mob looks, 10 bosses each + a final boss each, unlock W4 after beating W3, W5 after W4 (no skipping).
+
+## Carried over from 0.3 work (unfinished)
+- [ ] Boss fights push runs past 45 min on harder difficulties/worlds (sim: W1 34–75 min, W2 46–94, W3 55–110 with bare fists). Plan: soften boss HP scaling from difficulty and world so a run to wave 100 is ~45 min (+ breaks) on every difficulty.
+- [ ] Report the progression simulation results to the user (sim tooling: scratchpad/sim/bot.js, tools/simall.js).
+- [ ] "Make getting new ability progression good": ability rarities gated by fighter level (Rare L2, Epic L4, Legendary L6, Mythic L8) and wave (4/8/14/20). Re-check with sim XP numbers and smooth it.
+
+## Decisions log
+- 0.4 skipped as a release name; its boss overhaul items (cinematic entrances, boss polish) already shipped in 0.3 work.
+- Brutal = the existing hardest difficulty "You're Not Winning Bro" (keep its name and description).
+
+## Done in this version
+(append as items complete)
+
+## Known bugs
+(append as found)
