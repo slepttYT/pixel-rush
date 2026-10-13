@@ -876,9 +876,10 @@ summary:hover{color:var(--bone)}
       <h2 id="chart">Characters</h2>
       <div class="chhead">
         <canvas id="chprev" width="300" height="230"></canvas>
-        <div class="chinfo"><div id="chname"></div><div id="chtitle"></div><p id="chdesc"></p><div id="chkit"></div><div id="chskins"><span id="chsklab">Skin preview</span><button type="button" data-sv="">Current</button><button type="button" data-sv="0">Default</button><button type="button" data-sv="1" class="gld">Gold</button><button type="button" data-sv="2" class="dia">Diamond</button><button type="button" data-sv="3" class="gal">Galaxy</button></div><div id="chlock"></div></div>
+        <div class="chinfo"><div id="chname"></div><div id="chtitle"></div><p id="chdesc"></p><div id="chstats"></div><div id="chkit"></div><div id="chskins"><span id="chsklab">Skin preview</span><button type="button" data-sv="">Current</button><button type="button" data-sv="0">Default</button><button type="button" data-sv="1" class="gld">Gold</button><button type="button" data-sv="2" class="dia">Diamond</button><button type="button" data-sv="3" class="gal">Galaxy</button></div><div id="chlock"></div></div>
       </div>
       <div id="chgrid"></div>
+      <div id="chtip" hidden></div>
       <div class="row"><button class="btn gold" id="chgo" type="button">START RUN</button><button class="btn ghost" id="chback" type="button">BACK</button></div>
     </div>
   </div>
@@ -1352,6 +1353,7 @@ const WORLD_CROWD=()=>world===3?1.5:world===2?1.25:1;
 const hpS=h=>Math.ceil(h*DF().eh*(loop?1+.3*loop:1)*WORLD_HP()*dynS);
 const totalWave=()=>loop*LOOP_WAVES+wave;
 function acct(x){x=x===undefined?xpTotal:x;let L=1;while(x>=xpNeed(L)){x-=xpNeed(L);L++}return{L:L,x:x,need:xpNeed(L)}}
+const MOB_XP=.03,WAVE_XP_K=.6; /* 0.5: share of a wave's XP each mob drops / share still paid when the wave is cleared */
 function waveXp(){return (8+wave*.4+(wave%10===0?40*(wave/10):0))*xpMul()*DF().xp*(1+.1*(upg.xp||0))*(p.xpM||1)*(1+(dynS-1)*.6)}
 function xpHtml(a,pct){const w=pct===undefined?Math.min(100,a.x/a.need*100):pct;return '<div class="xpl"><span>Account level <b>'+a.L+'</b></span><span>'+a.x+' / '+a.need+' XP</span></div><div class="xpb"><i style="width:'+w.toFixed(1)+'%"></i></div>'}
 const RUN_COIN=6; /* coins per 5 waves cleared in a run */
@@ -3175,11 +3177,23 @@ function renderSkinBtns(){
   $('chsklab').textContent=skinView===null?'Skin preview':'Previewing '+SK_NAME[skinView].toLowerCase()+(skinView>real?' · reach fighter level '+SK_LV[skinView]+' to earn it':' · yours');
 }
 $('chskins').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;skinView=b.dataset.sv===''?null:+b.dataset.sv;sfx(520,.06,'triangle',.04,1.3);renderSkinBtns()});
-function renderChars(){
-  try{renderSkinBtns()}catch(e){}
-  const sel=charById(chSel),lk=!charUnlocked(sel),cur=CH();
-  const n=CHARS.filter(charUnlocked).length;
-  $('chart').textContent=(charMode==='play'?'Choose your fighter':'Characters')+'  ·  '+n+' / '+CHARS.length+' unlocked';
+/* 0.5: a fighter's base stats as pixel bars (hover or focus a card to see them) */
+function charStats(c){
+  const bar=(v,mx)=>{const n=Math.max(0,Math.min(10,Math.round(v/mx*10)));return '<span class="sbar">'+'<i class="on"></i>'.repeat(n)+'<i></i>'.repeat(10-n)+'</span>'};
+  const pc=v=>{const d=Math.round((v-1)*100);return d?(d>0?'+':'')+d+'%':'normal'};
+  const hp=5+(diff==='nowin'?0:(c.hp||0)),rows=[
+    ['HEARTS',hp,8,hp+(c.hp&&diff!=='nowin'?' ('+(c.hp>0?'+':'')+c.hp+')':'')],
+    ['SPEED',c.spd||1,1.6,pc(c.spd||1)],
+    ['ATTACK SPEED',1/(c.cd||1),1.6,pc(1/(c.cd||1))],
+    ['DAMAGE',1+(c.dm||0)+(c.mel?c.mel*.5:0),2.4,(c.dm?'+'+c.dm:'normal')+(c.mel?' · melee +'+c.mel:'')],
+    ['REACH',c.reach||1,1.6,pc(c.reach||1)],
+    ['DASH',c.dash||1,1.6,pc(c.dash||1)],
+    ['COINS / XP',((c.coin||1)+(c.xp||1))/2,1.6,pc(c.coin||1)+' / '+pc(c.xp||1)]];
+  return rows.map(r=>'<div class="srw"><span>'+r[0]+'</span>'+bar(r[1],r[2])+'<em>'+r[3]+'</em></div>').join('');
+}
+let chHover=null;
+function renderChInfo(sel){
+  const lk=!charUnlocked(sel);
   $('chname').textContent=sel.n;$('chname').style.color=lk?'#9aa0b8':sel.acc;$('chtitle').textContent=lk?'Locked':sel.t;$('chtitle').style.color=lk?'#ff4d5e':sel.acc;
   $('chdesc').textContent=lk?'Earn the achievement below to unlock this character and see its full kit.':sel.d;
   {const kc=lk?[]:kitChips(sel),lim=kc.filter(k=>k[4]);
@@ -3188,6 +3202,14 @@ function renderChars(){
   if(lk){const a=ACH.find(x=>x[0]===sel.ach),pg=PROG[sel.ach]?PROG[sel.ach]():null;
     $('chlock').innerHTML='<b>Unlock by earning “'+a[1]+'”</b><br>'+a[2]+(pg?' <span style="color:var(--gold);font-weight:700">('+Math.min(pg[0],pg[1])+' / '+pg[1]+')</span>':'')}
   else $('chlock').innerHTML=clvHtml(sel.id);
+  $('chstats').innerHTML=lk?'':charStats(sel);
+}
+function renderChars(){
+  try{renderSkinBtns()}catch(e){}
+  const cur=CH();
+  const n=CHARS.filter(charUnlocked).length;
+  $('chart').textContent=(charMode==='play'?'Choose your fighter':'Characters')+'  ·  '+n+' / '+CHARS.length+' unlocked';
+  renderChInfo(charById(chHover||chSel));
   $('chgrid').innerHTML=CHARS.map((c,i)=>{const l=!charUnlocked(c),a=c.ach&&ACH.find(x=>x[0]===c.ach);
     return '<button type="button" class="chc'+(l?' lock':'')+(c.id===cur.id?' on':'')+(c.id===chSel?' sel':'')+'" data-i="'+c.id+'" style="--tc:'+c.acc+'"><canvas width="96" height="96"></canvas><b>'+(l?'???':c.n)+'</b><small>'+(l?'Earn “'+a[1]+'”':c.t)+'</small>'+(l?'':'<span class="clv">Lv '+clvl(c.id)+'</span>')+'</button>'}).join('');
   [...$('chgrid').children].forEach((b,i)=>drawPortrait(b.firstChild,CHARS[i],!charUnlocked(CHARS[i]),1.2));
@@ -3195,10 +3217,10 @@ function renderChars(){
   $('chback').hidden=false;
 }
 function drawCharPrev(now){
-  const cv=$('chprev'),ch=skinView===null?charById(chSel):Object.assign({},charById(chSel),{_pv:skinView}),lk=!charUnlocked(ch),t=now/1000,c=cv.getContext('2d'),w=cv.width,h=cv.height;
+  const cv=$('chprev'),pid=chHover||chSel,ch=skinView===null||chHover?charById(pid):Object.assign({},charById(pid),{_pv:skinView}),lk=!charUnlocked(ch),t=now/1000,c=cv.getContext('2d'),w=cv.width,h=cv.height;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,w,h);c.globalAlpha=1;
   const g=c.createRadialGradient(w/2,h*.55,6,w/2,h*.55,w*.6);g.addColorStop(0,ch.acc+'44');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,w,h);
-  drawCharSpr(c,ch,w/2,h*.56,Math.max(3,Math.floor(h/28)),charPose(true,t*.6),Math.sin(t*.5)<0,skinView===null?cSkin(ch.id):skinView); /* big pixel preview, walking and turning */
+  drawCharSpr(c,ch,w/2,h*.56,Math.max(3,Math.floor(h/28)),charPose(true,t*.6),Math.sin(t*.5)<0,skinView===null||chHover?cSkin(ch.id):skinView); /* big pixel preview, walking and turning */
   if(lk){c.globalCompositeOperation='source-atop';c.fillStyle='rgba(8,10,16,.85)';c.fillRect(0,0,w,h);c.globalCompositeOperation='source-over';c.fillStyle='#ff4d5e';c.font='700 13px sans-serif';c.textAlign='center';c.fillText('LOCKED',w/2,h-12)}
 }
 function homeExtras(){
@@ -3499,7 +3521,7 @@ function openSub(k,opener){
   else if(k==='wpn'){renderWpn();const f=$('wpngrid').querySelector('.on');if(f)f.focus()}
   else if(k==='dsel'){renderDsel()}
   else if(k==='world'){renderWorld();const f=$('worldgrid').querySelector('.on')||$('worldgrid').firstChild;if(f)f.focus()}
-  else if(k==='chars'){skinView=null;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
+  else if(k==='chars'){skinView=null;chHover=null;$('chtip').hidden=true;chSel=CH().id;renderChars();const f=$('chgrid').querySelector('.on');if(f)f.focus()}
   else if(k==='cheat'){renderCheat()}
   else if(k==='acct'){renderAcct()}
   else if(k==='mail'){renderMail()}
@@ -5996,9 +6018,9 @@ function hurtE(e,dmg,a,heavy,pierce){
   if(e.hp<=0)kill(e);
 }
 /* coins and XP from gold and green enemies spill on the floor: walk over them to pick them up (they fade after 25 s) */
-const LOOT_PX={coin:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffd36b',H:'#fff4c2',D:'#c98a1c'}],xp:[['..G..','.GHG.','GHGGD','.GGD.','..D..'],{G:'#5dff7a',H:'#e2ffe6',D:'#1f9a3a'}]};
+const LOOT_PX={gold:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffb347',H:'#fff0c2',D:'#b8661c'}],coin:[['.YYY.','YHYYD','YHYYD','YYYYD','.DDD.'],{Y:'#ffd36b',H:'#fff4c2',D:'#c98a1c'}],xp:[['..G..','.GHG.','GHGGD','.GGD.','..D..'],{G:'#5dff7a',H:'#e2ffe6',D:'#1f9a3a'}]};
 function drawLoot(h){
-  const L=LOOT_PX[h.k],g=L[0],c=L[1],u=2.4,sx=h.k==='coin'?Math.max(.25,Math.abs(Math.cos(time*3+h.sd))):1,bob=h.vx||h.vy?0:Math.sin(time*4+h.sd)*1.5;
+  const L=LOOT_PX[h.k],g=L[0],c=L[1],u=2.4,sx=h.k!=='xp'?Math.max(.25,Math.abs(Math.cos(time*3+h.sd))):1,bob=h.vx||h.vy?0:Math.sin(time*4+h.sd)*1.5;
   ctx.save();ctx.translate(h.x,h.y+bob);ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(-5,6,10,3);ctx.scale(sx,1);
   ctx.fillStyle='#0a0a10';for(let y=0;y<5;y++)for(let x=0;x<5;x++)if(g[y][x]!=='.')ctx.fillRect((x-2.5)*u-1,(y-2.5)*u-1,u+2,u+2);
   for(let y=0;y<5;y++)for(let x=0;x<5;x++){const k=g[y][x];if(k!=='.'){ctx.fillStyle=c[k];ctx.fillRect((x-2.5)*u,(y-2.5)*u,u,u)}}
@@ -6025,7 +6047,9 @@ function kill(e){
   {const cm=DF().coin*(p.coinM||1)*(cheat.coinx?5:1)*(loop>0?2:1);let cg=Math.max(1,Math.round(e.pts/8*cm));
   if(e.el==='y'){const yw=Math.max(2,Math.round((3+wave*.4)*cm*(1+.1*(upg.coin||0))));spillLoot(e.x,e.y,'coin',yw,Math.min(6,yw));stats.yellow++;cg=Math.round((25+wave*3)*cm);spark(e.x,e.y,'#ffe14d',26,340);for(let q=0;q<yw&&q<10;q++)parts.push({x:e.x,y:e.y,vx:(R()-.5)*260,vy:-120-R()*160,l:.8,m:.8,c:'#ffd36b',s:5});sfx(1200,.15,'triangle',.06,1.4);setTimeout(()=>sfx(1600,.12,'triangle',.05,1.2),90)}
   if(e.el==='g'){stats.green++;spillLoot(e.x,e.y,'xp',(12+wave*.6)*xpMul()*DF().xp*(1+.1*(upg.xp||0)),3);spark(e.x,e.y,'#5dff7a',22,320);sfx(880,.15,'triangle',.06,1.5)}
-  coins+=cg}
+  /* 0.5: every mob drops its gold and a little XP on the floor to pick up (bosses and the tutorial still pay out directly).
+     The per-mob XP comes out of the wave-clear XP, so collecting everything gives about the same total as before */
+  if(tut||e.t==='boss'||e.dkb||brMode)coins+=cg;else{spillLoot(e.x,e.y,'gold',cg,1);const xo=waveXp()*MOB_XP;if(xo>0)spillLoot(e.x,e.y,'xp',xo,1)}}
   spark(e.x,e.y,e.c,18,300);spark(e.x,e.y,'#f1ead8',5,240);
   {const mb=TYPES[e.t]&&TYPES[e.t].mb;hitstop=Math.max(hitstop,mb?.12:.05);shake=Math.max(shake,mb?12:6)}
   dieSfx(e);
@@ -6559,7 +6583,7 @@ function update(dt){
   else if(enemies.length===0){
     if(waveActive){
       waveActive=false;if(!p.hitW)stats.flawless++;const bw=wave%10===0;pickT=(bw||(wave%5&&wave!==1))?0:WAVE_BREAK; /* the break comes before the shop opens */
-      gain=Math.round((30+wave*12+(bw?40+60*Math.floor(wave/10):0))*2*DF().coin*(p.coinM||1)*(world===3?2:world===2?1.5:1)*(1+(dynS-1)*.6));coins+=gain;const xg=Math.round(waveXp());runXp+=xg;waveEndFx(bw,xg);clearT=WAVE_BREAK;if(brMode)clearT=3.2;
+      gain=Math.round((30+wave*12+(bw?40+60*Math.floor(wave/10):0))*2*DF().coin*(p.coinM||1)*(world===3?2:world===2?1.5:1)*(1+(dynS-1)*.6));coins+=gain;const xg=Math.round(waveXp()*(brMode?1:WAVE_XP_K));runXp+=xg;waveEndFx(bw,xg);clearT=WAVE_BREAK;if(brMode)clearT=3.2;
       if(wave>=LOOP_WAVES&&(!brMode||brIdx>=29)){winT=1.8;if(devWarp||brMode){/* test run: no unlocks */}else if(world===1&&!stats.w2){stats.w2=1;w2New=true;saveMeta()}else if(world===2&&!stats.w3){stats.w3=1;w3New=true;saveMeta()}}
       if(bw)p.hp=p.maxhp;else if(p.hp<p.maxhp)p.hp++;
       if(p.cp.waveHeal)healP(p.cp.waveHeal);
@@ -6631,8 +6655,10 @@ function update(dt){
     h.life-=dt;
     if(h.k){ /* coin / XP piece: slides to a stop, then waits to be walked over */
       h.age+=dt;if(h.vx||h.vy){h.x+=h.vx*dt;h.y+=h.vy*dt;const f=Math.exp(-dt*5);h.vx*=f;h.vy*=f;if(Math.abs(h.vx)+Math.abs(h.vy)<4)h.vx=h.vy=0;h.x=Math.min(Math.max(h.x,M+10),W-M-10);h.y=Math.min(Math.max(h.y,M+10),H-M-10)}
+      if(h.age>.35){const dx=p.x-h.x,dy=p.y-h.y,dd=Math.hypot(dx,dy);if(dd<72&&dd>1){h.x+=dx/dd*280*dt;h.y+=dy/dd*280*dt}} /* a small pull so you don't have to step on every piece */
       if(h.age>.35&&Math.hypot(h.x-p.x,h.y-p.y)<p.r+16){h.life=0;
-        if(h.k==='coin'){const v=Math.max(1,Math.round(h.v));runWallet+=v;floatTxt(h.x,h.y-10,'+'+v,'#ffe14d');spark(h.x,h.y,'#ffd36b',6,140);sfx(1300+R()*300,.06,'triangle',.04,1.4)}
+        if(h.k==='gold'){const v=Math.max(1,Math.round(h.v));coins+=v;floatTxt(h.x,h.y-10,'+'+v+'g','#ffb347');sfx(1100+R()*300,.05,'triangle',.035,1.4)}
+        else if(h.k==='coin'){const v=Math.max(1,Math.round(h.v));runWallet+=v;floatTxt(h.x,h.y-10,'+'+v,'#ffe14d');spark(h.x,h.y,'#ffd36b',6,140);sfx(1300+R()*300,.06,'triangle',.04,1.4)}
         else{runXp+=h.v;floatTxt(h.x,h.y-10,'+'+Math.round(h.v)+' XP','#5dff7a');spark(h.x,h.y,'#5dff7a',6,140);sfx(900+R()*200,.06,'sine',.04,1.6)}}
       continue}
     if(Math.hypot(h.x-p.x,h.y-p.y)<p.r+14&&p.hp<p.maxhp){p.hp++;h.life=0;spark(h.x,h.y,'#ffd36b',10,160);sfx(600,.15,'triangle',.06,1.6)}
@@ -8725,7 +8751,19 @@ loadBinds();loadPad();labelKeys();
 $('hchar').addEventListener('click',e=>{charMode='pick';openSub('chars',e.currentTarget)});
 $('chback').addEventListener('click',closeSub);
 $('chgo').addEventListener('click',()=>{if(charMode==='play'){closeSub();openSub('wpn',$('play'))}else closeSub()});
-$('chgrid').addEventListener('click',e=>{const b=e.target.closest('.chc');if(!b)return;const c=charById(b.dataset.i);chSel=c.id;
+/* 0.5: hovering or focusing a fighter shows its stats; on touch screens the first tap previews and the second tap picks */
+let chPtr='mouse';
+function chPeek(id){if(chHover===id)return;chHover=id;renderChInfo(charById(id||chSel));if(!id)$('chtip').hidden=true}
+/* touch preview: the stats panel may be scrolled away, so a compact card with the stats pops up at the bottom */
+function chTip(id){const c=charById(id),t=$('chtip');if(charUnlocked(c)){t.innerHTML='<b style="color:'+c.acc+'">'+c.n+'</b><small>'+c.t+'</small><div class="tipst">'+charStats(c)+'</div><p>Tap again to pick '+c.n+'</p>'}else t.innerHTML='<b>Locked</b><small>Earn its achievement to unlock this fighter</small>';t.hidden=false}
+$('chgrid').addEventListener('pointerdown',e=>{chPtr=e.pointerType||'mouse'});
+$('chgrid').addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const b=e.target.closest('.chc');if(b)chPeek(b.dataset.i)});
+$('chgrid').addEventListener('pointerleave',e=>{if(e.pointerType!=='touch')chPeek(null)});
+$('chgrid').addEventListener('focusin',e=>{const b=e.target.closest('.chc');if(b&&b.matches(':focus-visible'))chPeek(b.dataset.i)});
+$('chgrid').addEventListener('focusout',e=>{if(!$('chgrid').contains(e.relatedTarget))chPeek(null)});
+$('chgrid').addEventListener('click',e=>{const b=e.target.closest('.chc');if(!b)return;
+  if(chPtr==='touch'&&chHover!==b.dataset.i&&b.dataset.i!==chSel){chPeek(b.dataset.i);chTip(b.dataset.i);[...$('chgrid').children].forEach(x=>x.classList.toggle('peek',x===b));sfx(520,.06,'triangle',.04,1.4);return}
+  chPtr='mouse';chHover=null;const c=charById(b.dataset.i);chSel=c.id;
   if(charUnlocked(c)){curChar=c.id;try{LS.setItem('cinder-char',curChar)}catch(x){}sfx(620,.1,'triangle',.06,1.5);if(charMode==='play'){openSub('wpn',$('play'));return}}else sfx(150,.12,'square',.05,.7);renderChars()});
 $('hcheat').addEventListener('click',e=>{fromAch=false;if(cheatsUnlocked())openSub('cheat',e.currentTarget);else sfx(150,.12,'square',.05,.7)});
 /* cheats from the pause menu: the pause menu steps aside (never both on screen), the game stays paused,
@@ -9707,5 +9745,14 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 #evotx{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:min(92%,720px);margin:0;padding:14px 18px;background:#0b0d12;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c;font-family:'Press Start 2P',monospace;font-size:clamp(11px,1.6vw,16px);line-height:1.6;color:#fff;text-align:center}
 #evotx b{color:#8ee8ff}#evotx .evn{color:#ffd36b}
 #evoskip{position:absolute;bottom:4%;font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.2em;color:#7a8296}
+#chstats{display:grid;grid-template-columns:1fr;gap:3px;margin:6px 0}
+#chstats .srw{display:grid;grid-template-columns:96px auto 1fr;align-items:center;gap:8px;font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.08em;color:#b8c4b8}
+#chstats .sbar{display:inline-flex;gap:2px}#chstats .sbar i{width:7px;height:8px;background:#1a2a1e;box-shadow:inset 0 0 0 1px #2a4a30}#chstats .sbar i.on{background:#5fd07a;box-shadow:inset 0 -2px 0 #2a8a3a}
+#chstats em{font-style:normal;color:#e9ffe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chgrid .chc.peek{outline:3px dashed #ffd36b;outline-offset:-3px}
+@media (max-height:480px){#chstats{gap:1px;margin:3px 0}#chstats .srw{font-size:8px;grid-template-columns:78px auto 1fr}#chstats .sbar i{width:5px;height:6px}}
+#chtip{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:45;width:min(420px,92vw);background:#0b0d12;padding:10px 12px;box-shadow:0 0 0 3px #1e6b2c,0 0 0 6px #0b3a15,0 0 0 9px #3cb04c,0 10px 30px rgba(0,0,0,.6);font-family:'Silkscreen',monospace;pointer-events:none}
+#chtip b{font-family:'Press Start 2P',monospace;font-size:12px}#chtip small{display:block;color:#9ec8a0;font-size:10px;margin:2px 0 6px}#chtip p{margin:6px 0 0;color:#ffd36b;font-size:10px;letter-spacing:.12em}
+#chtip .tipst .srw{display:grid;grid-template-columns:86px auto 1fr;gap:6px;align-items:center;font-size:9px;color:#b8c4b8}#chtip .sbar{display:inline-flex;gap:2px}#chtip .sbar i{width:6px;height:6px;background:#1a2a1e}#chtip .sbar i.on{background:#5fd07a}#chtip em{font-style:normal;color:#e9ffe0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </body></html>
