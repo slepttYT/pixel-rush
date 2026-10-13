@@ -3232,8 +3232,11 @@ const UPDATES=[
   'Achievements are off during the tutorial and while any cheat is on.',
   'A new title screen: a blue sky with drifting clouds, and your fighter cutting down mobs that walk in over the grass.',
   'The difficulty achievements (Hard Knock, Hard Hitter, Not Winning Huh and Hard Way Home) are gone. The cheat menu scrolls.',
-  'Every boss gets tired: the 1st boss of a world attacks twice, the 2nd three times, the 3rd four times and so on, then stands panting for 3 seconds. The Rage Goblin King is slower, and his club stays stuck longer.',
-  'On the title screen your fighter shows off a different mythic weapon every 10 seconds.',
+  'Every boss gets tired: the 1st boss of a world attacks twice, the 2nd three times, the 3rd four times and so on, then is staggered for 3 seconds. The Rage Goblin King is slower, and his club stays stuck longer.',
+  'On the title screen your fighter shows off a different mythic weapon every 10 seconds: swords swing, guns shoot and bombs get thrown.',
+  'Final boss entrances are now cinematics: the camera looks up and follows the Dragon down, pans into the vault as the Golem wakes and smashes through the wall, and the Pharaoh rises out of the sand.',
+  'New looks for the Catfish (a real princess until you walk up), the Lake Hydra, and the Keeper (an armoured vault warden). The Dark King and the Rogue have arms and legs.',
+  'The main menu battle shows at most 3 enemies at a time. Text no longer overlaps: menu footers hide behind menu screens, and the hotbar no longer shows over the pause menu.',
   'Touching an enemy or a boss no longer hurts. Only their attacks do, including a dash or charge that runs into you.',
   'Three new boss themes: Throne of Ash, Iron Tempest and Crimson Eclipse. A heartbeat plays and your hearts pulse when you are low.',
   'Slashes no longer break enemy shots for free. Pick up the new Shot Breaker ability (knife and fists) to break them; level 2 breaks boss shots too.',
@@ -3351,6 +3354,7 @@ function renderJuke(){
 /* ---------- home sub-screens (controls, jukebox) ---------- */
 let savesDraw=null;
 function openSub(k,opener){
+  document.body.classList.add('insub');
   listen=null;sub=k;subOpener=opener||document.activeElement;$('saves').hidden=k!=='saves';
   $('upd').hidden=k!=='upd';$('keys').hidden=k!=='keys';$('juke').hidden=k!=='juke';$('cos').hidden=k!=='cos';$('set').hidden=k!=='set';$('ach').hidden=k!=='ach';$('chars').hidden=k!=='chars';$('wpn').hidden=k!=='wpn';$('world').hidden=k!=='world';$('dsel').hidden=k!=='dsel';$('cheat').hidden=k!=='cheat';$('acct').hidden=k!=='acct';$('help').hidden=k!=='help';plisten=null;
   if(k==='keys'){$('keymsg').textContent='';$('padmsg').textContent='';renderPad();renderKeys();const f=$('keylist').querySelector('.slot');if(f)f.focus()}
@@ -3371,6 +3375,7 @@ function openSub(k,opener){
   {const ov=$(k);if(ov){ov.classList.add('opening');try{fitMenus()}catch(e){}requestAnimationFrame(()=>{try{fitMenus()}catch(e){}ov.classList.remove('opening')})}}
 }
 function closeSub(){
+  document.body.classList.remove('insub');
   const was=sub;listen=null;plisten=null;sub=null;$('saves').hidden=true;$('upd').hidden=true;$('keys').hidden=true;$('juke').hidden=true;$('cos').hidden=true;$('set').hidden=true;$('ach').hidden=true;$('chars').hidden=true;$('wpn').hidden=true;$('world').hidden=true;$('dsel').hidden=true;$('cheat').hidden=true;$('acct').hidden=true;$('help').hidden=true;
   if(was==='world'&&!worldGo){openSub('wpn',subOpener);return}
   if(was==='wpn'&&runFlow&&state==='menu'){openSub('chars',subOpener);return}
@@ -4227,7 +4232,7 @@ $('slots').addEventListener('click',e=>{
   location.reload();
 });
 function showHome(){
-  lowHp=false;stage.classList.remove('lowhp');
+  lowHp=false;stage.classList.remove('lowhp');cine=null;cam.x=0;cam.y=0;
   if(tut){stats.tutDone=1;stats.tutAsk=1;tut=null;tutUI();saveMeta()} /* left the tutorial early: its text box goes away, no level reward */
   brWant=false;setWorld(1);bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   homeK=homeK==='home'?'home2':'home';state='menu';stage.classList.remove('dead');$('pause').hidden=true;$('panel').hidden=true;$('shop').hidden=true;$('home').hidden=false;refreshHome();
@@ -4235,6 +4240,7 @@ function showHome(){
 
 /* ---------- game setup ---------- */
 function reset(){
+  cine=null;cam.x=0;cam.y=0;
   brMode=brWant;brIdx=-1;devWarp=false;wallHole=0;runAch=[];bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
   Object.assign(p,{x:W/2,y:H/2,vx:0,vy:0,ix:0,iy:0,hp:DF().hp,maxhp:DF().hp,face:0,cd:0,dashT:0,dashCd:0,dashMax:1.1,dashId:0,vc:0,inv:0,blink:0,sw:0,swMax:.18,swHeavy:false,rec:0,swings:0,dx:1,dy:0,ddx:1,ddy:0,r:11,ka:0,kp:[],hits:0,souls:0,dv:0,revT:0,swiftT:0,infS:0,infT:0,phxCd:0,shT:0,vacc:0});lava=[];pools=[];shadows=[];
   p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});p.rageS=0;p.rageT=0;p.gramp=0;
@@ -4251,7 +4257,7 @@ function reset(){
   if(brMode)brBegin();
 }
 function buildHp(){$('hp').innerHTML='';for(let i=0;i<p.maxhp;i++)$('hp').appendChild(document.createElement('i'))}
-function banner(t){const b=$('banner');b.textContent=t;b.classList.remove('show');void b.offsetWidth;b.classList.add('show')}
+function banner(t){if(bossIn||cine)return; /* the boss name card is already up: no second line of text over it */const b=$('banner');b.textContent=t;b.classList.remove('show');void b.offsetWidth;b.classList.add('show')}
 function nextWave(){
   if(brMode)brAdvance();
   wave++;spawnT=0;waveActive=true;p.hitW=false;p.wardUsed=false;
@@ -4478,7 +4484,81 @@ function spawnFinal(){
   else{e.sx=W*.15;e.sy=H*.38;e.lx=W/2;e.ly=M+110}
   e.x=e.sx;e.y=e.sy;e.spawnT=99; /* untouchable while it makes its entrance */
   wallHole=0;
-  bossIntroStart(C);
+  cineStart(e); /* the entrance plays as a short cinematic, then the name card shows */
+}
+/* ---------- final boss cinematics. A camera (cam) can leave the arena: up into the sky over World 1, right into the
+   vault beside World 2. The player is frozen while it plays; the name card shows once the boss has landed ---------- */
+let cine=null;const cam={x:0,y:0};
+const cez=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
+function cineStart(e){cine={e:e,k:e.fk,t:0,f:{}};e.cine=true;cam.x=0;cam.y=0;if(e.fk===3){e.rise=0;e.x=e.lx;e.y=e.ly}}
+function cineEnd(){const e=cine&&cine.e;cine=null;cam.x=0;cam.y=0;if(e){e.cine=false;e.rise=undefined;e.wake=undefined;bossIntroStart(e.cfg)}}
+function cineTick(dt){
+  const c=cine,e=c.e,k=c.k,t=(c.t+=dt),once=n=>c.f[n]?false:(c.f[n]=1,true);
+  if(e.dead||enemies.indexOf(e)<0){cineEnd();return}
+  if(k===1){ /* the camera looks up into the sky, follows the dragon across, then follows its dive into the arena */
+    const up=-H*.62,sy=up+H*.24;e.fz=0;
+    if(t<1)cam.y=up*cez(t);
+    if(t<.7){e.x=-180;e.y=sy}
+    else if(t<2.6){const q=(t-.7)/1.9;e.x=-180+(W*.84+180)*q;e.y=sy+Math.sin(q*TAU*1.5)*26;cam.x=Math.max(-W*.22,Math.min(W*.22,(e.x-W/2)*.45));
+      if(once('roar'))beastCall('growl');
+      if(R()<dt*40)parts.push({x:e.x-e.r,y:e.y+(R()-.5)*30,vx:-120-R()*80,vy:(R()-.5)*40,l:.6,m:.6,c:R()<.5?'#ff8a3d':'#ffd36b',s:3+R()*3});shake=Math.max(shake,3)}
+    else if(t<3.8){const q=cez((t-2.6)/1.2),x0=W*.84;e.x=x0+(e.lx-x0)*q;e.y=sy+(e.ly-sy)*q;cam.y=Math.min(0,up*(1-q));cam.x*=Math.exp(-dt*5);shake=Math.max(shake,3+q*6);
+      if(R()<dt*50)parts.push({x:e.x+(R()-.5)*60,y:e.y-e.r,vx:(R()-.5)*60,vy:-80-R()*60,l:.5,m:.5,c:'#ffd36b',s:2+R()*3})}
+    else{finalLand(e);cineEnd()}
+  }else if(k===2){ /* the camera pans into the vault: the golem wakes, stomps to the wall, pounds it and smashes through */
+    const vx=W*.6,gx=W*1.35,wx=W+e.r+30;
+    if(t<1){cam.x=vx*cez(t);e.x=gx;e.y=H/2;e.wake=0}
+    else if(t<2){const q=t-1;e.wake=q;shake=Math.max(shake,2+q*8);
+      if(R()<dt*30)parts.push({x:W+R()*W*.7,y:M+R()*20,vx:(R()-.5)*20,vy:120+R()*80,l:.8,m:.8,c:R()<.5?'#8a8f9c':'#5a5d68',s:2+R()*3});
+      if(t>1.55&&once('roar')){beastCall('roar');ringFx(e.x,e.y,e.r*2.2,.4);shake=Math.max(shake,14)}}
+    else if(t<2.9){const q=(t-2)/.9;e.wake=1;e.x=gx-(gx-wx)*q;e.y=H/2;cam.x=vx-(vx-W*.36)*cez(q);
+      const st=((t-2)/.3)|0;if(once('step'+st)){shake=Math.max(shake,10);sfx(60,.25,'sawtooth',.08,.5);w1dust(e.x,e.y+e.r*.9,10,'#8a8f9c')}}
+    else if(t<3.8){const q=(t-2.9)/.9;e.x=wx+Math.sin(t*30)*3;wallHole=Math.max(.02,q);shake=Math.max(shake,3+q*10);
+      if(R()<dt*(20+q*60))parts.push({x:W-M-R()*30,y:H/2+(R()-.5)*(80+q*70),vx:-60-R()*140,vy:(R()-.5)*120,l:.5,m:.5,c:R()<.5?'#8a8f9c':'#5a5d68',s:2+R()*4});
+      if(R()<dt*7)sfx(70+R()*30,.25,'sawtooth',.05,.6)}
+    else if(t<4.9){if(once('smash')){wallHole=2;shake=36;sfx(55,.9,'sawtooth',.14,.35);noise(.7,.1);ringFx(W-M,H/2,170,.5);
+        for(let i=0;i<34;i++)parts.push({x:W-M-R()*20,y:H/2+(R()-.5)*130,vx:-120-R()*320,vy:(R()-.5)*260,l:.9,m:.9,c:R()<.5?'#8a8f9c':R()<.5?'#5a5d68':'#bdb8a6',s:3+R()*5})}
+      const q=cez((t-3.8)/1.1);e.x=wx+(e.lx-wx)*q;e.y=H/2+(e.ly-H/2)*q;cam.x=W*.36*(1-q);shake=Math.max(shake,6)}
+    else{finalLand(e);cineEnd()}
+  }else{ /* the sand swirls, then the Pharaoh rises out of it */
+    e.x=e.lx;e.y=e.ly;
+    if(t<1.3){shake=Math.max(shake,2+t*3);e.rise=0;
+      if(R()<dt*70){const a=R()*TAU,d=e.r*(1.2+R()*1.6);parts.push({x:e.x+Math.cos(a)*d,y:e.y+e.r*.8+Math.sin(a)*d*.45,vx:-Math.sin(a)*120-Math.cos(a)*70,vy:Math.cos(a)*50-Math.sin(a)*30,l:.6,m:.6,c:R()<.5?'#e8c070':'#c8963a',s:2+R()*3})}
+      if(R()<dt*5)sfx(80+R()*40,.3,'sawtooth',.04,.6)}
+    else if(t<3.4){const q=cez((t-1.3)/2.1);e.rise=q;shake=Math.max(shake,5);if(once('up')){ringFx(e.x,e.y+e.r*.8,e.r*2,.45);sfx(60,1,'sawtooth',.1,.5);noise(.4,.06)}
+      if(R()<dt*60)parts.push({x:e.x+(R()-.5)*e.r*1.6,y:e.y+e.r*.8-q*e.r*2.4*R(),vx:(R()-.5)*50,vy:60+R()*80,l:.6,m:.6,c:R()<.5?'#e8c070':'#ffd36b',s:2+R()*3})}
+    else if(t<3.9){e.rise=1;if(once('hiss')){beastCall('hiss');shake=Math.max(shake,16);for(let i=0;i<3;i++)spark(e.x,e.y,'#ffd36b',20,420)}}
+    else{finalLand(e);cineEnd()}
+  }
+}
+/* what lies outside the arena while the camera is away: a dusk sky above World 1, the vault room beside World 2 */
+function drawOffstage(){
+  ctx.fillStyle=world===3?'#8a6a3a':world===2?'#1c1f22':'#1f3a1a';ctx.fillRect(-W,0,W,H);ctx.fillRect(W,0,W,H);
+  if(cam.y<0){
+    const SK=['#2a0f24','#4a1830','#6e2434','#9a3a34','#c85a3a','#e8843e','#f4a84a'],top=-H*1.3,bh=(H*1.3)/SK.length;
+    SK.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(-W,top+i*bh,W*3,bh+1)});
+    ctx.fillStyle='#1a0c14';for(let x=-W;x<W*2;x+=24){const h=30+Math.abs(Math.sin(x*.013))*70+Math.abs(Math.sin(x*.041))*30;ctx.fillRect(x,-h,24,h)}
+    ctx.fillStyle='rgba(255,220,180,.5)';for(let i=0;i<8;i++){const cx=((i*317+time*12)%(W*3))-W,cy=top+40+(i*97)%(H*.6);ctx.fillRect(cx,cy,70,8);ctx.fillRect(cx+12,cy-8,40,8)}
+  }
+  if(cam.x>0){
+    ctx.fillStyle='#121318';ctx.fillRect(W-M,-H,W*1.3,H*3);
+    ctx.fillStyle='#2a2b33';ctx.fillRect(W,M,W*.95,H-2*M);
+    ctx.strokeStyle='#1e1f26';ctx.lineWidth=2;
+    for(let y=M,r0=0;y<H-M;y+=32,r0++){ctx.beginPath();ctx.moveTo(W,y);ctx.lineTo(W*1.95,y);ctx.stroke();for(let x=W+(r0%2)*32;x<W*1.95;x+=64){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+32);ctx.stroke()}}
+    ctx.strokeStyle='#4a4c58';ctx.lineWidth=4;ctx.strokeRect(W,M,W*.95,H-2*M);
+    for(const tx of[W+70,W*1.5,W*1.88]){glowAt(tx,M+34,60,'255,170,80',.35+.1*Math.sin(time*9+tx));ctx.fillStyle='#5a3a1a';ctx.fillRect(tx-3,M+30,6,22);ctx.fillStyle='#ffb347';ctx.fillRect(tx-5,M+20+Math.sin(time*14+tx)*2,10,12)}
+    for(let i=0;i<5;i++){const gx=W*1.55+i*34,gy=H-M-26-(i%2)*10;ctx.fillStyle='#c8901c';ctx.beginPath();ctx.ellipse(gx,gy,22,10,0,0,TAU);ctx.fill();ctx.fillStyle='#ffd36b';ctx.beginPath();ctx.ellipse(gx,gy-3,16,6,0,0,TAU);ctx.fill()}
+  }
+}
+/* the Pharaoh climbing out of the sand: only the part above the sand line shows, light pours out behind him */
+function drawPharaohRise(e){
+  const q=e.rise||0,gy=e.y+e.r*.85,T=time;
+  ctx.save();ctx.globalAlpha=.35+.4*q;ctx.translate(e.x,gy-e.r*1.2*q);
+  for(let i=0;i<10;i++){ctx.rotate(TAU/10);ctx.fillStyle=i%2?'rgba(255,224,140,.5)':'rgba(255,200,90,.35)';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-18,-e.r*3.2*q);ctx.lineTo(18,-e.r*3.2*q);ctx.closePath();ctx.fill()}ctx.restore();
+  ctx.save();ctx.fillStyle='#9a6a24';ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,0,TAU);ctx.fill();
+  ctx.strokeStyle='#e8c070';ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(e.x,gy,e.r*(.5+i*.45),e.r*(.17+i*.14),0,T*3+i,T*3+i+3.6);ctx.stroke()}ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(e.x-e.r*4,gy-e.r*6,e.r*8,e.r*6);ctx.clip();ctx.translate(0,(1-q)*e.r*2.9);drawFinal(e,false);ctx.restore();
+  ctx.save();ctx.strokeStyle='#d8b060';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(e.x,gy,e.r*1.7,e.r*.55,0,.1,Math.PI-.1);ctx.stroke();ctx.restore();
 }
 function finalFly(e,dt){
   const k=e.fk;e.fly-=dt;const el=e.flyMax-e.fly,T0=1.1;
@@ -4515,7 +4595,10 @@ function finalFly(e,dt){
     if(R()<dt*45)parts.push({x:e.x+(R()-.5)*70,y:e.y-e.fz*300+(R()-.5)*30,vx:(R()-.5)*70,vy:40+R()*70,l:.55,m:.55,c:R()<.5?c1:c2,s:2+R()*3});
     shake=Math.max(shake,2+q*5);
   }
-  if(e.fly<=0){
+  if(e.fly<=0)finalLand(e);
+}
+function finalLand(e){
+  const k=e.fk;
     e.fly=0;e.fz=0;e.spawnT=0;e.x=e.lx;e.y=e.ly;if(k===3){e.burrowed=false;e.ghost=false}
     ringFx(e.x,e.y,e.landR+60,.55);ringFx(e.x,e.y,e.landR-10,.4);
     shake=Math.max(shake,30);sfx(60,.8,'sawtooth',.13,.4);noise(.55,.09);
@@ -4524,7 +4607,6 @@ function finalFly(e,dt){
     if(dd<e.landR+p.r&&p.inv<=0&&p.dashT<=0)hurtP({dmg:2},dx/dd,dy/dd);
     for(let i=0;i<16;i++){const a=i*TAU/16;bullets.push({x:e.x,y:e.y,vx:Math.cos(a)*170,vy:Math.sin(a)*170,r:6,l:5,c:e.cfg.bl})}
     banner(e.cfg.boss.toUpperCase());e.bs='idle';e.bt=1.1;
-  }
 }
 function spawnBoss(){
   const tier=Math.floor(wave/10),cfg=zoneOf(wave);
@@ -4888,7 +4970,7 @@ function bossAI(e,dt,ux,uy,d){
   }
   if(tire){const k1=w1?e.w1s:e.bs;
     if(k1!==k0&&(w1?TIRE_ATK.includes(k1):k1!=='idle'))e.atkN=(e.atkN||0)+1;
-    if((e.atkN||0)>=tireNeed(e)&&(w1?TIRE_REST.includes(k1):k1==='idle')){e.tiredT=TIRE_T;e.atkN=0;floatTxt(e.x,e.y-e.r-24,'TIRED!','#8ee8ff');sfx(220,.4,'sine',.06,.6);shake=Math.max(shake,4)}}
+    if((e.atkN||0)>=tireNeed(e)&&(w1?TIRE_REST.includes(k1):k1==='idle')){e.tiredT=TIRE_T;e.atkN=0;floatTxt(e.x,e.y-e.r-24,'STAGGERED!','#8ee8ff');sfx(220,.4,'sine',.06,.6);shake=Math.max(shake,4)}}
 }
 /* ground strikes: circles mark the floor, then the ground erupts. thorns (Vine Monster), fissure (Gravetender), pillars (Comet Oracle) */
 function mkStrikes(e,a,ph,tier){
@@ -5988,7 +6070,7 @@ function tutMob(){
 }
 function startTutorial(){
   if(sub)closeSub();selWorld=1;brWant=false;beginRun();
-  tut={step:0,t:0,prog:0,d:0,lx:p.x,ly:p.y,dash:0,dg:p.dgT||0};enemies=[];toSpawn=0;waveActive=false;wave=0;tutGo(0);banner('TUTORIAL');
+  tut={step:0,t:0,prog:0,d:0,lx:p.x,ly:p.y,dash:0,dg:p.dgT||0};enemies=[];toSpawn=0;waveActive=false;wave=0;tutGo(0);
 }
 function endTutorial(done){
   stats.tutDone=1;stats.tutAsk=1;
@@ -6037,6 +6119,7 @@ function update(dt){
   /* low hearts: a heartbeat (and pulsing hearts) while you are down to your last third of hearts */
   {const low=!tut&&p.hp>0&&p.hp<=Math.max(1,Math.floor(p.maxhp/3));if(low!==lowHp){lowHp=low;stage.classList.toggle('lowhp',low)}
    if(low){hbT-=dt;if(hbT<=0){hbT=p.hp<=1?.8:1.15;sfx(64,.13,'sine',.16,.7);setTimeout(()=>sfx(56,.16,'sine',.12,.7),170)}}else hbT=.15}
+  if(cine){cineTick(dt);return}
   if(bossIn){bossIntroTick(dt);return}
   padAimUpd();hotTick(dt);wpnTick(dt);
 
@@ -7551,7 +7634,7 @@ function drawDragon(e,fl,P){
 
 function drawFinal(e,fl){
   const fly=e.fly>0,fz=(fly&&e.fk!==2)?e.fz:0;
-  ctx.save();ctx.globalAlpha=.34*(1-fz*.5);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.85,e.r*(1.5-fz*.5),e.r*.38,0,0,TAU);ctx.fill();ctx.restore();
+  if(!(e.cine&&e.y<M)){ctx.save();ctx.globalAlpha=.34*(1-fz*.5);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.85,e.r*(1.5-fz*.5),e.r*.38,0,0,TAU);ctx.fill();ctx.restore()} /* no ground shadow while it is up in the sky */
   if(fly){
     const pr=e.fk===2?Math.min(1,(e.flyMax-e.fly)/1.1):e.fk===3?Math.min(1,(e.flyMax-e.fly)/e.flyMax):1-fz;
     ctx.save();ctx.strokeStyle='#ff4d5e';ctx.fillStyle='#ff4d5e';ctx.globalAlpha=.1+.3*pr;ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.lx,e.ly,e.landR,0,TAU);ctx.fill();ctx.globalAlpha=.3+.6*pr;ctx.stroke();ctx.restore();
@@ -7941,6 +8024,7 @@ function draw(){
   ctx.fillStyle='#12141c';ctx.fillRect(0,0,W,H);
   ctx.save();
   if(shake>.3&&set.shake)ctx.translate((R()-.5)*shake,(R()-.5)*shake);
+  if(cam.x||cam.y){ctx.translate(-cam.x,-cam.y);drawOffstage()}
   if(room==='vault')drawVaultBg();else if(drawWorldBg()){
   ctx.beginPath();ctx.arc(W/2,H/2,90,0,TAU);ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2;ctx.stroke();
   drawDoor();if(wallHole>0)drawWallHole();
@@ -7971,6 +8055,8 @@ function draw(){
   for(const z of pools){const k=Math.min(1,z.t/.6);ctx.save();ctx.globalAlpha=.8*k;const g=ctx.createRadialGradient(z.x,z.y,2,z.x,z.y,z.r);g.addColorStop(0,'#c8ff6a');g.addColorStop(.55,'#5fb52a');g.addColorStop(1,'rgba(40,90,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(z.x,z.y,z.r,z.r*.75,0,0,TAU);ctx.fill();ctx.restore()}
   for(const sh of shadows){ctx.globalAlpha=.5;ctx.fillStyle='#4a3a9a';ctx.beginPath();ctx.arc(sh.x,sh.y,p.r,0,TAU);ctx.fill();ctx.strokeStyle='#8a7bff';ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1}
   for(const e of enemies){
+    if(e.fin&&e.fly>0&&e.fk===3&&e.rise!==undefined){drawPharaohRise(e);continue}
+    if(e.fin&&e.fly>0&&e.fk===2&&e.wake!==undefined){pixelDraw(e.x,e.y,bossHalf(e),()=>drawFinal(e,false));if(e.wake<1){ctx.save();ctx.globalAlpha=.55*(1-e.wake);ctx.fillStyle='#2a2b33';ctx.beginPath();ctx.ellipse(e.x,e.y,e.r*1.3,e.r*1.4,0,0,TAU);ctx.fill();ctx.restore()}if(e.wake>.55)glowAt(e.x,e.y-e.r*.7,e.r*.8,'122,232,255',.35+.25*Math.sin(time*10));continue}
     if(e.fin&&e.fly>0){if(e.fk===3)drawFinal(e,false);else pixelDraw(e.x,e.y,bossHalf(e),()=>drawFinal(e,false));continue}
     if(e.spawnT>0){
       const k=e.spawnT/.75;ctx.strokeStyle=e.c;ctx.globalAlpha=Math.max(0,.9-k*.5);ctx.lineWidth=2;
@@ -8134,7 +8220,7 @@ function menuSim(dt){
   if(!mh){mh={x:cx,y:cy,face:0,cd:0,sw:0,swings:0};menuWeapon((R()*4)|0)}
   mh.wT-=dt;mh.lab-=dt;if(mh.wT<=0)menuWeapon(mh.wi+1);
   /* mobs walk in from outside the ring */
-  if(menv.length<5&&R()<dt*1.2){const ts=['goblin','goblin','thief','wizard','jester','archer','lancer','golem'],t0=ts[(R()*ts.length)|0],t=TYPES[t0].mb&&menv.some(o=>TYPES[o.t].mb)?'goblin':t0,T=TYPES[t],a=R()*TAU,big=T.mb;
+  if(menv.filter(o=>!o.dead).length<3&&R()<dt*1.2){ /* at most 3 enemies on the menu at once */const ts=['goblin','goblin','thief','wizard','jester','archer','lancer','golem'],t0=ts[(R()*ts.length)|0],t=TYPES[t0].mb&&menv.some(o=>TYPES[o.t].mb)?'goblin':t0,T=TYPES[t],a=R()*TAU,big=T.mb;
     menv.push({t,menu:1,x:cx+Math.cos(a)*(RR+60),y:cy+Math.sin(a)*(RR+40),vx:0,r:T.r,c:T.c,hp:big?6:3,maxhp:big?6:3,ph:R()*TAU,flash:0,ev:R()<.25?(R()<.4?2:1):0,st:'',stT:0,cdm:1+R(),kx:0,ky:0})}
   for(const e of menv){
     const dx=mh.x-e.x,dy=mh.y-e.y,d=Math.hypot(dx,dy)||1;e.flash-=dt;e.vx=dx;e.cdm-=dt;
@@ -8443,9 +8529,9 @@ renderDiffs();
 
 /* ---------- title scene: a side view under a blue sky. Clouds drift, and your fighter cuts down World 1 mobs
    that walk in from the right; every mob falls in one hit. Drawn on a small canvas and scaled up with hard pixels ---------- */
-const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0,wi:-1,wT:0};
+const tScene={on:false,g:null,k:2,w:0,h:0,gy:0,bg:null,last:0,cl:[],mobs:[],fx:[],spT:.6,atk:0,hx:0,wi:-1,wT:0,shots:[],bombs:[],cd:0,fireT:0};
 /* the title fighter shows off a different mythic weapon every 10 seconds */
-const tsMyth=()=>SKINS.filter(x=>x.r==='mythic'&&x.tab!=='b');
+const tsMyth=()=>SKINS.filter(x=>x.r==='mythic');
 function tsCircle(g,cx,cy,r){for(let y=-r;y<=r;y++){const hw=Math.floor(Math.sqrt(r*r-y*y+.5));g.fillRect(Math.round(cx-hw),Math.round(cy+y),hw*2+1,1)}}
 function tsSize(){
   const T=$('title'),cv=$('tcv'),W0=T.clientWidth||stage.clientWidth,H0=T.clientHeight||stage.clientHeight;
@@ -8485,10 +8571,23 @@ function tsUpdate(dt){
     if(S.sw)for(let q=0;q<14;q++)S.fx.push({x:S.hx+8,y:S.gy-24,vx:(R()-.5)*120,vy:-30-R()*90,l:.7+R()*.4,c:R()<.5?(S.sw.glow||'#fff'):(S.sw.tr||'#fff')})}
   if(S.sw&&R()<dt*10)S.fx.push({x:S.hx+10+R()*16,y:S.gy-30-R()*14,vx:(R()-.5)*20,vy:-20-R()*20,l:.5+R()*.4,c:S.sw.tr||'#fff'});
   S.mobs.sort((a,b)=>a.x-b.x);
+  const kind=S.sw?S.sw.tab:'k',boom=(m,c)=>{m.hitT=.12;for(let q=0;q<16;q++)S.fx.push({x:m.x,y:S.gy-10,vx:(R()-.3)*110,vy:-40-R()*90,l:.6+R()*.3,c:q%3?'#f1ead8':c||(S.sw&&S.sw.glow)||'#ffd36b'})};
+  S.cd-=dt;S.fireT=Math.max(0,S.fireT-dt);
+  /* guns shoot, bombs get thrown: at whatever mob is closest and not already targeted */
+  if((kind==='g'||kind==='b')&&S.cd<=0){const tg=S.mobs.find(m=>m.hitT<=0&&!m.tg&&m.x<S.w*.78);
+    if(tg){tg.tg=1;S.fireT=.18;
+      if(kind==='g'){S.cd=.55;S.shots.push({x:S.hx+16,y:S.gy-21,m:tg});for(let q=0;q<5;q++)S.fx.push({x:S.hx+17,y:S.gy-21,vx:40+R()*60,vy:(R()-.5)*40,l:.2,c:'#fff3a8'})}
+      else{S.cd=1.1;const vy=-140,gr=280,h=27,tt=(-vy+Math.sqrt(vy*vy+2*gr*h))/gr,dx=(tg.x-tg.v*tt)-(S.hx+6);S.bombs.push({x:S.hx+6,y:S.gy-30,vx:dx/tt,vy:vy,t:0,m:tg})} /* lead the target by the real flight time */}}
+  for(const b of S.shots){b.x+=420*dt;if(b.m&&b.x>=b.m.x-4){if(b.m.hitT<=0)boom(b.m);b.dead=1}if(b.x>S.w+10)b.dead=1}S.shots=S.shots.filter(b=>!b.dead);
+  for(const b of S.bombs){b.t+=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.vy+=280*dt;if(b.y>=S.gy-3){b.dead=1;
+      for(let q=0;q<22;q++){const a=R()*TAU,v=40+R()*110;S.fx.push({x:b.x,y:S.gy-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,l:.5+R()*.3,c:R()<.4?'#ffd36b':R()<.5?'#ff8a3d':'#5a5a5a'})}
+      for(const m of S.mobs)if(m.hitT<=0&&Math.abs(m.x-b.x)<26)boom(m,'#ff8a3d')}}
+  S.bombs=S.bombs.filter(b=>!b.dead);
   for(let i=0;i<S.mobs.length;i++){const m=S.mobs[i];if(m.hitT>0){m.hitT-=dt;continue}
     const ahead=i>0?S.mobs[i-1]:null,stopAt=Math.max(S.hx+22,ahead&&ahead.hitT<=0?ahead.x+36:0);
     if(m.x>stopAt)m.x=Math.max(stopAt,m.x-m.v*dt);
-    if(i===0&&m.x<=S.hx+24&&S.atk<=0){S.atk=.26;m.hitT=.12; /* one hit, down it goes */
+    if((kind==='g'||kind==='b')&&m.x<=S.hx+24&&m.hitT<=0)boom(m); /* point blank */
+    if(i===0&&m.x<=S.hx+24&&S.atk<=0&&kind!=='g'&&kind!=='b'){S.atk=.26;m.hitT=.12; /* one hit, down it goes */
       for(let q=0;q<16;q++)S.fx.push({x:m.x,y:S.gy-10,vx:(R()-.3)*110,vy:-40-R()*90,l:.6+R()*.3,c:q%3?'#f1ead8':(S.sw&&S.sw.glow)||'#ffd36b'})}}
   S.mobs=S.mobs.filter(m=>!(m.hitT<0));
   for(const q of S.fx){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=220*dt;q.l-=dt}S.fx=S.fx.filter(q=>q.l>0&&q.y<S.gy+2);
@@ -8503,9 +8602,11 @@ function tsDraw(){
   const cs=charSprite(ch,'w0',sk),cy=S.gy-cs.c.height*MOB_U*.38;
   drawCharSpr(g,ch,S.hx,cy,MOB_U,S.atk>.1?'w1':'w0',false,sk);
   /* the mythic weapon, held out in front; it sweeps down on each kill */
-  const sw=S.sw,sp=S.atk>0?1-S.atk/.26:0,wa=S.atk>0?-1.5+sp*2.4:-.75+Math.sin(t*2)*.06;
+  const sw=S.sw,sp=S.atk>0?1-S.atk/.26:0,kd=sw?sw.tab:'k',wa=kd==='g'?-.05-(S.fireT>.1?.25:0):kd==='b'?(S.fireT>0?-2.2+(1-S.fireT/.18)*2:-.4):S.atk>0?-1.5+sp*2.4:-.75+Math.sin(t*2)*.06;
   if(sw){g.save();g.translate(Math.round(S.hx+5),Math.round(cy+5));g.rotate(wa);g.scale(.5,.5);try{weaponShape(g,sw,t)}catch(e){}g.restore()}
   if(S.atk>.06){const k=1-(S.atk-.06)/.2,a0=-1.3+k*2.2;g.fillStyle=(sw&&sw.tr)||'#ffffff';for(let a=a0-1;a<a0;a+=.04){for(const r of[17,18,19,20])g.fillRect(Math.round(S.hx+6+Math.cos(a)*r),Math.round(cy+4+Math.sin(a)*r),1,1)}}
+  for(const b of S.shots){g.fillStyle=(sw&&sw.tr)||'#fff3a8';g.fillRect(Math.round(b.x)-5,Math.round(b.y),6,2);g.fillStyle='#ffffff';g.fillRect(Math.round(b.x),Math.round(b.y),2,2)}
+  for(const b of S.bombs){const x=Math.round(b.x),y=Math.round(b.y);g.fillStyle='#0a0a10';g.fillRect(x-3,y-5,6,10);g.fillRect(x-5,y-3,10,6);g.fillStyle='#2e2e3e';g.fillRect(x-2,y-4,4,8);g.fillRect(x-4,y-2,8,4);g.fillStyle='#6a6a80';g.fillRect(x-2,y-2,2,2);g.fillStyle='#8a6a3a';g.fillRect(x+1,y-7,1,3);g.fillStyle=((t*20)|0)%2?'#ffd36b':(sw&&sw.glow)||'#ff5a3a';g.fillRect(x+1,y-9,2,2)}
   for(const q of S.fx){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(Math.round(q.x),Math.round(q.y),2,2)}g.globalAlpha=1;
 }
 function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
@@ -9043,5 +9144,15 @@ body.ontitle #home{visibility:hidden}
 @container (max-height:480px){#cheat .box{padding-top:40px;gap:6px}#cheat h2{font-size:20px!important;margin:0}#cheat .note{font-size:9px!important;line-height:1.4;margin:0}#cheat .row .btn{padding:6px 14px}}
 
 #title #tscr1 .thint{display:none!important}
+
+/* overlapping text fixes: the main menu footer hides behind menu screens, overlays sit above the in-run HUD,
+   shop rows never squash into each other, the tutorial boxes clear the banner */
+body.insub #home .hfoot,body.insub #home #slots{visibility:hidden}
+#pause,#shop,#panel,#tutask,#tutwin{z-index:40!important}
+#pause:not([hidden])~#hotbar,#pause:not([hidden])~#dashwrap{visibility:hidden}
+#cosscroll>*{flex-shrink:0}
+#oddsnote{margin:4px 0 6px;line-height:1.5}
+body:has(#pause:not([hidden])) #hotbar,body:has(#pause:not([hidden])) #dashwrap,body:has(#shop:not([hidden])) #dashwrap,body:has(#shop:not([hidden])) #hotbar{visibility:hidden}
+@container (max-height:480px){#chars .box{padding-top:40px!important}}
 </style>
 </body></html>
