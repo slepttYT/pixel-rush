@@ -2973,8 +2973,12 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.4';
+const UPD_VER='4.5';
 const UPDATES=[
+ ['v4.5','Pixel Rush 2.0, part 6: a living main menu','#5fd0a2',[
+  'The main menu is now a tiny version of the game: your fighter moves around the arena and actually fights mobs that walk in.',
+  'The weapon changes every 10 seconds (fists, knife, gun, bomb), each time with a random skin, showing real swings, shots and bomb throws.',
+  'It is only a show: nothing on the menu touches your save or progress.']],
  ['v4.4','Pixel Rush 2.0, part 5: weapon challenges','#ff8a3d',[
   'New weapon challenges: beat World 2 and World 3 using only one weapon (Rock Puncher, Stone Cutter, Ricochet, Quarry Blaster, Desert Duelist, High Noon, Sandstorm, plus Bare-Knuckle Legend).',
   'Jack of All Trades: win World 1 once with every weapon. Mastery achievements for finishing each weapon\u2019s mastery track, and Arsenal Master for all four.',
@@ -7587,12 +7591,56 @@ function menuTick(dt){
   embers=embers.filter(e=>e.y>-10&&e.l>0);
   for(const q of mparts){q.x+=q.vx*dt;q.y+=q.vy*dt;const f=Math.exp(-dt*3);q.vx*=f;q.vy*=f;q.l-=dt}
   mparts=mparts.filter(q=>q.l>0);
-  if(menv.length<5&&R()<dt*.6){const ts=['goblin','goblin','thief','wizard','jester','archer','lancer','golem'],t=ts[(R()*ts.length)|0],T=TYPES[t],dir=R()<.5?1:-1,zi=Math.floor(mt/6)%10;
-    menv.push({t,menu:1,x:dir>0?-30:W+30,y:60+R()*(H-120),vx:dir*(25+R()*25),r:T.r,c:T.c,hp:1,maxhp:1,ph:R()*TAU,chargeT:3,ws:0,fuse:0,wt:1,el:R()<.12?(R()<.5?'g':'y'):null,flash:0,zi,fa:0})}
-  for(const e of menv){e.x+=e.vx*dt;e.y+=Math.sin(mt+e.ph)*10*dt}
-  menv=menv.filter(e=>e.x>-60&&e.x<W+60);
+  menuSim(dt);
 }
 const mcur={x:0,y:0,on:false};let mface=0;
+/* ---------- main menu battle: a miniature of the real game. The hero fights mobs with a weapon that changes every 10 seconds, wearing a random skin of that weapon.
+   It only touches menu-local state (mh, menv, mshots); nothing here saves or changes progress ---------- */
+const MW_T=['f','k','g','b'],MW_PK={f:'punch',k:'knife',g:'gun',b:'bomb'},MW_NAME={f:'FISTS',k:'KNIFE',g:'GUN',b:'BOMB'};
+let mh=null,mshots=[],mfx=[];
+const menuCenter=()=>({cx:W>700?W*.74:W*.5,cy:H*.48,R:Math.min(236,Math.min(W,H)*.23)});
+function menuWeapon(i){
+  const t=MW_T[i%4],pool=SKINS.filter(s=>s.pk===MW_PK[t]&&!isDevId(s.id)).concat(STARTERS.filter(s=>s.pk===MW_PK[t]));
+  const s=pool[(R()*pool.length)|0];mh.wi=i;mh.wt=t;mh.skin=s?s.id:'';mh.wT=10;mh.lab=2.5;
+}
+function menuSim(dt){
+  const {cx,cy,R:RR}=menuCenter();
+  if(!mh){mh={x:cx,y:cy,face:0,cd:0,sw:0,swings:0};menuWeapon((R()*4)|0)}
+  mh.wT-=dt;mh.lab-=dt;if(mh.wT<=0)menuWeapon(mh.wi+1);
+  /* mobs walk in from outside the ring */
+  if(menv.length<5&&R()<dt*1.2){const ts=['goblin','goblin','thief','wizard','jester','archer','lancer','golem'],t0=ts[(R()*ts.length)|0],t=TYPES[t0].mb&&menv.some(o=>TYPES[o.t].mb)?'goblin':t0,T=TYPES[t],a=R()*TAU,big=T.mb;
+    menv.push({t,menu:1,x:cx+Math.cos(a)*(RR+60),y:cy+Math.sin(a)*(RR+40),vx:0,r:T.r,c:T.c,hp:big?6:3,maxhp:big?6:3,ph:R()*TAU,flash:0,ev:R()<.25?(R()<.4?2:1):0,st:'',stT:0,cdm:1+R(),kx:0,ky:0})}
+  for(const e of menv){
+    const dx=mh.x-e.x,dy=mh.y-e.y,d=Math.hypot(dx,dy)||1;e.flash-=dt;e.vx=dx;e.cdm-=dt;
+    if(e.st){e.stT-=dt;if(e.stT<=0){if(e.st==='wind'){e.st='act';e.stT=.22;e.aa=Math.atan2(dy,dx)}else{e.st='';e.cdm=1.2+R()}}}
+    else if(d<e.r+26&&e.cdm<=0){e.st='wind';e.stT=.35;e.aa=Math.atan2(dy,dx)}
+    if(d>e.r+18&&!e.st){e.x+=dx/d*48*dt;e.y+=dy/d*48*dt}
+    e.x+=e.kx*dt;e.y+=e.ky*dt;const kf=Math.exp(-dt*8);e.kx*=kf;e.ky*=kf;
+  }
+  /* the hero picks the nearest mob and fights it at its weapon's range */
+  let tg=null,td=1e9;for(const e of menv){const d=Math.hypot(e.x-mh.x,e.y-mh.y);if(d<td){td=d;tg=e}}
+  const want=mh.wt==='g'?170:mh.wt==='b'?190:mh.wt==='k'?40:30;
+  let mx=0,my=0;
+  if(tg){const dx=tg.x-mh.x,dy=tg.y-mh.y,d=td||1;mh.face+=Math.atan2(Math.sin(Math.atan2(dy,dx)-mh.face),Math.cos(Math.atan2(dy,dx)-mh.face))*(1-Math.exp(-dt*12));
+    if(d>want+12){mx=dx/d;my=dy/d}else if(d<want-25){mx=-dx/d;my=-dy/d}else{mx=-dy/d*.5;my=dx/d*.5}}
+  else{mx=(cx-mh.x)/80;my=(cy-mh.y)/80;mh.face+=dt*.8}
+  mh.x+=mx*150*dt;mh.y+=my*150*dt;
+  {const ox=mh.x-cx,oy=mh.y-cy,od=Math.hypot(ox,oy);if(od>RR-30){mh.x=cx+ox/od*(RR-30);mh.y=cy+oy/od*(RR-30)}}
+  mh.cd-=dt;if(mh.sw>0)mh.sw-=dt;
+  const hit=(e,n,a)=>{e.hp-=n;e.flash=.1;e.kx=Math.cos(a)*260;e.ky=Math.sin(a)*260;
+    if(e.hp<=0){e.dead=1;for(let i=0;i<14;i++){const q=R()*TAU,v=60+R()*200;mparts.push({x:e.x,y:e.y,vx:Math.cos(q)*v,vy:Math.sin(q)*v,l:.5,m:.5,c:i%2?e.c:'#f1ead8',s:3+R()*3})}}};
+  if(tg&&mh.cd<=0){const a=Math.atan2(tg.y-mh.y,tg.x-mh.x);
+    if((mh.wt==='f'||mh.wt==='k')&&td<want+tg.r+18){mh.sw=.18;mh.swings++;mh.cd=mh.wt==='f'?.32:.4;hit(tg,1,a);mfx.push({k:'slash',x:mh.x,y:mh.y,a:a,l:.18,m:.18,R:mh.wt==='f'?40:58})}
+    else if(mh.wt==='g'&&td<420){mh.sw=.09;mh.cd=.3;mshots.push({k:'b',x:mh.x+Math.cos(a)*22,y:mh.y+Math.sin(a)*22,vx:Math.cos(a)*650,vy:Math.sin(a)*650,l:.8,a:a})}
+    else if(mh.wt==='b'&&td<420){mh.sw=.3;mh.cd=1.1;mshots.push({k:'bomb',sx:mh.x,sy:mh.y,tx:tg.x,ty:tg.y,t:0,l:.55})}}
+  for(const s of mshots){
+    if(s.k==='b'){s.x+=s.vx*dt;s.y+=s.vy*dt;s.l-=dt;for(const e of menv)if(!e.dead&&Math.hypot(e.x-s.x,e.y-s.y)<e.r+4){hit(e,1,s.a);s.l=0;break}}
+    else{s.t+=dt;if(s.t>=s.l){s.l=-1;mfx.push({k:'boom',x:s.tx,y:s.ty,l:.3,m:.3});for(const e of menv)if(!e.dead&&Math.hypot(e.x-s.tx,e.y-s.ty)<70+e.r)hit(e,2,Math.atan2(e.y-s.ty,e.x-s.tx));for(let i=0;i<16;i++){const q=R()*TAU,v=80+R()*220;mparts.push({x:s.tx,y:s.ty,vx:Math.cos(q)*v,vy:Math.sin(q)*v,l:.45,m:.45,c:R()<.5?'#ff8a3d':'#ffd36b',s:3+R()*4})}}}
+  }
+  mshots=mshots.filter(s=>s.k==='b'?s.l>0:s.l>0);
+  for(const f of mfx)f.l-=dt;mfx=mfx.filter(f=>f.l>0);
+  menv=menv.filter(e=>!e.dead);
+}
 addEventListener('pointermove',e=>{if(state!=='menu')return;const r=cv.getBoundingClientRect();mcur.x=(e.clientX-r.left)/S;mcur.y=(e.clientY-r.top)/S;mcur.on=true},{passive:true});
 /* green grass menu scene: stripes, scenery and the studded arena ring around the hero */
 const GRASS_DECOR=(()=>{let sd=7;const r=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};const o=[];for(let i=0;i<46;i++){const t=i%9===0?'mush':i%7===0?'bush':i%11===0?'rock':'flower';o.push({t:t,x:r(),y:r()})}return o})();
@@ -7623,23 +7671,23 @@ function drawMenu(){
   ctx.strokeStyle='#7fe08a';ctx.lineWidth=1.5;
   for(const rr of[130,168,206]){ctx.globalAlpha=.25;ctx.setLineDash([4,10+rr/20]);ctx.lineDashOffset=-mt*(rr%2?1:-1)*20;ctx.beginPath();ctx.arc(cx,cy,rr,0,TAU);ctx.stroke()}
   ctx.setLineDash([]);ctx.globalAlpha=1;
-  for(const e of menv){ctx.globalAlpha=.55;drawMob(e,false)}
-  ctx.globalAlpha=1;
-  const sk=skinOf(equip),myth=sk&&RI[sk.r]>=5,sc=slashCol();
-  ctx.lineCap='round';ctx.strokeStyle=sc||'#ffd36b';
-  for(let i=0;i<6;i++){const head=mt*4,tail=head-(i+1)*.18;ctx.beginPath();ctx.arc(cx,cy,92,tail,head);ctx.globalAlpha=.1+i*.05;ctx.lineWidth=3+i*2.4;ctx.stroke()}
-  ctx.globalAlpha=1;
-  const cyc=(mt*.9)%2.4;p.rec=0;p.swHeavy=Math.floor(mt*.9/2.4)%3===2;p.swMax=p.swHeavy?.6:.4;p.sw=cyc<p.swMax?p.swMax-cyc:0;
-  if(mcur.on){const ta=Math.atan2(mcur.y-cy,mcur.x-cx);let d=ta-mface;d=Math.atan2(Math.sin(d),Math.cos(d));mface+=d*(1-Math.exp(-(mdt||.016)*14))}
-  p.face=mface;
-  const sp=swordPose();
-  ctx.save();ctx.translate(cx,cy);ctx.rotate(mface);
-  {const mc=CH();drawChar(ctx,mc,11,mt,0);drawSword(sp.a,sp.off);drawChar(ctx,mc,11,mt,1)}
-  ctx.restore();
-  if(myth){const L=(skinOf(equip).len)*(.35+R()*.65),rr=p.r*.45+sp.off+L;emitVfx(sk,cx+Math.cos(sp.a+mface)*rr,cy+Math.sin(sp.a+mface)*rr,mdt,mparts)}
-  for(let i=0;i<3;i++){const a=mt*3.4+i*TAU/3;drawKnife(cx+Math.cos(a)*66,cy+Math.sin(a)*66,a)}
+  for(const e of menv)drawMob(e,e.flash>0);
+  if(mh){
+    const sk=skinBase(mh.skin)||DEFSK,myth=sk&&RI[sk.r]>=5,sc=sk.tr||'#ffd36b';
+    for(const s of mshots){if(s.k==='b'){ctx.strokeStyle=sc;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*.02,s.y-s.vy*.02);ctx.stroke()}
+      else{const k=s.t/s.l,x=s.sx+(s.tx-s.sx)*k,y=s.sy+(s.ty-s.sy)*k-Math.sin(k*Math.PI)*70;drawShot('ball','#3a3d48',x,y,0,2)}}
+    for(const f of mfx){const k=f.l/f.m;ctx.globalAlpha=k;ctx.strokeStyle=f.k==='boom'?'#ffd36b':sc;ctx.lineWidth=f.k==='boom'?4:5;ctx.beginPath();if(f.k==='boom')ctx.arc(f.x,f.y,70*(1.1-k*.6),0,TAU);else ctx.arc(f.x,f.y,f.R,f.a-1.1,f.a+1.1);ctx.stroke()}
+    ctx.globalAlpha=1;
+    /* borrow the real weapon drawing for a moment: swap the preview skin in, draw, swap back (nothing is saved) */
+    const eqS=equip,swS=[p.sw,p.swMax,p.swHeavy,p.rec,p.swings,p.face,p.x,p.y];
+    equip=mh.skin;p.sw=Math.max(0,mh.sw);p.swMax=mh.wt==='b'?.3:mh.wt==='g'?.09:.18;p.swHeavy=false;p.rec=0;p.swings=mh.swings;p.face=mh.face;p.x=mh.x;p.y=mh.y;
+    try{const sp=swordPose();ctx.save();ctx.translate(mh.x,mh.y);ctx.rotate(mh.face);const mc=CH();drawChar(ctx,mc,11,mt,0);drawSword(sp.a,sp.off);drawChar(ctx,mc,11,mt,1);ctx.restore();
+      if(myth&&R()<.5){const L=(sk.len||36)*(.35+R()*.65),rr=p.r*.45+sp.off+L;emitVfx(sk,mh.x+Math.cos(sp.a+mh.face)*rr,mh.y+Math.sin(sp.a+mh.face)*rr,mdt,mparts)}}
+    finally{equip=eqS;[p.sw,p.swMax,p.swHeavy,p.rec,p.swings,p.face,p.x,p.y]=swS}
+    if(mh.lab>0){const {cx:qx,cy:qy,R:qr}=menuCenter();ctx.globalAlpha=Math.min(1,mh.lab);ctx.font='700 13px Chakra Petch,sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a0a10';const tx=MW_NAME[mh.wt]+' · '+(sk.n||'Basic');ctx.strokeText(tx,qx,qy+qr+34);ctx.fillStyle=sc;ctx.fillText(tx,qx,qy+qr+34);ctx.globalAlpha=1}
+  }
   const pp=petOf(petEq);
-  if(pp){const a=mt*1.1,px=cx+Math.cos(a)*105,py=cy+Math.sin(a)*58+Math.sin(mt*5)*3;ctx.save();ctx.translate(px,py);ctx.rotate(Math.cos(a+Math.PI/2)>0?0:Math.PI);ctx.scale(.9,.9);petShape(ctx,pp,mt);ctx.restore();if(pp.vfx)emitVfx(pp,px,py,mdt,mparts)}
+  if(pp){const a=mt*1.1,hx0=mh?mh.x:cx,hy0=mh?mh.y:cy,px=hx0+Math.cos(a)*55,py=hy0+Math.sin(a)*32+Math.sin(mt*5)*3;ctx.save();ctx.translate(px,py);ctx.rotate(Math.cos(a+Math.PI/2)>0?0:Math.PI);ctx.scale(.9,.9);petShape(ctx,pp,mt);ctx.restore();if(pp.vfx)emitVfx(pp,px,py,mdt,mparts)}
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const q of mparts){ctx.globalAlpha=Math.max(0,q.l/q.m);ctx.fillStyle=q.c;ctx.fillRect(q.x-q.s/2,q.y-q.s/2,q.s,q.s)}
   ctx.restore();
