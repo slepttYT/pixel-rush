@@ -1635,10 +1635,12 @@ const PD={
 const PRAR=['common','common','uncommon','uncommon','rare','rare','epic','legendary','mythic'];
 const PETS=[];
 Object.keys(PD).forEach(sp=>PD[sp].forEach((d,i)=>{const o=d[3]?{vfx:d[3],glow:d[4],tr:d[4]}:{};PETS.push(Object.assign({id:'xp_'+sp+i,pk:sp,r:PRAR[i],n:d[0],pet:sp,b:d[1],g:d[2],h:d[2],glow:d[2],tr:d[2],len:20},o))}));
+/* developer-only Dragon Whelp: the World 1 Dragon boss, shrunk to pet size. Its pack id 'dev' is in no loot box, and it only shows or equips with developer access */
+PETS.push({id:'dev_dragon',pk:'dev',r:'dev',n:'Dragon Whelp',pet:'dragon',b:'#c4392b',g:'#ffb347',h:'#ffb347',glow:'#ff8a3d',tr:'#ffb347',vfx:'flame',len:24,dev:true});
 const DEFPET={id:'',n:'No Pet',r:'common',pet:null};
 const petOf=id=>id?PETS.find(x=>x.id===id)||null:null;
 let petEq='';try{petEq=LS.getItem('cinder-pet')||''}catch(e){}
-if(petEq&&!own.has(petEq))petEq='';
+if(petEq&&!own.has(petEq)&&!(petEq==='dev_dragon'&&dev.skin))petEq='';if(petEq==='dev_dragon'&&!dev.skin)petEq='';
 const pet={x:0,y:0,a:0};
 function grantLevelCoins(){
   const L=acct().L;let g=0;
@@ -1661,6 +1663,7 @@ function rollBox(pk){
 /* weapon art: drawn in a local frame, hand at the origin, blade pointing along +x. Blades get a gradient sheen for depth */
 function shine(c,y0,y1,a){const g=c.createLinearGradient(0,y0,0,y1);g.addColorStop(0,'rgba(255,255,255,'+(a||.6)+')');g.addColorStop(.5,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.4)');c.fillStyle=g;c.fill()}
 function petShape(c,s,t){
+  if(s.pet==='dragon'){const main=ctx;ctx=c;try{drawDragon({x:0,y:0,r:13,phase:1,fly:0,fz:0,msp:0,bs:''},false)}finally{ctx=main}return}
   const k=s.pet,my=RI[s.r]>=5;c.lineJoin='round';c.lineCap='round';c.lineWidth=2;c.strokeStyle='#12141c';
   if(my){c.save();c.globalCompositeOperation='lighter';c.fillStyle=s.vfx==='sun'?'hsl('+(((t*90)%360)|0)+',100%,55%)':s.glow;c.globalAlpha=s.dev?.25+.1*Math.sin(t*6):.12+.04*Math.sin(t*6);c.beginPath();c.arc(0,0,19,0,TAU);c.fill();c.restore()}
   const f=col=>{c.fillStyle=col;c.fill();c.stroke()},wag=Math.sin(t*8)*4,bob=Math.sin(t*6);
@@ -2204,8 +2207,8 @@ function drawAura(){
 let cosSel='',cosBusy=false,pv=[],pvT=0;
 let cosTab='k';
 const TABS=['k','g','b','f','p'];
-const owns=id=>own.has(id)||isStarter(id)||(isDevId(id)&&dev.skin);
-const itemList=()=>cosTab==='p'?PETS:SKINS,NONEW={id:'',n:'Nothing equipped',r:'common',k:'sword',len:34,none:true},curItem=()=>cosTab==='p'?(petOf(cosSel)||DEFPET):(cosSel?(skinOf(cosSel)||NONEW):NONEW);
+const owns=id=>own.has(id)||isStarter(id)||((isDevId(id)||id==='dev_dragon')&&dev.skin);
+const itemList=()=>cosTab==='p'?PETS.filter(x=>!x.dev||dev.skin):SKINS,NONEW={id:'',n:'Nothing equipped',r:'common',k:'sword',len:34,none:true},curItem=()=>cosTab==='p'?(petOf(cosSel)||DEFPET):(cosSel?(skinOf(cosSel)||NONEW):NONEW);
 function showSel(){
   const s=curItem(),ow=!s.id||owns(s.id),r=RAR[RI[s.r]];
   if(s.none){$('cosname').textContent='Nothing equipped yet. Open a box!';return}
@@ -2342,12 +2345,13 @@ function openBox(pk){
   };
   next(0);
 }
+const SHOPPET={x:120,y:60,vx:0,vy:0};
 function drawPrev(now,dt){
   const cv=$('prev'),c=cv.getContext('2d'),t=now/1000,s=curItem(),ow=!s.id||owns(s.id),a=-.5+Math.sin(t*2)*.25;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,240,120);
   if(cosTab==='p'){
     if(s.pet){c.save();c.translate(120,60+Math.sin(t*3)*4);c.scale(2.2,2.2);c.globalAlpha=ow?1:.25;petShape(c,s,t);c.restore();
-      if(ow&&s.vfx)for(let i=0;i<2;i++)emitVfx(s,120+(R()-.5)*50,60+(R()-.5)*40,dt,pv)}
+      if(ow&&s.vfx){SHOPPET.x=120;SHOPPET.y=60;petFx(s,SHOPPET,dt,pv)}}
   }else if(!s.none){
     const fs=maxF(s);
     c.save();c.translate(80,76);c.rotate(a);c.scale(2.2,2.2);c.globalAlpha=ow?1:.25;weaponShape(c,fs,t);c.restore();
@@ -2623,6 +2627,16 @@ function charSprite(ch,pose,sk){
   return C[k]=out;
 }
 const CHS_CACHE={};
+/* ---------- pet effects: particles come from the pet in a steady rhythm. A trail streams behind it while it moves, a few motes drift up around it while it rests, and a small sparkle shows now and then ---------- */
+const PETFX={flame:['#ff8a3d','#ffd36b','#ff5a2a'],bolt:['#8ee8ff','#ffffff'],frost:['#bfe9ff','#ffffff'],rune:['#ff4d5e','#ffb3c0'],holy:['#fff3b0','#ffffff'],galaxy:['#9a7bff','#c8b8ff','#ffffff'],water:['#7fd0ff','#d8f2ff'],ghost:['#9afff0','#e8fffa'],rune2:['#e0c8ff','#9a7bff'],void:['#7a5aff','#ffffff'],glitch:['#4dfff0','#ff4dd8']};
+function petFx(pp,o,dt,arr){
+  const v=pp.vfx;if(!v)return;const cols=PETFX[v]||[pp.tr||'#ffffff','#ffffff'],col=()=>v==='sun'?'hsl('+(((performance.now()/6)%360)|0)+',100%,70%)':cols[(R()*cols.length)|0];
+  const sp=Math.hypot(o.vx||0,o.vy||0);o.ft=(o.ft||0)-dt;o.st=(o.st||0)-dt;
+  if(sp>25){if(o.ft<=0){o.ft=.05;const ux=o.vx/sp,uy=o.vy/sp;arr.push({x:o.x-ux*10+(R()-.5)*4,y:o.y-uy*10+(R()-.5)*4,vx:-ux*24+(R()-.5)*10,vy:-uy*24-10,l:.4,m:.4,c:col(),s:2.5})}}
+  else if(o.ft<=0){o.ft=.24;const a=performance.now()/1000*2.4+R()*.5;arr.push({x:o.x+Math.cos(a)*11,y:o.y+Math.sin(a)*6,vx:0,vy:-15,l:.7,m:.7,c:col(),s:2})}
+  if(o.st<=0){o.st=1.1+R()*.7;arr.push({x:o.x+(R()-.5)*14,y:o.y-8+(R()-.5)*6,vx:0,vy:-6,l:.28,m:.28,c:'#ffffff',s:3})}
+  if(pp.pet==='dragon'&&R()<dt*.6)for(let i=0;i<5;i++)arr.push({x:o.x+(Math.cos(o.fa||0)>=0?14:-14),y:o.y-10,vx:(Math.cos(o.fa||0)>=0?1:-1)*(60+R()*50),vy:(R()-.5)*25,l:.35,m:.35,c:R()<.5?'#ff8a3d':'#ffd36b',s:3}); /* the whelp puffs a little fire */
+}
 /* premium skin effects, drawn per frame at sprite resolution and masked to the inside of the sprite */
 const SKFX={c:null,g:null},hsh=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
 function skinFx(s,sk,t,seed){
@@ -5977,7 +5991,7 @@ function update(dt){
   }
 
   comboT-=dt;if(comboT<=0)combo=0;
-  {const k=1-Math.exp(-dt*5),tx=p.x-Math.cos(p.face)*30-Math.sin(p.face)*16,ty=p.y-Math.sin(p.face)*30+Math.cos(p.face)*16;pet.x+=(tx-pet.x)*k;pet.y+=(ty-pet.y)*k;pet.a=p.face;const pp=petOf(petEq);if(pp&&pp.vfx)emitVfx(pp,pet.x,pet.y,dt,parts)}
+  {const k=1-Math.exp(-dt*5),ox=pet.x,oy=pet.y,tx=p.x-Math.cos(p.face)*30-Math.sin(p.face)*16+Math.sin(time*1.3)*5,ty=p.y-Math.sin(p.face)*30+Math.cos(p.face)*16+Math.cos(time*1.1)*3;pet.x+=(tx-pet.x)*k;pet.y+=(ty-pet.y)*k;pet.a=p.face;pet.fa=p.face;pet.vx=(pet.x-ox)/Math.max(dt,1e-3);pet.vy=(pet.y-oy)/Math.max(dt,1e-3);const pp=petOf(petEq);if(pp)petFx(pp,pet,dt,parts)}
   const sk=skinOf(equip);
   if(sk&&sk.vfx){const aa=p.face+swordAngle(),LL=sk.len*(.35+R()*.65);emitVfx(sk,p.x+Math.cos(p.face)*p.r*.45+Math.cos(aa)*LL,p.y+Math.sin(p.face)*p.r*.45+Math.sin(aa)*LL,dt,parts)}
 
@@ -7068,14 +7082,14 @@ function drawPharaoh(e,fl){drawSandBoss(e,fl,'The Pharaoh',1.6)} /* the vault fi
 /* ---------- boss pixel renderer: the vector bosses of Worlds 1 and 2 (and the Dragon and Golem) draw onto a grid at 2 screen px per pixel,
    get an ink outline, and are blitted back without smoothing, so they match the pixel arenas, mobs and weapons ---------- */
 const BPX={c:null,g:null};
-function pixelDraw(cx,cy,half,fn){
+function pixelDraw(cx,cy,half,fn,noTint){
   const U=2,sz=Math.ceil(half*2/U)+4;
   if(!BPX.c||BPX.c.width<sz){BPX.c=document.createElement('canvas');BPX.c.width=BPX.c.height=sz;BPX.g=BPX.c.getContext('2d',{willReadFrequently:true})}
   const c=BPX.c,g=BPX.g,N=c.width;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,N,N);
   g.setTransform(1/U,0,0,1/U,(half-cx)/U+2,(half-cy)/U+2);
   const main=ctx;ctx=g;try{fn()}finally{ctx=main}
   /* grade the boss into its world: cool slate in the Stone World, warm sand in the Sand World */
-  {const wt=world===2?'rgba(70,95,130,.18)':world===3?'rgba(220,160,80,.18)':null;if(wt){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-atop';g.fillStyle=wt;g.fillRect(0,0,sz,sz);g.globalCompositeOperation='source-over'}}
+  {const wt=noTint?null:world===2?'rgba(70,95,130,.18)':world===3?'rgba(220,160,80,.18)':null;if(wt){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-atop';g.fillStyle=wt;g.fillRect(0,0,sz,sz);g.globalCompositeOperation='source-over'}}
   const d=g.getImageData(0,0,sz,sz),A=d.data,on=i=>A[i*4+3]>=110;
   for(let i=0;i<sz*sz;i++)if(A[i*4+3]<40)A[i*4+3]=0;
   const add=[];for(let y=0;y<sz;y++)for(let x=0;x<sz;x++){const i=y*sz+x;if(A[i*4+3])continue;if((x>0&&on(i-1))||(x<sz-1&&on(i+1))||(y>0&&on(i-sz))||(y<sz-1&&on(i+sz)))add.push(i)}
@@ -7929,7 +7943,9 @@ function draw(){
   if(p.kp&&p.kp.length&&p.mods.knife){
     ctx.globalAlpha=.1;ctx.strokeStyle='#f1ead8';ctx.lineWidth=1;ctx.beginPath();ctx.arc(p.x,p.y,56+5*p.mods.knife,0,TAU);ctx.stroke();ctx.globalAlpha=1;
   }
-  {const pp=petOf(petEq);if(pp){ctx.save();ctx.translate(pet.x,pet.y+Math.sin(time*5)*2);ctx.rotate(pet.a);petShape(ctx,pp,performance.now()/1000);ctx.restore()}}
+  {const pp=petOf(petEq);if(pp){const dr=pp.pet==='dragon',bob=Math.sin(time*(dr?2.2:5))*(dr?4:2);
+    ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(pet.x,pet.y+(dr?16:10),dr?15:9,dr?4:3,0,0,TAU);ctx.fill();ctx.restore();
+    pixelDraw(pet.x,pet.y,dr?48:34,()=>{ctx.save();ctx.translate(pet.x,pet.y+bob-(dr?8:0));if(dr){if(Math.cos(pet.a)<0)ctx.scale(-1,1)}else ctx.rotate(pet.a);petShape(ctx,pp,performance.now()/1000);ctx.restore()},true)}}
   if(state!=='over'||p.hp>0){
     {
       /* hurt flicker dims the player but never hides them, and it pauses during hit-stop */
@@ -7979,7 +7995,7 @@ const mcur={x:0,y:0,on:false};let mface=0;
 /* ---------- main menu battle: a miniature of the real game. The hero fights mobs with a weapon that changes every 10 seconds, wearing a random skin of that weapon.
    It only touches menu-local state (mh, menv, mshots); nothing here saves or changes progress ---------- */
 const MW_T=['f','k','g','b'],MW_PK={f:'punch',k:'knife',g:'gun',b:'bomb'},MW_NAME={f:'FISTS',k:'KNIFE',g:'GUN',b:'BOMB'};
-let mh=null,mshots=[],mfx=[];
+let mh=null,mshots=[],mfx=[];const MPET={x:0,y:0,vx:0,vy:0};
 const menuCenter=()=>({cx:W>700?W*.74:W*.5,cy:H*.48,R:Math.min(236,Math.min(W,H)*.23)});
 function menuWeapon(i){
   const t=MW_T[i%4],pool=SKINS.filter(s=>s.tab===t&&!isDevId(s.id)).concat(STARTERS.filter(s=>s.pk===MW_PK[t]));
@@ -8069,7 +8085,9 @@ function drawMenu(){
     if(mh.lab>0){const {cx:qx,cy:qy,R:qr}=menuCenter();ctx.globalAlpha=Math.min(1,mh.lab);ctx.font='700 13px Chakra Petch,sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a0a10';const tx=MW_NAME[mh.wt]+' · '+(sk.n||'Basic');ctx.strokeText(tx,qx,qy+qr+34);ctx.fillStyle=sc;ctx.fillText(tx,qx,qy+qr+34);ctx.globalAlpha=1}
   }
   const pp=petOf(petEq);
-  if(pp){const a=mt*1.1,hx0=mh?mh.x:cx,hy0=mh?mh.y:cy,px=hx0+Math.cos(a)*55,py=hy0+Math.sin(a)*32+Math.sin(mt*5)*3;ctx.save();ctx.translate(px,py);ctx.rotate(Math.cos(a+Math.PI/2)>0?0:Math.PI);ctx.scale(.9,.9);petShape(ctx,pp,mt);ctx.restore();if(pp.vfx)emitVfx(pp,px,py,mdt,mparts)}
+  if(pp){const a=mt*1.1,hx0=mh?mh.x:cx,hy0=mh?mh.y:cy,px=hx0+Math.cos(a)*55,py=hy0+Math.sin(a)*32+Math.sin(mt*5)*3,dr=pp.pet==='dragon',dirR=Math.cos(a+Math.PI/2)>0;
+    MPET.vx=(px-MPET.x)/Math.max(mdt,1e-3);MPET.vy=(py-MPET.y)/Math.max(mdt,1e-3);MPET.x=px;MPET.y=py;MPET.fa=dirR?0:Math.PI;
+    pixelDraw(px,py,dr?48:34,()=>{ctx.save();ctx.translate(px,py-(dr?8:0));if(dr){if(!dirR)ctx.scale(-1,1)}else{ctx.rotate(dirR?0:Math.PI);ctx.scale(.9,.9)}petShape(ctx,pp,mt);ctx.restore()},true);petFx(pp,MPET,mdt,mparts)}
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const q of mparts){ctx.globalAlpha=Math.max(0,q.l/q.m);ctx.fillStyle=q.c;ctx.fillRect(q.x-q.s/2,q.y-q.s/2,q.s,q.s)}
   ctx.restore();
