@@ -177,3 +177,17 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - [x] Join codes (PR-XXXX-XXXX-XXXXX: IPv4+port+salt+check, 10-round keyed Feistel, Crockford base32) in server + game (Online.Core.code/label; IP never shown for code joins). Server first-run setup wizard (--setup to redo), UPnP port opening + public IP (removed on exit), public IP fallback lookup. Tested with a mock router and an SEA build.
 - [x] Online races: 2x enemies. Archer: cross of 4 arrows (+follow-up crosses when evolved). Jester: 1 card, +1 per 15 waves and per evolution, max 7. Heart drops: HUD heart sprite.
 - [x] Repo: Pixel-Rush-Game.exe + Pixel-Rush-Server.exe at the top; everything else in details/. Release workflow (.github/workflows/release.yml) publishes both EXEs on a v* tag.
+
+## User requests (0.6 menus/shop/weapons, verbatim)
+"new opening aniimation have it open to it being high in the sky make it say pixel rush in the games font and then under it smaller made by sleptt spyder crash
+then it will pan down to the current home screen once you click play make it slecet a save file and name it *this will be player name in muiltyplayer and insted of saying account level make it say the player names also add a filter system to filter out bad words or names if it is gonna filter it out make it a have a pop up saying the username isnt apporite try again
+also remove selecting a difficulty insted add that to the config settings after picking a charater make the updates tab the same scale as achements and scrollable
+in shop add 3 tabs skins upgrades and unlocks *skins tab will have the loot boxes and have sub catogorys for each weapon* add dev skins for new weapons as well as 4 uniqe skins for the bomer rang mace wand *change name from magic* and bow wand and bow also behave like the gun to much make wand have a aoe circle make abbilitys to in game to increase this size and add posion dmg fire dmg etc* also fix fire dmg posion dmg and other effects carrying over from others runs for the bow add a charging system where you can hold down to charge it up dealing more dmg
+and for the upgrades tab make sub sections for each weapon and make 5 total upggrades of 10 so 0/10 for first world after beating the first world with your weapon of choice add a 10/20 featureing new upgrades make sure it only shows the 10/20 if youve beaten world 1 with that weapon ad dthe same for world 3 being 20/30 etc etc and for the unlocks tab this is where you unlock new items so start with fists then you can unlock bomerrang for 500 knife for 1000 *make it say 1k* mace for 1.5k bow for 2k gun for 2.5k and bomb for 3k and wand for 5k *make sure the weapon is as good as the price intails also add back certin difficulty achements just make it so theres none for the hardest difficulty"
+
+## User request (online lobby, verbatim)
+"we need the server setup to be more stright forward and for dummys server name should be the join code also add a lobby so once you join the server you load into a lobby you wait for lobby make to start you pick a charater weapon and then vote on a world if you have every world unlock but the person ur playing with only has world 1 it will auto be world 1 and if they world 1 and 2 it will only be a vote between those 2 also make it 1-4 not 1-16"
+
+## User request (difficulty rewards, verbatim)
+"remove the 1.5x coins hard gives you and remove any -coins and xp form your not wining bro but keep easy -1.5 coins"
+-> Hard: coins 1x (XP stays 1.5x). You're Not Winning Bro: no coin/XP bonus (1x/1x). Easy keeps half coins.

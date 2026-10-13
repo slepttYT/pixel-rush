@@ -361,7 +361,8 @@ summary:hover{color:var(--bone)}
 .hfoot .hupd:hover,.hfoot .hupd:focus-visible{border-color:var(--gold);color:#fff}
 .hfoot .hdot{display:none;position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff4d5e}
 .hfoot .hupd.new .hdot{display:block}
-#updlist{display:flex;flex-direction:column;gap:14px;width:100%}
+#updlist{display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box;max-height:min(52cqh,420px);overflow-y:auto;padding-right:6px;scrollbar-width:thin;scrollbar-color:#3a4157 transparent}
+#upd{overflow:hidden!important}#upd .box{width:100%;max-width:560px;box-sizing:border-box} /* 0.6: the same size as Achievements, and the list scrolls */
 #updlist .cx b small{color:var(--gold);font-weight:600;letter-spacing:.14em;margin-left:8px}
 #updlist .cx ul{margin:4px 0 0;padding-left:18px;font-size:13px;color:var(--dim);display:flex;flex-direction:column;gap:3px}
 .hfoot .hpress{color:var(--gold);animation:blink 1.3s steps(2,jump-none) infinite}
@@ -609,6 +610,36 @@ summary:hover{color:var(--bone)}
 #qtybar span{font-size:13px;letter-spacing:.14em;font-weight:700;color:var(--dim);text-transform:uppercase}
 #qtybar b{font-family:var(--display);font-size:20px;min-width:2.2em;text-align:center;color:var(--gold)}
 #qtybar .btn.sm{padding:8px 14px}
+#cos .stabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}#cos .stabs .btn{padding:10px 8px;font-size:15px;letter-spacing:.14em}
+#cos .stabs .btn.on{background:var(--gold);color:#1b1608;border-color:var(--gold)}
+.wuh{display:flex;align-items:baseline;gap:10px;margin:10px 0 2px}.wuh .wuc{font-family:var(--display);color:var(--gold);font-size:15px}.wuh small{color:var(--dim);font-size:11px;letter-spacing:.06em}
+.item.wu .pips{font-style:normal;letter-spacing:2px;color:var(--gold);margin-left:4px}
+.item.unl canvas{width:112px;height:44px;display:block;margin:0 auto 4px;image-rendering:pixelated}
+#cfgdiff{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%}
+.cdf{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:7px 9px;color:var(--bone);background:#1a1e2b;border:2px solid #2b3144;border-left:4px solid var(--tc);border-radius:5px;cursor:pointer;font:inherit}
+.cdf b{font-size:11px;letter-spacing:.08em;color:var(--tc);line-height:1.15}.cdf small{font-size:10px;color:var(--dim);line-height:1.2}
+.cdf:hover,.cdf:focus-visible{border-color:var(--tc);outline:none}.cdf.on{background:#252a3c;box-shadow:0 0 0 2px var(--tc)}
+#cfgdnote{margin:2px 0 0;font-size:12px}
+@media (max-width:700px){#cfgdiff{grid-template-columns:repeat(2,1fr)}}
+#home .menulist #hdiff{display:none!important}
+#title .tdh,#title #tdiffs,#title #tddesc{display:none!important}
+#title .tintro{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2.4cqh,26px);pointer-events:none;will-change:transform,opacity}
+#title .tintro[hidden]{display:none!important}
+#title .tintro .logo{margin:0}
+#title .tcred{margin:0;font-family:'Press Start 2P',monospace;font-size:clamp(10px,min(1.7cqw,2.6cqh),22px);letter-spacing:.14em;color:#e8f0ff;text-shadow:.15em .15em 0 #123a6e;text-align:center;padding:0 16px}
+#title #tscr1{transition:opacity .5s ease}
+#title.intro #tscr1{opacity:0;pointer-events:none}
+.tname{display:flex;flex-direction:column;gap:5px;width:100%;max-width:440px;margin:4px auto 0}
+.tname label{font-size:12px;letter-spacing:.16em;font-weight:700;color:#bfe9c4}.tname label small{font-weight:500;letter-spacing:.04em;color:var(--dim);margin-left:6px}
+.tname input{width:100%;box-sizing:border-box;padding:10px 12px;font:700 16px var(--body);letter-spacing:.06em;color:var(--bone);background:#06070b;border:2px solid #2f6b3a;border-radius:5px;outline:none;-webkit-user-select:text;user-select:text}
+.tname input:focus{border-color:#7be07a}
+.tnerr{margin:0;min-height:1.2em;font-size:12px;color:#ffb0b8}
+.tnbad{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(4,6,10,.72)}
+.tnbad[hidden]{display:none!important}
+.tnbad .tnbox{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:min(420px,90vw);padding:20px 22px;background:#0e1410;border:3px solid #ff4d5e;border-radius:8px;box-shadow:0 0 0 4px #3a0b12,0 18px 50px rgba(0,0,0,.6);text-align:center}
+.tnbad b{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:#ff8a94}
+.tnbad p{margin:0;font-size:14px;color:var(--bone)}
+#hacct .pname{color:var(--gold);letter-spacing:.06em}
 #rskip{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);transform:translateX(-50%);min-width:220px;z-index:5}
 </style>
 
@@ -700,11 +731,14 @@ summary:hover{color:var(--bone)}
       <p class="kicker">TOP-DOWN HACK AND SLASH</p>
       <h1 class="logo">PIXEL<br><em>RUSH</em></h1>
       <button class="btn gold big" id="tplay" type="button">PLAY</button>
-      <p class="thint">CHOOSE A SAVE AND A DIFFICULTY</p>
+      <p class="thint">CHOOSE A SAVE</p>
     </div>
+    <div class="tintro" id="tintro" hidden aria-hidden="true"><h1 class="logo">PIXEL<br><em>RUSH</em></h1><p class="tcred">MADE BY SLEPTT SPYDER CRASH</p></div>
     <div class="tbox" id="tscr2" hidden>
       <h2 class="tseh">SELECT SAVE</h2>
       <div class="tslots" id="tslots"></div>
+      <div class="tname" id="tname"><label for="tnamein">PLAYER NAME <small>this is your name in multiplayer</small></label><input id="tnamein" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Type a name for this save"><p class="tnerr" id="tnerr" aria-live="polite"></p></div>
+      <div class="tnbad" id="tnbad" hidden role="alertdialog" aria-modal="true" aria-labelledby="tnbadt"><div class="tnbox"><b id="tnbadt">THAT USERNAME ISN'T APPROPRIATE</b><p>Please pick a different name and try again.</p><button type="button" class="btn gold" id="tnbadok">TRY AGAIN</button></div></div>
       <h3 class="tdh">DIFFICULTY</h3>
       <div class="tdiffs" id="tdiffs"></div>
       <p class="tdesc" id="tddesc"></p>
@@ -800,7 +834,8 @@ summary:hover{color:var(--bone)}
         <canvas id="prev" width="240" height="120"></canvas>
         <div><div id="cosname"></div><div id="cosres" class="note"></div><div id="wallet"></div></div>
       </div>
-      <div class="tabs"><button type="button" class="btn ghost sm" id="tk">KNIVES</button><button type="button" class="btn ghost sm" id="tg">GUNS</button><button type="button" class="btn ghost sm" id="tb">BOMBS</button><button type="button" class="btn ghost sm" id="tf">FISTS</button><button type="button" class="btn ghost sm" id="tr">BOOMERANGS</button><button type="button" class="btn ghost sm" id="tm">MAGIC</button><button type="button" class="btn ghost sm" id="ta">BOWS</button><button type="button" class="btn ghost sm" id="tc">MACES</button><button type="button" class="btn ghost sm" id="tp">PETS</button><button type="button" class="btn ghost sm" id="tu">UPGRADES</button></div>
+      <div class="tabs stabs" id="stabs"><button type="button" class="btn ghost" id="sts">SKINS</button><button type="button" class="btn ghost" id="stu">UPGRADES</button><button type="button" class="btn ghost" id="stl">UNLOCKS</button></div>
+      <div class="tabs" id="skintabs"><button type="button" class="btn ghost sm" id="tk">KNIVES</button><button type="button" class="btn ghost sm" id="tg">GUNS</button><button type="button" class="btn ghost sm" id="tb">BOMBS</button><button type="button" class="btn ghost sm" id="tf">FISTS</button><button type="button" class="btn ghost sm" id="tr">BOOMERANGS</button><button type="button" class="btn ghost sm" id="tm">WANDS</button><button type="button" class="btn ghost sm" id="ta">BOWS</button><button type="button" class="btn ghost sm" id="tc">MACES</button><button type="button" class="btn ghost sm" id="tp">PETS</button><button type="button" class="btn ghost sm" id="tu">UPGRADES</button></div>
       <div id="cosscroll"><div id="qtybar"></div><div id="packs"></div>
       <p class="note" id="oddsnote">Odds per box: Mythic 1/1000 · Legendary 1/400 · Epic 1/100 · Rare 1/50 · Uncommon 1/20, otherwise Common. Pity: your 1000th box is a guaranteed Mythic (once per save). Duplicates refund a few coins. Only Mythic weapons and pets have special effects: glow, particles and an aura.</p>
       <div id="coll"></div></div>
@@ -887,6 +922,7 @@ summary:hover{color:var(--bone)}
         <div class="cfgl"><canvas id="cfgprev" width="240" height="240"></canvas><div id="cfgwho"></div></div>
         <div class="cfgr">
           <h3 class="pdh">Weapon</h3><div id="cfgwpn" class="cfgw"></div><p id="cfgwnote" class="note"></p>
+          <h3 class="pdh">Difficulty</h3><div id="cfgdiff" class="cfgdf"></div><p id="cfgdnote" class="note"></p>
           <h3 class="pdh">World</h3><div id="cfgworld" class="cfgwd"></div>
           <h3 class="pdh">Challenge modifiers <small id="cfgrew"></small></h3><div id="cfgmods" class="cfgm"></div>
           <div class="row"><button class="btn gold" id="cfggo" type="button">START RUN</button></div>
@@ -961,6 +997,33 @@ let SLOT=1;try{SLOT=Math.max(1,Math.min(3,+localStorage.getItem('cinder-slot')||
 const fmtK=n=>{n=Math.round(n||0);const a=Math.abs(n),f=(v,s)=>(v>=100?Math.round(v):Math.round(v*10)/10)+s;return a<1000?String(n):a<999500?f(n/1000,'k'):f(n/1e6,'M')}; /* 999,999 rounds up to 1M, never 1000k */
 const slotKey=(k,n)=>{n=n||SLOT;return n>1&&SLOT_G.indexOf(k)<0?k.replace('cinder-','cinder-s'+n+'-'):k};
 const LS={getItem:k=>localStorage.getItem(slotKey(k)),setItem:(k,v)=>localStorage.setItem(slotKey(k),v),removeItem:k=>localStorage.removeItem(slotKey(k))};
+/* 0.6: every save has a player name (picked on the save screen). It is the name other players see online */
+const escN=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const slotName=n=>{try{return (localStorage.getItem(slotKey('cinder-name',n))||'').slice(0,16)}catch(e){return ''}};
+const playerName=()=>slotName(SLOT);
+/* the name filter: checks a name for swear words and slurs, including l33t spellings, s.p.a.c.e.d letters and repeated letters.
+   Words that hide inside normal words (like "ass" in "class") only count when they stand on their own */
+const BADSUB=['fuck','fck','fvck','phuck','phuk','shit','sh1t','bitch','biatch','cunt','nigg','nigr','fagg','faggot','whore','slut','pussy','penis','vagin','porn','nazi','hitler','retard','twat','wank','bastard','dildo','jizz','molest','pedophil','rapist','cumshot','blowjob','handjob','horny','boob','testicl','kkk','asshole','arsehole','dumbass','jackass','motherf','cocksuck','dickhead','bollock','titties','tittie','orgasm','ejacul','erection','genital','sperm','hentai','xxx','onlyfans','nudes','naked','killyourself','suicide','terroris','gestapo','swastika','chink','kike','wetback','tranny','gook','beaner','raghead','towelhead','negro'];
+const BADTOK=['ass','arse','cock','dick','rape','raped','anal','sex','sexy','cum','tit','tits','fag','fags','hoe','hoes','piss','pedo','kys','nude','slag','prick','fap','thot','dong','wtf','stfu','milf','fuk','fuq','semen','spic','coon','niga','heil','jap'];
+function nameBad(raw){
+  const s0=String(raw||'');
+  const leet=x=>x.replace(/0/g,'o').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[4@]/g,'a').replace(/[5$]/g,'s').replace(/7/g,'t').replace(/8/g,'b').replace(/9/g,'g').replace(/\+/g,'t');
+  const words=s0.replace(/([a-z])([A-Z])/g,'$1 $2').split(/[^A-Za-z0-9@$!|+]+/).map(w=>leet(w.toLowerCase()).replace(/[^a-z]/g,'')).filter(Boolean);
+  let flat=leet(s0.toLowerCase()).replace(/[^a-z ]/g,'').replace(/ /g,'');
+  for(const ok of ['therapist','scunthorpe','shiitake','shitake','penistone','cockpit','cocktail','peacock','hancock','dickens','assassin','classic','bassist','sussex'])flat=flat.split(ok).join('-'); /* real words that hide a bad one */
+  const sq=flat.replace(/(.)\1+/g,'$1');
+  for(const b of BADSUB){const bb=b.replace(/ /g,''),bq=bb.replace(/(.)\1+/g,'$1');if(flat.indexOf(bb)>=0||(bq.length>=4&&sq.indexOf(bq)>=0))return true}
+  for(const w of words.concat([flat])){const wq=w.replace(/(.)\1+/g,'$1');if(BADTOK.indexOf(w)>=0||BADTOK.indexOf(wq)>=0)return true;for(const t of BADTOK){if(w===t+'s'||w===t+'z'||wq===t+'s')return true}}
+  return false;
+}
+function nameProblem(raw){
+  const n=String(raw||'').trim();
+  if(n.length<2)return 'Your name needs at least 2 characters.';
+  if(n.length>16)return 'Your name can be at most 16 characters.';
+  if(!/^[A-Za-z0-9 _\-.]+$/.test(n))return 'Use only letters, numbers, spaces, - _ and dots.';
+  if(nameBad(n))return 'bad';
+  return '';
+}
 const $=id=>document.getElementById(id);
 const cv=$('cv'),stage=$('stage');let ctx=cv.getContext('2d'); /* let: bosses briefly redirect ctx to a small pixel grid (pixelDraw) */document.body.appendChild($('xh'));
 const R=Math.random,TAU=Math.PI*2,M=18;
@@ -1435,8 +1498,8 @@ const xpMul=l=>Math.pow(1.2,l===undefined?loop:l);
 const DIFFS={
  easy:{n:'EASY',c:'#5fd0a2',hp:5,xp:0,coin:.5,pd:1,eh:.5,es:.85,ed:0,cw:.7,bt:.8,s:'No XP · ½ coins · really easy',r:'Really easy. Enemies have half health, move slower and come in smaller waves, and bosses attack more slowly. You earn no XP and half coins.'},
  medium:{n:'MEDIUM',c:'#ffd36b',hp:5,xp:1,coin:1,pd:1,eh:1.15,es:1.05,ed:0,cw:1.1,bt:1.05,s:'Average Joe',r:'The way Pixel Rush was meant to be played. Just your average Joe experience.'},
- hard:{n:'HARD',c:'#ff8a3d',hp:3,xp:1.5,coin:1.5,pd:1,eh:1.5,es:1.15,ed:1,cw:1.35,bt:1.25,s:'3 hearts · really hard',r:'Really hard. 3 hearts, tougher faster enemies that hit harder, much bigger waves and bosses that attack much faster. 1.5x XP and 1.5x coins.'},
- nowin:{n:"YOU'RE NOT WINNING BRO",c:'#ff4d5e',hp:1,xp:2,coin:2,pd:.5,eh:2.2,es:1.3,ed:1,cw:1.5,bt:1.4,s:'1 heart · half damage',r:'Start with 1 health and deal half damage. Enemies have 1.7x health, move 25% faster and hit harder. 2x XP and coins if you somehow survive.'}
+ hard:{n:'HARD',c:'#ff8a3d',hp:3,xp:1.5,coin:1,pd:1,eh:1.5,es:1.15,ed:1,cw:1.35,bt:1.25,s:'3 hearts · really hard',r:'Really hard. 3 hearts, tougher faster enemies that hit harder, much bigger waves and bosses that attack much faster. 1.5x XP.'},
+ nowin:{n:"YOU'RE NOT WINNING BRO",c:'#ff4d5e',hp:1,xp:1,coin:1,pd:.5,eh:2.2,es:1.3,ed:1,cw:1.5,bt:1.4,s:'1 heart · half damage',r:'Start with 1 health and deal half damage. Enemies have 1.7x health, move 25% faster and hit harder. No bonus coins or XP: this one is just for bragging rights.'}
 };
 try{Object.assign(stats,JSON.parse(LS.getItem('cinder-stats')||'{}'));ach=JSON.parse(LS.getItem('cinder-ach')||'{}');upg=JSON.parse(LS.getItem('cinder-upg')||'{}')}catch(e){}
 if(ach.rmp2===1)ach.rmp2=2; /* old builds could leave Slaughterhouse half-unlocked; it was already earned */
@@ -1489,7 +1552,7 @@ const totalWave=()=>loop*LOOP_WAVES+wave;
 function acct(x){x=x===undefined?xpTotal:x;let L=1;while(x>=xpNeed(L)){x-=xpNeed(L);L++}return{L:L,x:x,need:xpNeed(L)}}
 const MOB_XP=.03,WAVE_XP_K=.6; /* 0.5: share of a wave's XP each mob drops / share still paid when the wave is cleared */
 function waveXp(){return (8+wave*.4+(wave%10===0?40*(wave/10):0))*xpMul()*DF().xp*(1+.1*(upg.xp||0))*(p.xpM||1)*(1+(dynS-1)*.6)}
-function xpHtml(a,pct){const w=pct===undefined?Math.min(100,a.x/a.need*100):pct;return '<div class="xpl"><span>Account level <b>'+a.L+'</b></span><span>'+a.x+' / '+a.need+' XP</span></div><div class="xpb"><i style="width:'+w.toFixed(1)+'%"></i></div>'}
+function xpHtml(a,pct){const w=pct===undefined?Math.min(100,a.x/a.need*100):pct,pn=playerName();return '<div class="xpl"><span>'+(pn?'<b class="pname">'+escN(pn)+'</b> &middot; LV ':'Account level ')+'<b>'+a.L+'</b></span><span>'+a.x+' / '+a.need+' XP</span></div><div class="xpb"><i style="width:'+w.toFixed(1)+'%"></i></div>'}
 const RUN_COIN=6; /* coins per 5 waves cleared in a run */
 function bankXp(cleared){
   try{collectLoot()}catch(e){}
@@ -1616,8 +1679,8 @@ const WLINES={
  bomb:[['grenade','Grenade',{rng:'bomb',cd:1,dmg:3,br:80,bd:240}],['cball','Cannonball',{rng:'bomb',cd:.95,dmg:4,br:105,bd:300,roll:1}],['bomb','Bomb',{rng:'bomb',cd:.9,dmg:6,br:140,bd:320}]],
  /* 0.5: four new families, unlocked in order after the Bomb */
  boomer:[['boomer','Default Boomerang',{rng:'boom',cd:.7,dmg:1.4,rg:250,spd:520}],['mboomer','Metal Boomerang',{rng:'boom',cd:.62,dmg:2,rg:290,spd:580}],['tboomer','Three-Prong Boomerang',{rng:'boom',cd:.55,dmg:2.6,rg:320,spd:620,tri:1}]],
- magic:[['stick','Stick',{rng:'magic',cd:.45,dmg:1.3,spd:420,rg:520,home:3}],['wand','Magic Wand',{rng:'magic',cd:.38,dmg:1.6,spd:480,rg:600,home:4}],['staff','Staff',{rng:'magic',cd:.42,dmg:1.6,spd:500,rg:650,home:4.5,n:2}]],
- bow:[['bow','Bow and Arrow',{rng:'bow',cd:.5,dmg:1.8,spd:900,rg:620,pr:1}],['cbow','Compact Bow',{rng:'bow',cd:.36,dmg:1.9,spd:950,rg:600,pr:1}],['xbow','Crossbow',{rng:'bow',cd:.48,dmg:3.4,spd:1150,rg:760,pr:3}]],
+ magic:[['stick','Stick',{rng:'magic',cd:.6,dmg:2,rg:300,ar:46}],['wand','Magic Wand',{rng:'magic',cd:.55,dmg:2.6,rg:330,ar:54}],['staff','Staff',{rng:'magic',cd:.55,dmg:2.8,rg:360,ar:60,n:2}]], /* 0.6: the Wand casts a magic circle on the ground that bursts and hits everything inside */
+ bow:[['bow','Bow and Arrow',{rng:'bow',cd:.22,dmg:1.8,spd:900,rg:620,pr:1,ct:.75}],['cbow','Compact Bow',{rng:'bow',cd:.18,dmg:1.9,spd:950,rg:600,pr:1,ct:.6}],['xbow','Crossbow',{rng:'bow',cd:.26,dmg:3.4,spd:1150,rg:760,pr:3,ct:.9}]], /* 0.6: hold to draw the bow (ct = seconds to full charge), let go to shoot */
  mace:[['mace','Mace',{rad:.95,cd:1.15,dmg:1.5,kb:1.6}],['mace2','Two-Headed Mace',{rad:1.05,cd:1.1,dmg:2.2,kb:1.8}],['mace3','Three-Headed Mace',{rad:1.15,cd:1.05,dmg:3,kb:2}]] /* 0.5: the exact evolution paths. Each stage keeps the old stage's numbers so balance is unchanged */
 };
 const KL=(id,pk,r,n,b,g,h,o,line)=>{
@@ -1741,7 +1804,13 @@ const DEVSK=KL('dev_rainbow','knife','dev','Prism Knife','#ffffff','#ffffff','#1
 const DEVGUN=KL('dev_gun','gun','dev','Prism Gun','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.gun);
 const DEVBOMB=KL('dev_bomb','bomb','dev','Prism Bomb','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.bomb);
 const DEVFIST=KL('dev_fist','punch','dev','Prism Fists','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.punch);
-const DEVSKS=[DEVSK,DEVGUN,DEVBOMB,DEVFIST],DEVIDS={dev_rainbow:DEVSK,dev_gun:DEVGUN,dev_bomb:DEVBOMB,dev_fist:DEVFIST},isDevId=id=>!!id&&Object.prototype.hasOwnProperty.call(DEVIDS,id);
+/* 0.6: Prism dev skins for the four newer weapons too */
+const DEVBOOM=KL('dev_boom','boomer','dev','Prism Boomerang','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.boomer);
+const DEVWAND=KL('dev_wand','magic','dev','Prism Wand','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.magic);
+const DEVBOW=KL('dev_bow','bow','dev','Prism Bow','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.bow);
+const DEVMACE=KL('dev_mace','mace','dev','Prism Mace','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.mace);
+const DEV_OF={k:'dev_rainbow',g:'dev_gun',b:'dev_bomb',f:'dev_fist',r:'dev_boom',m:'dev_wand',a:'dev_bow',c:'dev_mace'};
+const DEVSKS=[DEVSK,DEVGUN,DEVBOMB,DEVFIST,DEVBOOM,DEVWAND,DEVBOW,DEVMACE],DEVIDS={dev_rainbow:DEVSK,dev_gun:DEVGUN,dev_bomb:DEVBOMB,dev_fist:DEVFIST,dev_boom:DEVBOOM,dev_wand:DEVWAND,dev_bow:DEVBOW,dev_mace:DEVMACE},isDevId=id=>!!id&&Object.prototype.hasOwnProperty.call(DEVIDS,id);
 /* which shop tab each skin belongs to */
 const tabFor=pk=>(pk==='punch'||pk.indexOf('f_')===0)?'f':(pk==='gun'||pk.indexOf('g_')===0)?'g':(pk==='bomb'||pk.indexOf('b_')===0)?'b':(pk==='boomer'||pk.indexOf('r_')===0)?'r':(pk==='magic'||pk.indexOf('m_')===0)?'m':(pk==='bow'||pk.indexOf('a_')===0)?'a':(pk==='mace'||pk.indexOf('c_')===0)?'c':'k';
 SKINS.concat(STARTERS,DEVSKS,[DEFSK]).forEach(x=>{x.tab=x.pk?tabFor(x.pk):'k';if(x.forms)x.forms.forEach(f=>{f.tab=x.tab})});
@@ -1773,10 +1842,22 @@ SKINS.length=0;
        ['claws','Claw Pack','Claws','Fists to claws','#ffd36b',['Fists','Brass Knuckles','Claws'],'claws'],
        ['skeleton','Skeleton Pack','Skeleton Hands','Fists to skeleton hands','#e8e0c8',['Fists','Brass Knuckles','Skeleton Hands'],'skeleton'],
        ['robot','Robot Pack','Robot Hands','Fists to robot hands','#4dc3ff',['Fists','Brass Knuckles','Robot Hands'],'robot']],
-    r:[['outback','Outback Pack','Boomerang','Boomerangs in 9 materials, Common to Mythic','#d8a050',[],null]],
-    m:[['arcane','Arcane Pack','Magic','Sticks, wands and staffs in 9 materials','#b98aff',[],null]],
-    a:[['ranger','Ranger Pack','Bow','Bows and crossbows in 9 materials','#7bd84a',[],null]],
-    c:[['warlord','Warlord Pack','Mace','Maces in 9 materials','#c8ccd8',[],null]]
+    r:[['outback','Outback Pack','Boomerang','Boomerangs in 9 materials, Common to Mythic','#d8a050',[],null],
+       ['chakram','Chakram Pack','Chakram','Boomerangs to chakrams','#ffd36b',[],'chakram'],
+       ['shuriken','Shuriken Pack','Giant Shuriken','Boomerangs to giant shurikens','#9aa3b2',[],'shuriken'],
+       ['bladerang','Bladerang Pack','Bladerang','Boomerangs to bladerangs','#ff4d5e',[],'bladerang']], /* 0.6: four boxes like every other weapon */
+    m:[['arcane','Arcane Pack','Wand','Sticks, wands and staffs in 9 materials','#b98aff',[],null],
+       ['crystal','Crystal Pack','Crystal Wand','Wands to crystal wands','#7ae8ff',[],'crystal'],
+       ['scepter','Royal Pack','Scepter','Wands to royal scepters','#ffd36b',[],'scepter'],
+       ['necro','Necro Pack','Skull Staff','Wands to skull staffs','#9be04a',[],'skullstaff']],
+    a:[['ranger','Ranger Pack','Bow','Bows and crossbows in 9 materials','#7bd84a',[],null],
+       ['longbow','Longbow Pack','Longbow','Bows to longbows','#c9a06a',[],'longbow'],
+       ['elven','Elven Pack','Elven Bow','Bows to elven bows','#5fd0a2',[],'elven'],
+       ['repeater','Repeater Pack','Repeater','Bows to repeater crossbows','#8a93ad',[],'repeater']],
+    c:[['warlord','Warlord Pack','Mace','Maces in 9 materials','#c8ccd8',[],null],
+       ['morning','Morning Star Pack','Morning Star','Maces to morning stars','#c9d2dc',[],'morningstar'],
+       ['hammer','War Hammer Pack','War Hammer','Maces to war hammers','#ff8a3d',[],'warhammer'],
+       ['flanged','Flanged Pack','Flanged Mace','Maces to flanged maces','#ffd36b',[],'flanged']]
   };
   const LINEOF={k:'knife',g:'gun',b:'bomb',f:'punch',r:'boomer',m:'magic',a:'bow',c:'mace'},PSETS=[ELEM,ELEM_G,ELEM_B];
   PACKS.k=[];PACKS.g=[];PACKS.b=[];PACKS.f=[];PACKS.r=[];PACKS.m=[];PACKS.a=[];PACKS.c=[];
@@ -1802,34 +1883,58 @@ const skinBase=id=>id?(isDevId(id)?(dev.skin?DEVIDS[id]:null):SKINS.find(s=>s.id
    Bonuses are percentages, so a slow heavy weapon gains exactly as much as a fast light one and a later weapon is never just better.
    Unlock prices: mastering the fists costs 1,000 coins (unlocks the knife), the knife 2,000 (gun), the gun about 3,000 (bomb); the bomb track is about 4,000.
    Each step costs a little more than the last, so the first steps come quickly and the last ones are a goal ---------- */
-const EVO_T=['f','k','g','b','r','m','a','c'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb',r:'Boomerang',m:'Magic',a:'Bow',c:'Mace'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb',r:'st_boom',m:'st_magic',a:'st_bow',c:'st_mace'};
-const WM_MAX=10,WM_BASE={f:47,k:94,g:141,b:188,r:235,m:282,a:329,c:376};
-const WM_SPEC={f:['Knockout','Heavy punches stun enemies for a moment'],k:['Precision','+10% chance to crit for double damage'],g:['Armor Piercing','+25% damage to mini bosses and bosses'],b:['Napalm','Blasts set enemies on fire'],r:['Sharp Return','Boomerangs deal +40% damage on the way back'],m:['Arcane Burst','Magic bolts burst on impact and hit enemies nearby'],a:['Volley','Charged shots fire three arrows'],c:['Earthshaker','Spin smashes send out a shockwave']};
-const WM_STEPS={
- f:[['dmg',.08],['spd',.06],['reach',.06],['form'],['dmg',.08],['spd',.06],['reach',.06],['form'],['spec'],['dmg',.1]],
- k:[['dmg',.08],['reach',.07],['spd',.05],['form'],['dmg',.08],['reach',.07],['spd',.05],['form'],['spec'],['dmg',.1]],
- g:[['spd',.06],['dmg',.08],['reach',.08],['form'],['spd',.06],['dmg',.08],['reach',.08],['form'],['spec'],['dmg',.1]],
- b:[['dmg',.08],['reach',.07],['spd',.05],['form'],['dmg',.08],['reach',.07],['spd',.05],['form'],['spec'],['dmg',.1]],
- r:[['dmg',.08],['reach',.08],['spd',.05],['form'],['dmg',.08],['reach',.08],['spd',.05],['form'],['spec'],['dmg',.1]],
- m:[['dmg',.08],['spd',.06],['reach',.07],['form'],['dmg',.08],['spd',.06],['reach',.07],['form'],['spec'],['dmg',.1]],
- a:[['spd',.06],['dmg',.08],['reach',.08],['form'],['spd',.06],['dmg',.08],['reach',.08],['form'],['spec'],['dmg',.1]],
- c:[['dmg',.08],['reach',.06],['spd',.06],['form'],['dmg',.08],['reach',.06],['spd',.06],['form'],['spec'],['dmg',.1]]
-};
+const EVO_T=['f','k','g','b','r','m','a','c'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb',r:'st_boom',m:'st_magic',a:'st_bow',c:'st_mace'};
+const WM_MAX=10;
+const WM_SPEC={f:['Knockout','Heavy punches stun enemies for a moment'],k:['Precision','+10% chance to crit for double damage'],g:['Armor Piercing','+25% damage to mini bosses and bosses'],b:['Napalm','Blasts set enemies on fire'],r:['Sharp Return','Boomerangs deal +40% damage on the way back'],m:['Arcane Echo','Every wand circle bursts a second time for 50% damage'],a:['Volley','A full draw fires three arrows'],c:['Earthshaker','Spin smashes send out a shockwave']};
 const WM_LINE={f:'punch',k:'knife',g:'gun',b:'bomb',r:'boomer',m:'magic',a:'bow',c:'mace'};
-/* old saves: evolution upgrade 1 becomes mastery step 4, both upgrades become a mastered track so nothing that was unlocked locks again */
-for(const t of ['f','k','g','b']){const o=upg['ev'+t]||0;if(o&&!(upg['wm'+t]>0))upg['wm'+t]=o>=2?10:4;delete upg['ev'+t]}
-const wmLv=t=>Math.min(WM_MAX,upg['wm'+t]||0);
-const wmCost=(t,n)=>Math.round(WM_BASE[t]*(1+.25*(n-1))/5)*5;
-const wmSum=(t,k)=>{let s=0;const L=wmLv(t);for(let i=0;i<L;i++)if(WM_STEPS[t][i][0]===k)s+=WM_STEPS[t][i][1];return s};
-const wmSpec=t=>wmLv(t)>=9;
-function wmText(t,i){const st=WM_STEPS[t][i],nm=EVO_NAME[t].toLowerCase(),fm=WLINES[WM_LINE[t]];
-  if(i===WM_MAX-1)return['Mastery','+'+Math.round(st[1]*100)+'% damage. Masters the '+nm+(EVO_T[EVO_T.indexOf(t)+1]?' and unlocks the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)+1]].toLowerCase():'')];
-  if(st[0]==='form'){const f=fm[i===3?1:2][1];return['Evolve: '+f,'Evolves into the '+f+', its next form']}
-  if(st[0]==='spec')return[WM_SPEC[t][0],WM_SPEC[t][1]];
-  const pc=Math.round(st[1]*100);return st[0]==='dmg'?['Damage','+'+pc+'% damage']:st[0]==='spd'?['Speed','+'+pc+'% attack speed']:['Reach','+'+pc+'% '+(t==='b'?'blast size':(t==='g'||t==='r'||t==='m'||t==='a')?'range':'reach')]}
-const evoLv=t=>wmLv(t)>=8?2:wmLv(t)>=4?1:0;
+/* 0.6: weapons are bought in Shop > Unlocks (fists are free). Prices go up with how strong the weapon is */
+const UNLOCK_P={r:500,k:1000,c:1500,a:2000,g:2500,b:3000,m:5000},UNLOCK_ORD=['f','r','k','c','a','g','b','m'];
+const fmtP=n=>n>=1000?(Math.round(n/100)/10)+'K':String(n);
+/* each weapon's own power scale (applied to every hit it lands), so a pricier weapon is a stronger weapon. Measured from damage per second
+   on one target and on a crowd, with ranged weapons counted a bit higher because they are safer to use */
+const WPOW={f:1,r:1.02,k:1.15,c:.7,a:1.3,g:1.8,b:1.4,m:1.3};
+/* 0.6: per-weapon upgrades in tiers (Shop > Upgrades). Tier I has 5 upgrades of 2 ranks each (0/10). Beating World 1 with a weapon opens
+   its Tier II (10/20) with new upgrades, World 2 opens Tier III (20/30) and so on up to Tier VI (50/60). A tier can be bought once the one
+   before it is complete. The weapon evolves at 4 and 8 points, and completing Tier I gives it its special */
+const WU_TIERS=6,WU_PER=5,WU_RK=2;
+const WU_S={f:['kb','stun','kb','stun'],r:['ret','burn','ret','slow'],k:['crit','pois','crit','heal'],c:['stun','kb','stun','kb'],a:['charge','pierce','charge','pierce'],g:['pierce','crit','pierce','boss'],b:['burn','reach','burn','slow'],m:['aoe','pois','aoe','burn']};
+const WU_PAT=[['dmg','spd','reach','S0','S1'],['dmg','crit','boss','S2','S3'],['dmg','spd','burn','pois','heal'],['dmg','crit','reach','S0','slow'],['dmg','boss','spd','S1','heal'],['dmg','crit','burn','pois','S2']];
+const WU_V={dmg:.06,spd:.04,reach:.05,crit:.02,boss:.06,burn:.05,pois:.05,slow:.05,heal:.02,kb:.12,stun:.03,ret:.12,charge:.1,pierce:.5,aoe:.07};
+const WU_FB=['spd','reach','slow','heal','boss','crit','burn','pois','kb'];
+const WU={};
+for(const t of EVO_T)WU[t]=WU_PAT.map((pat,ti)=>{const used=new Set();return pat.map(k=>{let key=k[0]==='S'?WU_S[t][+k[1]]:k;if(used.has(key))key=WU_FB.find(x=>!used.has(x));used.add(key);
+  return {id:key+(ti+1),k:key,tier:ti+1,v:key==='pierce'?.5:Math.round(WU_V[key]*(1+.25*ti)*1000)/1000}})});
+const ROMAN=['','I','II','III','IV','V','VI'];
+const WU_BASE={f:45,r:60,k:75,c:90,a:105,g:120,b:135,m:160};
+for(const t of ['f','k','g','b']){const o=upg['ev'+t]||0;if(o&&!(upg['wm'+t]>0))upg['wm'+t]=o>=2?10:4;delete upg['ev'+t]} /* very old saves: evolution upgrades become mastery steps */
+if(!upg.wu||typeof upg.wu!=='object'){ /* old saves: the 10-step mastery becomes Tier I points, and every weapon that was open stays owned */
+  const OLD=['f','k','g','b','r','m','a','c'];upg.wu={};upg.own=upg.own||{};
+  OLD.forEach((t,i)=>{const L=Math.min(10,upg['wm'+t]||0),r={};for(let j=0;j<L;j++){const e=WU[t][0][j%5];r[e.id]=(r[e.id]||0)+1}upg.wu[t]=r;
+    if(i>0&&(upg['wm'+OLD[i-1]]||0)>=10)upg.own[t]=1});
+  OLD.forEach(t=>{delete upg['wm'+t]});
+  try{LS.setItem('cinder-upg',JSON.stringify(upg))}catch(e){}
+}
+if(!upg.own||typeof upg.own!=='object')upg.own={};
+const wuR=(t,id)=>Math.min(WU_RK,((upg.wu&&upg.wu[t])||{})[id]||0);
+const wuPts=(t,tier)=>WU[t][tier-1].reduce((a,e)=>a+wuR(t,e.id),0);
+const wuTot=t=>WU[t].reduce((a,tr)=>a+tr.reduce((b,e)=>b+wuR(t,e.id),0),0);
+const wBeat=t=>{let w=0;const ww=stats.wwin||{};for(let i=1;i<=5;i++)if((ww[i+t]||0)>0)w=i;return w}; /* the highest world whose final boss you beat with this weapon */
+const wuTierOpen=(t,n)=>n===1||wBeat(t)>=n-1;
+const wuCost=(t,tier,k)=>Math.round(WU_BASE[t]*(1+.25*k)*(1+.7*(tier-1))/5)*5;
+const wmLv=t=>Math.min(WM_MAX,wuPts(t,1));
+const wmSum=(t,k)=>{let s=0;for(const tr of WU[t])for(const e of tr)if(e.k===k)s+=e.v*wuR(t,e.id);return s};
+const wmSpec=t=>wuPts(t,1)>=WM_MAX;
+function wuText(t,e){const nm=EVO_NAME[t].toLowerCase(),pc=Math.round(e.v*100)+'%',T=ROMAN[e.tier];
+  const N={dmg:['Power','+'+pc+' damage per rank'],spd:[t==='a'?'Draw Speed':'Speed',t==='a'?pc+' faster draw per rank':'+'+pc+' attack speed per rank'],reach:[t==='b'?'Blast Size':t==='m'?'Cast Range':(t==='g'||t==='r'||t==='a')?'Range':'Reach','+'+pc+' '+(t==='b'?'blast size':(t==='g'||t==='r'||t==='a'||t==='m')?'range':'reach')+' per rank'],
+    crit:['Critical Hits','+'+pc+' chance per rank to hit for double damage'],boss:['Boss Slayer','+'+pc+' damage to bosses and mini bosses per rank'],burn:['Burning Hits',pc+' chance per rank to set enemies on fire'],
+    pois:['Poison Hits',pc+' chance per rank to poison enemies'],slow:['Chilling Hits',pc+' chance per rank to slow enemies'],heal:['Life Steal',pc+' chance per rank to heal 1 heart on a kill'],
+    kb:['Knockback','+'+pc+' knockback per rank'],stun:['Stunning Blows',pc+' chance per rank to stun an enemy for a moment'],ret:['Sharp Return','+'+pc+' damage on the way back per rank'],
+    charge:['Full Draw','Charged arrows hit +'+pc+' harder per rank'],pierce:['Piercing','Every 2 ranks: shots pass through 1 more enemy'],aoe:['Bigger Circles','+'+pc+' circle size per rank']}[e.k];
+  return [N[0]+' '+T,N[1]];
+}
+const evoLv=t=>{const n=wuTot(t);return n>=8?2:n>=4?1:0};
 const evoDone=t=>wmLv(t)>=WM_MAX;
-const typeOpen=t=>t==='f'||!!dev.skin||evoDone(EVO_T[EVO_T.indexOf(t)-1]);
+const typeOpen=t=>t==='f'||!!dev.skin||!!upg.own[t];
 /* hand over the basic common weapon of every weapon that is open but has nothing equipped */
 function evoGrant(){for(const t of EVO_T.slice(1))if(typeOpen(t)&&!eq[t])eq[t]=EVO_ST[t]}
 function wLevel(){if(isDevId(eq[wType]))return Math.min(Math.floor(clearedWaves()/10),2);return evoLv(wType)} /* mastery steps 4 and 8 evolve the weapon right away: steps 0-3 first form, 4-7 second form, 8-10 final form. Dev skins still evolve once per boss */
@@ -2155,7 +2260,7 @@ function newArt(c,s,t,bc,L,k,grip,ball){
 }
 
 /* ---------- cosmetic-only art for the weapon boxes' final evolutions (stats never come from here) ---------- */
-const VKS={butterfly:1,m16:1,sniper:1,shotgun:1,nuke:1,pipebomb:1,cannonball:1,rpg:1,boxing:1,claws:1,skeleton:1,robot:1};
+const VKS={butterfly:1,m16:1,sniper:1,shotgun:1,nuke:1,pipebomb:1,cannonball:1,rpg:1,boxing:1,claws:1,skeleton:1,robot:1,chakram:1,shuriken:1,bladerang:1,crystal:1,scepter:1,skullstaff:1,longbow:1,elven:1,repeater:1,morningstar:1,warhammer:1,flanged:1};
 function vkArt(c,s,t,bc,L,k,grip,ball){
   const poly=(pts,col)=>{c.beginPath();pts.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();c.fillStyle=col;c.fill();c.stroke()};
   const box=(x,y,w,h,col,sh)=>{c.beginPath();c.rect(x,y,w,h);c.fillStyle=col;c.fill();if(sh)shine(c,y,y+h,.5);c.stroke()};
@@ -2163,7 +2268,70 @@ function vkArt(c,s,t,bc,L,k,grip,ball){
     c.save();c.globalCompositeOperation='lighter';const fl=.7+.3*Math.sin(t*28);c.fillStyle='#ffb347';c.beginPath();c.arc(x+dx,y+dy,3.6*fl,0,TAU);c.fill();c.fillStyle='#ffffff';c.beginPath();c.arc(x+dx,y+dy,1.5,0,TAU);c.fill();c.restore()};
   const DARK='#2a2f3a',STEEL='#dfe9f5',INK='#12141c';
   const sphere=(x,y,r)=>{c.beginPath();c.arc(x,y,r,0,TAU);c.fillStyle=bc;c.fill();const g=c.createRadialGradient(x-r*.4,y-r*.5,1,x,y,r*1.1);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(0,0,0,.4)');c.fillStyle=g;c.fill();c.stroke()};
-  if(k==='butterfly'){
+  if(k==='chakram'){ /* 0.6: a steel war ring: a sharp outer edge with teeth, a wrapped grip across the middle */
+    c.beginPath();c.arc(4,0,14,0,TAU);c.arc(4,0,8,0,TAU,true);c.fillStyle=bc;c.fill('evenodd');c.stroke();
+    for(let i=0;i<10;i++){const a=i*TAU/10+t*.4;poly([[4+Math.cos(a-.18)*13.5,Math.sin(a-.18)*13.5],[4+Math.cos(a)*18,Math.sin(a)*18],[4+Math.cos(a+.18)*13.5,Math.sin(a+.18)*13.5]],s.g)}
+    c.save();c.strokeStyle='rgba(255,255,255,.7)';c.lineWidth=1.2;c.beginPath();c.arc(4,0,11.5,-2.4,-1.2);c.stroke();c.restore();
+    box(-5,-2,18,4,s.h);
+  }else if(k==='shuriken'){ /* 0.6: a giant four-point throwing star with a hole in the middle */
+    c.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4+.4,r=i%2?5:18;const x=4+Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();c.fillStyle=bc;c.fill();shine(c,-18,18,.45);c.stroke();
+    c.save();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;for(let i=0;i<4;i++){const a=i*Math.PI/2+.4;c.beginPath();c.moveTo(4,0);c.lineTo(4+Math.cos(a)*16,Math.sin(a)*16);c.stroke()}c.restore();
+    ball(4,0,3.6,s.g);c.fillStyle=INK;c.beginPath();c.arc(4,0,1.5,0,TAU);c.fill();
+  }else if(k==='bladerang'){ /* 0.6: a long bladed boomerang with a bright cutting edge and a grip at the elbow */
+    poly([[-10,-3],[-2,-16],[16,-12],[19,-10],[2,-9],[-3,0],[2,9],[19,10],[16,12],[-2,16],[-10,3]],bc);
+    c.save();c.strokeStyle=s.g;c.lineWidth=2;c.beginPath();c.moveTo(-1,-14.5);c.lineTo(16,-11);c.moveTo(-1,14.5);c.lineTo(16,11);c.stroke();c.restore();
+    box(-11,-3.4,7,6.8,s.h);c.fillStyle=INK;c.beginPath();c.arc(-7.5,0,1.2,0,TAU);c.fill();
+  }else if(k==='crystal'){ /* 0.6: a slim rod topped with a glowing cut crystal */
+    grip(-12,-2);box(-2,-1.6,L-17,3.2,s.h);box(L-20,-3,3,6,s.g);
+    poly([[L-17,0],[L-12,-6],[L-4,-6.5],[L+4,0],[L-4,6.5],[L-12,6]],bc);
+    c.save();c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=1;c.beginPath();c.moveTo(L-12,-6);c.lineTo(L-8,0);c.lineTo(L-12,6);c.moveTo(L-8,0);c.lineTo(L+4,0);c.stroke();c.restore();
+    c.save();c.globalCompositeOperation='lighter';c.fillStyle=s.glow||bc;c.globalAlpha=.3+.2*Math.sin(t*6);c.beginPath();c.arc(L-5,0,10,0,TAU);c.fill();c.restore();
+  }else if(k==='scepter'){ /* 0.6: a royal scepter: a gold rod and a crown holding a big gem */
+    grip(-12,-3);box(-3,-1.8,L-14,3.6,s.g,1);ball(-3,0,2.4,s.g);
+    const cx=L-6;poly([[cx-8,-5],[cx-9,-11],[cx-4,-7],[cx,-12],[cx+4,-7],[cx+9,-11],[cx+8,-5]],s.g);box(cx-8,-5,16,4,s.g);
+    ball(cx,4,5.4,bc);c.save();c.fillStyle='rgba(255,255,255,.7)';c.beginPath();c.arc(cx-1.8,2.2,1.6,0,TAU);c.fill();c.restore();
+    c.save();c.globalCompositeOperation='lighter';c.fillStyle=s.glow||bc;c.globalAlpha=.25+.2*Math.sin(t*5);c.beginPath();c.arc(cx,2,11,0,TAU);c.fill();c.restore();
+  }else if(k==='skullstaff'){ /* 0.6: a gnarled staff with a skull on top whose eyes glow */
+    box(-22,-1.8,L+4,3.6,s.h);grip(-6,4);
+    c.save();c.strokeStyle=INK;c.lineWidth=2;c.beginPath();c.moveTo(L-16,-2);c.quadraticCurveTo(L-12,-9,L-8,-7);c.moveTo(L-16,2);c.quadraticCurveTo(L-12,9,L-8,7);c.stroke();c.restore();
+    c.beginPath();c.ellipse(L-4,-1,8,7.2,0,0,TAU);c.fillStyle='#e8e0c8';c.fill();c.stroke();box(L-8,4,8,4,'#d8ceb2');
+    const ey=.6+.4*Math.sin(t*7);c.fillStyle=INK;c.beginPath();c.arc(L-6.6,-2,2.2,0,TAU);c.arc(L-1.4,-2,2.2,0,TAU);c.fill();
+    c.save();c.globalCompositeOperation='lighter';c.fillStyle=bc;c.globalAlpha=ey;c.beginPath();c.arc(L-6.6,-2,1.4,0,TAU);c.arc(L-1.4,-2,1.4,0,TAU);c.fill();c.restore();
+    c.fillStyle=INK;for(const x of[-6.5,-4,-1.5])c.fillRect(L+x-.5,4.5,1,3);
+  }else if(k==='longbow'){ /* 0.6: a tall longbow with a long arrow nocked */
+    const R2=18;c.save();c.strokeStyle='#e8e0c8';c.lineWidth=1;c.beginPath();c.moveTo(0,-R2);c.lineTo(-2,0);c.lineTo(0,R2);c.stroke();c.restore();
+    box(-12,-.8,33,1.6,'#c9a06a');poly([[21,-3],[26.5,0],[21,3]],STEEL);poly([[-12,-.8],[-16.5,-3.8],[-9,-.8]],s.g);poly([[-12,.8],[-16.5,3.8],[-9,.8]],s.g);
+    c.save();c.lineCap='round';c.beginPath();c.moveTo(0,-R2);c.quadraticCurveTo(13,0,0,R2);c.strokeStyle=INK;c.lineWidth=5.4;c.stroke();c.strokeStyle=bc;c.lineWidth=3.2;c.stroke();c.restore();
+    box(5,-3,3.2,6,s.h);ball(0,-R2,1.6,s.g);ball(0,R2,1.6,s.g);
+  }else if(k==='elven'){ /* 0.6: an elegant recurved elven bow with leaf ornaments */
+    const R2=15;c.save();c.strokeStyle='#e8e0c8';c.lineWidth=1;c.beginPath();c.moveTo(-2,-R2+1);c.lineTo(-1,0);c.lineTo(-2,R2-1);c.stroke();c.restore();
+    box(-10,-.8,28,1.6,'#c9a06a');poly([[18,-3],[23,0],[18,3]],STEEL);
+    c.save();c.lineCap='round';c.beginPath();c.moveTo(-2,-R2+1);c.bezierCurveTo(4,-R2-3,12,-6,8,0);c.bezierCurveTo(12,6,4,R2+3,-2,R2-1);c.strokeStyle=INK;c.lineWidth=5.4;c.stroke();c.strokeStyle=bc;c.lineWidth=3.2;c.stroke();c.restore();
+    for(const sg of[-1,1])poly([[4,sg*9],[9,sg*13],[6,sg*7]],s.g);
+    ball(8,0,2.4,s.g);
+  }else if(k==='repeater'){ /* 0.6: a repeating crossbow with a bolt magazine on top */
+    poly([[-17,-2.4],[8,-3],[8,3],[-10,3.6],[-18,5.8]],s.h);
+    box(-6,-1.5,24,3,bc,1);poly([[-4,3],[-1,3],[-2.4,7.6]],INK);
+    box(-2,-9,14,7,s.g);c.fillStyle=INK;for(const x of[1,4.5,8])c.fillRect(x,-8,1.4,5);
+    c.save();c.strokeStyle='#e8e0c8';c.lineWidth=1;c.beginPath();c.moveTo(13,-12);c.lineTo(3,0);c.lineTo(13,12);c.stroke();c.restore();
+    c.save();c.lineCap='round';c.beginPath();c.moveTo(13,-12);c.quadraticCurveTo(21,0,13,12);c.strokeStyle=INK;c.lineWidth=5;c.stroke();c.strokeStyle=STEEL;c.lineWidth=3;c.stroke();c.restore();
+    box(3,-.9,19,1.8,'#c9a06a');poly([[22,-2.8],[26.5,0],[22,2.8]],STEEL);
+  }else if(k==='morningstar'){ /* 0.6: a flail: a short handle, a chain and a big spiked ball */
+    grip(-14,2);ball(-14.5,0,2.3,s.g);box(2,-2.4,6,4.8,s.g);
+    const sw=Math.sin(t*4)*2,hx=L-2,hy=sw;
+    c.save();c.strokeStyle='#8a93a3';c.lineWidth=2;c.setLineDash([2.4,1.6]);c.beginPath();c.moveTo(8,0);c.quadraticCurveTo((8+hx)/2,4+sw,hx-7,hy);c.stroke();c.restore();
+    for(let i=0;i<10;i++){const a=i*TAU/10;poly([[hx+Math.cos(a-.28)*6.5,hy+Math.sin(a-.28)*6.5],[hx+Math.cos(a)*11.5,hy+Math.sin(a)*11.5],[hx+Math.cos(a+.28)*6.5,hy+Math.sin(a+.28)*6.5]],STEEL)}
+    sphere(hx,hy,7.2);
+  }else if(k==='warhammer'){ /* 0.6: a long war hammer: a heavy block head with a spike on the back */
+    grip(-14,6);ball(-14.5,0,2.3,s.g);box(6,-1.8,L-12,3.6,s.h);
+    box(L-10,-12,11,24,bc,1);box(L-12,-12,2.4,24,s.g);box(L+1,-12,2.4,24,s.g);
+    poly([[L-10,-3],[L-17,0],[L-10,3]],STEEL);
+    c.save();c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1.2;c.beginPath();c.moveTo(L-8,-10);c.lineTo(L-8,10);c.stroke();c.restore();
+  }else if(k==='flanged'){ /* 0.6: a flanged mace: steel plates fanning out round the head */
+    grip(-14,4);ball(-14.5,0,2.3,s.g);box(4,-2,L-16,4,s.h);box(L-14,-3,3,6,s.g);
+    const hx=L-4;for(let i=0;i<6;i++){const a=i*TAU/6+.26;poly([[hx+Math.cos(a-.5)*4,Math.sin(a-.5)*4],[hx+Math.cos(a-.12)*11,Math.sin(a-.12)*11],[hx+Math.cos(a+.12)*11,Math.sin(a+.12)*11],[hx+Math.cos(a+.5)*4,Math.sin(a+.5)*4]],bc)}
+    ball(hx,0,4.6,s.g);ball(hx+7,0,2,STEEL);
+  }else if(k==='butterfly'){
     /* balisong: two skeletonised handles flank the blade, joined by pivot pins, with a latch; the blade has a clip point, fuller and swedge */
     const hp=(y0,y1,col)=>{c.beginPath();c.moveTo(-17,y0+1);c.quadraticCurveTo(-18,y0,-16,y0);c.lineTo(3,y0);c.lineTo(5,(y0+y1)/2);c.lineTo(3,y1);c.lineTo(-16,y1);c.quadraticCurveTo(-18,y1,-17,y1-1);c.closePath();c.fillStyle=col;c.fill();c.stroke()};
     hp(-6.6,-.4,s.h);hp(.4,6.6,s.h);
@@ -2554,12 +2722,13 @@ const ownFlt={};
 const SHOP_PETS=false;
 function shopTabs(){
   ['k','g','b','r','m','a','c'].forEach(t=>{$('t'+t).style.display=typeOpen(t)?'':'none'});$('tp').style.display=SHOP_PETS?'':'none';
-  if((cosTab==='p'&&!SHOP_PETS)||(cosTab!=='u'&&cosTab!=='p'&&!typeOpen(cosTab))){cosTab='f';cosSel=eq.f}
+  if((cosTab==='p'&&!SHOP_PETS)||(cosTab!=='u'&&cosTab!=='l'&&cosTab!=='p'&&!typeOpen(cosTab))){cosTab='f';cosSel=eq.f}
 }
 function renderCos(){
   shopTabs();
   if(cosTab==='u'){renderUpg();return}
-  $('tu').classList.remove('on');
+  if(cosTab==='l'){renderUnl();return}
+  $('tu').classList.remove('on');topTabs();
   const P=cosTab==='p',eqId=P?petEq:eq[cosTab];
   TABS.forEach(t=>$('t'+t).classList.toggle('on',cosTab===t));
   $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
@@ -2567,7 +2736,7 @@ function renderCos(){
     const pt=EVO_T[EVO_T.indexOf(cosTab)-1];
     $('qtybar').hidden=true;$('qtybar').style.display='none';{const on=$('oddsnote');if(on)on.style.display='none'}
     $('cosname').textContent=EVO_NAME[cosTab]+' · locked';
-    $('packs').innerHTML='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[cosTab]+' boxes are locked</b><span>Master the '+EVO_NAME[pt].toLowerCase()+' in the Upgrades tab to unlock the basic '+EVO_NAME[cosTab].toLowerCase()+' and these boxes.</span></div>';
+    $('packs').innerHTML='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[cosTab]+' boxes are locked</b><span>Buy the '+EVO_NAME[cosTab].toLowerCase()+' in the Unlocks tab ('+fmtP(UNLOCK_P[cosTab]||0)+' coins) to open its skins.</span></div>';
     $('coll').innerHTML='';return;
   }
   boxQty=Math.max(1,Math.min(boxQty,MAXQ));
@@ -2705,7 +2874,7 @@ function drawPrev(now,dt){
 }
 
 let enemies=[],parts=[],slashes=[],drops=[],bolts=[],bullets=[];
-let thrown=[],meteors=[],pbul=[],pbomb=[],boomers=[];
+let thrown=[],meteors=[],pbul=[],pbomb=[],boomers=[],wcast=[];
 let hudC={};
 
 /* ---------- key bindings ---------- */
@@ -3249,6 +3418,18 @@ function kitChips(ch){
 }
 const PROG={first:()=>[stats.kills,1],k100:()=>[stats.kills,100],k1000:()=>[stats.kills,1000],k5000:()=>[stats.kills,5000],w5:()=>[stats.best,5],w10:()=>[stats.best,10],w25:()=>[stats.best,25],w50:()=>[stats.best,50],w100:()=>[stats.best,100],boss1:()=>[stats.boss,1],boss25:()=>[stats.boss,25],c20:()=>[stats.combo,20],c60:()=>[stats.combo,60],vault:()=>[stats.vault,1],gold2:()=>[stats.yellow,100],green:()=>[stats.green,10],lv5:()=>[acct().L,5],lv15:()=>[acct().L,15],loop:()=>[bestLoop,1]};
 
+/* 0.6: difficulty achievements are back for Easy, Medium and Hard (there are none for the hardest difficulty) */
+const dWon=(d,w)=>((stats.dwin||{})[d]||0)>=w;
+ACH.push(
+ ['dez1','Easy Does It','Beat World 1 on Easy',10,()=>dWon('easy',1)],
+ ['dez3','Sunday Stroll','Beat World 3 on Easy',30,()=>dWon('easy',3)],
+ ['dez5','Gentle Giant','Beat World 5 on Easy',80,()=>dWon('easy',5)],
+ ['dmd1','Average Joe','Beat World 1 on Medium',30,()=>dWon('medium',1)],
+ ['dmd3','Seasoned','Beat World 3 on Medium',80,()=>dWon('medium',3)],
+ ['dmd5','Swamp Survivor','Beat World 5 on Medium',150,()=>dWon('medium',5)],
+ ['dhd1','Hardened','Beat World 1 on Hard',80,()=>dWon('hard',1)],
+ ['dhd3','Battle Scarred','Beat World 3 on Hard',150,()=>dWon('hard',3)],
+ ['dhd5','Unbreakable','Beat World 5 on Hard',300,()=>dWon('hard',5)]);
 /* --- 15 extra achievements (40 total) --- */
 ACH.push(
  ['c100','Combo God','Reach a 100 hit combo',60,()=>stats.combo>=100],
@@ -3365,12 +3546,12 @@ ACH.push(
  ['gun3','High Noon','Beat World 3 using only the Gun',0,()=>wwin('3g')],
  ['bomb3','Sandstorm','Beat World 3 using only Bombs',0,()=>wwin('3b')],
  ['allw1','Jack of All Trades','Beat World 1 once with each weapon: Fists, Knife, Gun and Bombs',0,()=>['1f','1k','1g','1b'].every(wwin)],
- ['wmf','Iron Fists','Master the Fists (all 10 steps)',0,()=>wmLv('f')>=WM_MAX],
+ ['wmf','Iron Fists','Complete Tier I of the Fists upgrades',0,()=>wmLv('f')>=WM_MAX],
  ['wmk','Honed Edge','Master the Knife',0,()=>wmLv('k')>=WM_MAX],
  ['wmg','Sharpshooter','Master the Gun',0,()=>wmLv('g')>=WM_MAX],
  ['wmb','Big Boom','Master the Bomb',0,()=>wmLv('b')>=WM_MAX],
  ['wmr','Comeback Kid','Master the Boomerang',0,()=>wmLv('r')>=WM_MAX],
- ['wmm','Archmage','Master Magic',0,()=>wmLv('m')>=WM_MAX],
+ ['wmm','Archmage','Master the Wand',0,()=>wmLv('m')>=WM_MAX],
  ['wma','Dead Eye','Master the Bow',0,()=>wmLv('a')>=WM_MAX],
  ['wmc','Skull Splitter','Master the Mace',0,()=>wmLv('c')>=WM_MAX],
  ['wmall','Arsenal Master','Master every weapon',0,()=>EVO_T.every(t=>wmLv(t)>=WM_MAX)],
@@ -3532,6 +3713,7 @@ $('hach').addEventListener('click',e=>openSub('ach',e.currentTarget));
 const cumXp=L=>{let s=0;for(let i=1;i<L;i++)s+=xpNeed(i);return s};
 function renderAcct(){
   const a=acct(),L=a.L,toNext=a.need-a.x;
+  $('acctt').textContent=playerName()||'Account Level';
   $('acctsum').innerHTML='<div class="alv"><span>LEVEL</span><b>'+L+'</b></div><div class="alr">'+xpHtml(a)+'<p class="note">'+toNext+' XP to level '+(L+1)+' &middot; '+xpTotal+' XP total &middot; '+((L-1)*LEVEL_COINS+Math.floor((L-1)/BONUS_EVERY)*(LEVEL_BONUS-LEVEL_COINS))+' coins earned from levels so far</p><p class="note">10 coins every level, and 100 on every 10th level. '+(10-((L-1)%10))+' level'+((10-((L-1)%10))===1?'':'s')+' until the next 100.</p></div>';
   const ms=ACH.filter(x=>/^lv\d+$/.test(x[0])).map(x=>({a:x,lv:+x[0].slice(2),ch:CHARS.find(c=>c.ach===x[0])})).sort((p,q)=>p.lv-q.lv);
   $('acctms').innerHTML=ms.map(m=>{
@@ -3566,7 +3748,7 @@ const UPG={
  xp:{n:'Extra XP',d:'+10% XP from waves and green enemies per level. Stacks up to 5 times.',max:5}
 };
 const UPG_COST=500;
-const permaOpen=()=>typeOpen('b'); /* Perma upgrades stay locked until every weapon (fists, knife, gun and bomb) is unlocked */
+const permaOpen=()=>EVO_T.filter(typeOpen).length>=4; /* 0.6: General upgrades open once you own 4 weapons */
 const upgCost=()=>UPG_COST;
 /* the old permanent upgrades are gone: hand back whatever was spent on them */
 try{const OLDU={vit:80,swift:50,lucky:60,scholar:60,dashu:70,head:120};let rf=0,ch=false;for(const k in OLDU){if(upg[k]){for(let i=0;i<upg[k];i++)rf+=Math.round(OLDU[k]*(1+.8*i));ch=true}if(k in upg){delete upg[k];ch=true}}if(ch){wallet+=rf;saveMeta();saveOwn()}}catch(e){}
@@ -3575,49 +3757,79 @@ function buyUpg(k){
   const c=upgCost(k);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
   wallet-=c;upg[k]=lv+1;saveMeta();saveOwn();sfx(660,.16,'triangle',.07,1.6);renderCos();checkAch();
 }
-let upgTab='f';
-function buyEvo(t,n){
-  if(!typeOpen(t)||wmLv(t)!==n-1||n>WM_MAX)return;
-  const c=wmCost(t,n);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
-  const was=EVO_T.filter(x=>typeOpen(x));
-  const evB=evoLv(t),evSk=skinBase(eq[t])||skinBase(EVO_ST[t]||'st_fist');
-  wallet-=c;upg['wm'+t]=n;evoGrant();saveMeta();saveOwn();syncEq();sfx(660,.16,'triangle',.07,1.6);
-  {const evN=evoLv(t);if(evN>evB&&evSk&&evSk.forms)setTimeout(()=>playEvo(evSk.forms[evB],evSk.forms[evN]),120)} /* this step evolved the weapon */
-  const nu=EVO_T.find(x=>typeOpen(x)&&was.indexOf(x)<0);
-  renderCos();
-  $('cosres').textContent=nu?'Mastered! Unlocked: Basic '+EVO_NAME[nu]+'. Equip it from the weapon screen; its mastery track is open.':EVO_NAME[t]+' mastery '+n+' / '+WM_MAX+': '+wmText(t,n-1)[0]+'.';
+
+/* 0.6: buy one rank of a tiered weapon upgrade */
+function buyWU(t,id){
+  if(!typeOpen(t))return;
+  let e=null;for(const tr of WU[t])for(const x of tr)if(x.id===id)e=x;if(!e)return;
+  const r=wuR(t,id),pts=wuPts(t,e.tier);
+  if(r>=WU_RK||!wuTierOpen(t,e.tier)||(e.tier>1&&wuPts(t,e.tier-1)<WU_PER*WU_RK))return;
+  const c=wuCost(t,e.tier,pts);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
+  const evB=evoLv(t),evSk=skinBase(eq[t])||skinBase(EVO_ST[t]||'st_fist'),spB=wmSpec(t);
+  wallet-=c;upg.wu[t]=upg.wu[t]||{};upg.wu[t][id]=r+1;saveMeta();saveOwn();syncEq();sfx(660,.16,'triangle',.07,1.6);
+  {const evN=evoLv(t);if(evN>evB&&evSk&&evSk.forms)setTimeout(()=>playEvo(evSk.forms[evB],evSk.forms[evN]),120)} /* this rank evolved the weapon */
+  const sc=$('cosscroll')?$('cosscroll').scrollTop:0;renderCos();if($('cosscroll'))$('cosscroll').scrollTop=sc;
+  const tx=wuText(t,e);
+  $('cosres').textContent=(!spB&&wmSpec(t))?EVO_NAME[t]+' Tier I complete! Special unlocked: '+WM_SPEC[t][0]+'.':tx[0]+' rank '+(r+1)+' / '+WU_RK+'.';
   checkAch();
 }
+/* 0.6: buy a weapon in the Unlocks tab */
+function buyUnlock(t){
+  if(typeOpen(t)||!UNLOCK_P[t])return;
+  const c=UNLOCK_P[t];if(wallet<c){sfx(110,.1,'square',.05,.7);$('cosres').textContent='Not enough coins: the '+EVO_NAME[t].toLowerCase()+' costs '+fmtP(c)+'.';return}
+  wallet-=c;upg.own[t]=1;evoGrant();saveMeta();saveOwn();syncEq();sfx(660,.2,'triangle',.08,1.6);setTimeout(()=>sfx(990,.16,'triangle',.06,1.6),90);
+  renderCos();$('cosres').textContent='Unlocked the '+EVO_NAME[t].toLowerCase()+'! Pick it in Configure Run. Its skins and upgrades are open now.';
+  checkAch();
+}
+let upgTab='f';
+function topTabs(){
+  const k=cosTab==='u'?'u':cosTab==='l'?'l':'s';
+  $('sts').classList.toggle('on',k==='s');$('stu').classList.toggle('on',k==='u');$('stl').classList.toggle('on',k==='l');
+  $('skintabs').style.display=k==='s'?'':'none';$('tu').style.display='none';
+}
 function renderUpg(){
-  $('qtybar').hidden=true;{const on=$('oddsnote');if(on)on.style.display='none'}
-  TABS.forEach(t=>$('t'+t).classList.remove('on'));$('tu').classList.add('on');
+  $('qtybar').hidden=true;$('qtybar').style.display='none';{const on=$('oddsnote');if(on)on.style.display='none'}
+  TABS.forEach(t=>$('t'+t).classList.remove('on'));topTabs();
   $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
   $('cosname').textContent='Upgrades';
-  const NM=[['f','FISTS'],['k','KNIFE'],['g','GUN'],['b','BOMB'],['r','BOOMERANG'],['m','MAGIC'],['a','BOW'],['c','MACE'],['p','PERMA']];
+  const NM=UNLOCK_ORD.map(t=>[t,EVO_NAME[t].toUpperCase()]).concat([['p','GENERAL']]);
   if(upgTab!=='p'&&!typeOpen(upgTab))upgTab='f';
-  let h='<div class="tabs" style="grid-column:1/-1">'+NM.filter(n=>n[0]==='p'||typeOpen(n[0])).map(n=>{const lk=n[0]==='p'?!permaOpen():!typeOpen(n[0]);return '<button type="button" class="btn ghost sm'+(upgTab===n[0]?' on':'')+'" data-ut="'+n[0]+'">'+(lk?'&#128274; ':'')+n[1]+'</button>'}).join('')+'</div>';
+  let h='<div class="tabs" style="grid-column:1/-1">'+NM.filter(n=>n[0]==='p'||typeOpen(n[0])).map(n=>{const lk=n[0]==='p'&&!permaOpen();return '<button type="button" class="btn ghost sm'+(upgTab===n[0]?' on':'')+'" data-ut="'+n[0]+'">'+(lk?'&#128274; ':'')+n[1]+'</button>'}).join('')+'</div>';
   if(upgTab==='p'&&!permaOpen()){
-    const have=EVO_T.filter(typeOpen).length,nxt=EVO_T.find(x=>!typeOpen(x));
-    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked · '+have+' / '+EVO_T.length+' weapons unlocked</small><b>Perma upgrades are locked</b><span>Unlock every weapon first.'+(nxt?' Next up is the '+EVO_NAME[nxt].toLowerCase()+': master the '+EVO_NAME[EVO_T[EVO_T.indexOf(nxt)-1]].toLowerCase()+' in Upgrades.':'')+'</span></div>';
+    const have=EVO_T.filter(typeOpen).length;
+    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked · '+have+' / 4 weapons owned</small><b>General upgrades are locked</b><span>Own 4 weapons first (buy them in the Unlocks tab).</span></div>';
   }else if(upgTab==='p'){
     h+=Object.keys(UPG).map(k=>{const u=UPG[k],lv=upg[k]||0,mx=lv>=u.max,c=upgCost(k);
       return '<button type="button" class="item'+(mx?' maxed':'')+'" data-up="'+k+'" style="--tc:#ffd36b"'+(!mx&&wallet<c?' disabled':'')+'><small>'+(u.max>1?'Level '+lv+' / '+u.max:(mx?'Owned':'Not stackable'))+'</small><b>'+u.n+'</b><span>'+u.d+'</span><em class="price">'+(mx?(u.max>1?'Maxed':'Owned'):'<i class="coin"></i>'+c)+'</em></button>'}).join('');
-  }else if(!typeOpen(upgTab)){
-    const pt=EVO_T[EVO_T.indexOf(upgTab)-1];
-    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[upgTab]+' upgrades are locked</b><span>Master the '+EVO_NAME[pt].toLowerCase()+' (all 10 steps) first.</span></div>';
   }else{
-    const t=upgTab,lv=wmLv(t),nx=EVO_T[EVO_T.indexOf(t)+1];
-    h+='<p class="note" style="grid-column:1/-1;margin:0 0 2px">'+EVO_NAME[t]+' mastery <b style="color:var(--gold)">Step '+lv+' / '+WM_MAX+'</b> · now: '+[Math.round(wmSum(t,'dmg')*100)+'% damage',Math.round(wmSum(t,'spd')*100)+'% speed',Math.round(wmSum(t,'reach')*100)+'% '+(t==='b'?'blast':t==='g'?'range':'reach')].map(x=>'+'+x).join(' · ')+(wmSpec(t)?' · '+WM_SPEC[t][0]:'')+'</p>';
-    /* one step at a time: only the next step's box shows; buying it reveals the one after */
-    if(lv>=WM_MAX)h+='<div class="item maxed" style="--tc:#ffd36b;grid-column:1/-1;cursor:default"><small>Step '+WM_MAX+' / '+WM_MAX+'</small><b>'+EVO_NAME[t]+' mastered</b><span>Every step is bought.</span><em class="price">Mastered</em></div>';
-    else{const n=lv+1,c=wmCost(t,n),tx=wmText(t,n-1),big=WM_STEPS[t][n-1][0]==='form'||n>=9;
-      h+='<button type="button" class="item" data-evo="'+t+n+'" style="--tc:'+(big?'#ffd36b':'#8fd3ff')+';grid-column:1/-1"'+(wallet<c?' disabled':'')+'><small>Step '+n+' / '+WM_MAX+'</small><b>'+tx[0]+'</b><span>'+tx[1]+'</span><em class="price"><i class="coin"></i>'+c+'</em></button>'}
-    h+='<p class="note" style="grid-column:1/-1;margin:2px 0 0">Forms: '+WLINES[WM_LINE[t]].map(x=>x[1]).join(' → ')+' (steps 4 and 8).'+(nx?(evoDone(t)?' Mastered, so the '+EVO_NAME[nx].toLowerCase()+' is unlocked.':' Master it (step 10) to unlock the '+EVO_NAME[nx].toLowerCase()+'.'):' This is the last weapon.')+'</p>';
+    const t=upgTab,tot=wuTot(t),fm=WLINES[WM_LINE[t]];
+    h+='<p class="note" style="grid-column:1/-1;margin:0 0 2px">'+EVO_NAME[t]+' &middot; <b style="color:var(--gold)">'+tot+' points</b> &middot; form: '+fm[evoLv(t)][1]+(evoLv(t)<2?' (evolves at '+(evoLv(t)?8:4)+' points)':'')+' &middot; special: '+(wmSpec(t)?'<b style="color:var(--gold)">'+WM_SPEC[t][0]+'</b>':WM_SPEC[t][0]+' (complete Tier I)')+'</p>';
+    for(let n=1;n<=WU_TIERS;n++){
+      if(!wuTierOpen(t,n)){h+='<p class="note wuhint" style="grid-column:1/-1;margin:6px 0 0">&#128274; Beat World '+(n-1)+' with the '+EVO_NAME[t].toLowerCase()+' to open its next upgrade tier.</p>';break}
+      const pts=wuPts(t,n),prevOk=n===1||wuPts(t,n-1)>=WU_PER*WU_RK,full=pts>=WU_PER*WU_RK;
+      h+='<h3 class="ch wuh" style="--tc:'+(full?'#ffd36b':'#8fd3ff')+';grid-column:1/-1">Tier '+ROMAN[n]+' <span class="wuc">'+((n-1)*10+pts)+' / '+(n*10)+'</span>'+(prevOk?'':' <small>finish Tier '+ROMAN[n-1]+' first</small>')+'</h3>';
+      h+=WU[t][n-1].map(e=>{const r=wuR(t,e.id),mx=r>=WU_RK,c=wuCost(t,n,pts),tx=wuText(t,e);
+        return '<button type="button" class="item wu'+(mx?' maxed':'')+'" data-wu="'+t+':'+e.id+'" style="--tc:'+(mx?'#ffd36b':'#8fd3ff')+'"'+(!mx&&(wallet<c||!prevOk)?' disabled':'')+'><small>Rank '+r+' / '+WU_RK+' <i class="pips">'+'&#9632;'.repeat(r)+'&#9633;'.repeat(WU_RK-r)+'</i></small><b>'+tx[0]+'</b><span>'+tx[1]+'</span><em class="price">'+(mx?'Maxed':'<i class="coin"></i>'+c)+'</em></button>'}).join('');
+    }
   }
   $('packs').innerHTML=h;
   $('coll').innerHTML='';
 }
+/* 0.6: the Unlocks tab. Fists are free; every other weapon is bought here, cheapest (weakest) first */
+function renderUnl(){
+  $('qtybar').hidden=true;$('qtybar').style.display='none';{const on=$('oddsnote');if(on)on.style.display='none'}
+  TABS.forEach(t=>$('t'+t).classList.remove('on'));topTabs();
+  $('wallet').innerHTML='<i class="coin"></i>'+fmtK(wallet)+' coins';
+  $('cosname').textContent='Unlocks';
+  $('packs').innerHTML='<p class="note" style="grid-column:1/-1;margin:0">Buy new weapons. The more a weapon costs, the stronger it is.</p>'+UNLOCK_ORD.map(t=>{const ow=typeOpen(t),c=UNLOCK_P[t]||0,st=STARTERS.find(z=>z.tab===t);
+    return '<button type="button" class="item unl'+(ow?' maxed':'')+'" data-unl="'+t+'" style="--tc:'+(ow?'#5fd0a2':'#ffd36b')+'"'+(!ow&&wallet<c?' disabled':'')+'><canvas width="112" height="44" data-ucv="'+t+'"></canvas><small>'+(ow?'Owned':'Weapon')+'</small><b>'+EVO_NAME[t]+'</b><span>'+(st&&st.wl?st.wl.join(' &rarr; '):'')+'</span><em class="price">'+(ow?(c?'Owned':'Free'):'<i class="coin"></i>'+fmtP(c))+'</em></button>'}).join('');
+  $('packs').querySelectorAll('canvas[data-ucv]').forEach(cv=>{const t=cv.dataset.ucv,s=maxF(STARTERS.find(z=>z.tab===t)),c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.globalAlpha=typeOpen(t)?1:.55;const k=Math.min(1.3,80/(s.len+22));c.translate(56-((s.len-12)/2)*k,24);c.rotate(-.2);c.scale(k,k);try{weaponShape(c,s,1,true)}catch(e){}c.restore()});
+  $('coll').innerHTML='';
+}
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
+$('stu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';sfx(520,.05,'triangle',.04,1.3);renderCos()});
+$('stl').addEventListener('click',()=>{if(cosBusy||cosTab==='l')return;cosTab='l';pv=[];$('cosres').textContent='';sfx(520,.05,'triangle',.04,1.3);renderCos()});
+$('sts').addEventListener('click',()=>{if(cosBusy||(cosTab!=='u'&&cosTab!=='l'))return;cosTab=typeOpen(wType)?wType:'f';cosSel=eq[cosTab];pv=[];$('cosres').textContent='';sfx(520,.05,'triangle',.04,1.3);renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
 const UPD_VER='0.5.1';
@@ -4018,7 +4230,7 @@ const HOT=[
 ];
 const HOTD={};HOT.forEach(h=>{HOTD[h.id]=h});
 const hotOk=h=>!h.w||h.w.indexOf(wType)>=0,clampv=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-const sharpOf=m=>(m.sharp||0)+(m.fsharp||0)+(m.gsharp||0)+(m.bsharp||0);
+const sharpOf=m=>(m.sharp||0)+(m.fsharp||0)+(m.gsharp||0)+(m.bsharp||0)+(m.rsharp||0)+(m.msharp||0)+(m.asharp||0)+(m.csharp||0);
 const hotDmg=b=>b+sharpOf(p.mods)+(p.dmgB||0);
 function hotBuild(){
   const hb=$('hotbar');if(hb.children.length===4)return;
@@ -4497,7 +4709,7 @@ const TIERS={
 let lava=[],shadows=[];
 const ABIL=[
   {id:'knife',tier:1,base:40,max:5,name:'Orbit Knife',d:'A blade circles you and cuts what it touches. +1 knife per level.'},
-  {id:'reach',tier:1,base:30,max:4,w:'kfb',name:'Long Reach',d:'Reach +15%: longer slashes and punches, farther bomb throws.'},
+  {id:'reach',tier:1,base:30,max:4,w:'kfbc',name:'Long Reach',d:'Reach +15%: longer slashes and punches, farther bomb throws.'},
   {id:'haste',tier:1,base:35,max:4,name:'Quick Hands',d:'Attack 15% faster.'},
   {id:'fleet',tier:1,base:25,max:4,name:'Fleet Foot',d:'Move 12% faster.'},
   {id:'phantom',tier:1,base:30,max:3,name:'Phantom Step',d:'Dash recharges 25% faster.'},
@@ -4582,12 +4794,36 @@ const ABIL=[
   {id:'bgrav',tier:5,base:200,max:1,w:'b',name:'Gravity Core',d:'Bombs pull nearby enemies into the blast just before it goes off.'},
   {id:'bnuke',tier:5,base:200,max:1,w:'b',name:'Mini Nuke',d:'Every 6th bomb is a nuke: 2x radius and 3x damage.'},
   {id:'bcarp',tier:6,base:320,max:1,w:'b',name:'Carpet Bombing',d:'Each throw drops two extra bombs along its path.'},
-  {id:'bech',tier:6,base:320,max:1,w:'b',name:'Blast Echo',d:'Every explosion detonates again 0.6 seconds later at 70% power.'}
+  {id:'bech',tier:6,base:320,max:1,w:'b',name:'Blast Echo',d:'Every explosion detonates again 0.6 seconds later at 70% power.'},
+  /* ---- 0.6: wand ---- */
+  {id:'mbig',tier:1,base:30,max:4,w:'m',name:'Wider Circle',d:'Wand circles are 20% bigger per level.'},
+  {id:'mpois',tier:2,base:55,max:3,w:'m',name:'Toxic Circle',d:'Circles poison everything inside: 1 damage per second for 3 seconds, +1 per level.'},
+  {id:'mfire',tier:2,base:55,max:3,w:'m',name:'Fire Circle',d:'Circles set everything inside burning: 1 damage per second, +1 per level.'},
+  {id:'mfrost',tier:2,base:55,max:1,w:'m',name:'Frost Circle',d:'Circles slow everything inside for 1.5 seconds.'},
+  {id:'msharp',tier:3,base:70,max:3,w:'m',name:'Focus Crystal',d:'Every circle deals +1 damage.'},
+  {id:'mling',tier:3,base:75,max:2,w:'m',name:'Lingering Circle',d:'Circles stay on the ground for 1.2 seconds per level and keep hurting what is inside.'},
+  {id:'mtwin',tier:4,base:120,max:2,w:'m',name:'Twin Cast',d:'Cast +1 extra circle per level on another enemy.'},
+  {id:'mstorm',tier:5,base:200,max:1,w:'m',name:'Arcane Storm',d:'Every 6th cast calls lightning on everything inside the circles.'},
+  /* ---- 0.6: bow ---- */
+  {id:'aquick',tier:1,base:30,max:3,w:'a',name:'Quick Draw',d:'Draw the bow 18% faster per level.'},
+  {id:'adraw',tier:2,base:55,max:3,w:'a',name:'Heavy Draw',d:'Charged arrows hit 15% harder per level.'},
+  {id:'apierce',tier:2,base:55,max:2,w:'a',name:'Piercing Arrows',d:'Arrows pass through +1 enemy per level.'},
+  {id:'asharp',tier:3,base:70,max:3,w:'a',name:'Broadheads',d:'Every arrow deals +1 damage.'},
+  {id:'afire',tier:3,base:75,max:3,w:'a',name:'Fire Arrows',d:'Arrows drawn at least halfway set enemies burning: 1 damage per second, +1 per level.'},
+  {id:'asplit',tier:4,base:120,max:1,w:'a',name:'Split Shot',d:'A full draw fires three arrows.'},
+  /* ---- 0.6: boomerang ---- */
+  {id:'rsharp',tier:3,base:70,max:3,w:'r',name:'Sharpened Edge',d:'Every boomerang hit deals +1 damage.'},
+  {id:'rfire',tier:3,base:75,max:2,w:'r',name:'Blazing Boomerang',d:'Boomerangs set enemies burning: 1 damage per second, +1 per level.'},
+  {id:'rmulti',tier:4,base:120,max:1,w:'r',name:'Second Boomerang',d:'Keep one more boomerang in the air.'},
+  /* ---- 0.6: mace ---- */
+  {id:'cstun',tier:2,base:55,max:1,w:'c',name:'Skull Cracker',d:'Spin smashes stun what they hit for 1 second. Bosses resist.'},
+  {id:'csharp',tier:3,base:70,max:3,w:'c',name:'Spiked Head',d:'Every mace hit deals +1 damage.'},
+  {id:'cquake',tier:4,base:120,max:1,w:'c',name:'Earthquake',d:'Every 4th smash cracks the ground: 4 damage to everything around you.'}
 ];
 /* the old abilities were all about knives and swords: they now only show up for knife (or knife and fists) builds. The rest work with every weapon */
 const KNIFE_ONLY=['knife','razor','rush','heavysw','swiftsw','leechsw','thundersw','frostsw','windsw','revenge','shadowsw','vampsw','critsw','fire','stormsw','soulreap','magmasw','berserksw','timesw','dragonsw','reaper','celestial','realitysw','phxsw','devour','godslayer','infinity'];
 ABIL.forEach(a=>{if(KNIFE_ONLY.indexOf(a.id)>=0)a.w='k';if(a.id==='fury')a.w='kf'});
-const WTAG={k:'Knife',f:'Fists',g:'Gun',b:'Bomb',kf:'Knife / Fists',kfb:'Knife / Fists / Bomb'};
+const WTAG={k:'Knife',f:'Fists',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace',kf:'Knife / Fists',kfb:'Knife / Fists / Bomb',kfbc:'Knife / Fists / Bomb / Mace'};
 const abilOk=a=>!a.w||a.w.indexOf(wType)>=0;
 const abilById=id=>ABIL.find(a=>a.id===id);
 function costOf(a){return Math.round(a.base*(1+.1*(wave-1))*(1+.45*p.mods[a.id]))}
@@ -4708,7 +4944,7 @@ function showHome(){
 function reset(){
   cine=null;cam.x=0;cam.y=0;
   brMode=brWant;brIdx=-1;devWarp=false;wallHole=0;runAch=[];bossIn=null;{const bi=$('bossintro');bi.hidden=true;bi.classList.remove('go','paused')}
-  Object.assign(p,{x:W/2,y:H/2,vx:0,vy:0,ix:0,iy:0,hp:DF().hp,maxhp:DF().hp,face:0,cd:0,dashT:0,dashCd:0,dashMax:1.1,dashId:0,vc:0,inv:0,blink:0,sw:0,swMax:.18,swHeavy:false,rec:0,swings:0,dx:1,dy:0,ddx:1,ddy:0,r:11,ka:0,kp:[],hits:0,souls:0,dv:0,revT:0,swiftT:0,infS:0,infT:0,phxCd:0,shT:0,vacc:0});lava=[];pools=[];shadows=[];
+  Object.assign(p,{x:W/2,y:H/2,vx:0,vy:0,ix:0,iy:0,hp:DF().hp,maxhp:DF().hp,face:0,cd:0,dashT:0,dashCd:0,dashMax:1.1,dashId:0,vc:0,inv:0,blink:0,sw:0,swMax:.18,swHeavy:false,rec:0,swings:0,dx:1,dy:0,ddx:1,ddy:0,r:11,ka:0,kp:[],hits:0,souls:0,dv:0,revT:0,swiftT:0,infS:0,infT:0,phxCd:0,shT:0,vacc:0,burnT:0,burnA:0,poisT:0,poisA:0,chillT:0,airN:0,bowC:0,bowOn:0,bowFull:0,casts:0});lava=[];wcast=[];pools=[];shadows=[];
   p.mods={};ABIL.forEach(a=>{p.mods[a.id]=0});p.rageS=0;p.rageT=0;p.gramp=0;
   hudC={};pickT=0;coins=0;gain=0;runWallet=0;floats=[];lootAcc.c=lootAcc.x=0;
   enemies=[];parts=[];slashes=[];drops=[];bolts=[];bullets=[];thrown=[];meteors=[];pbul=[];pbomb=[];boomers=[];p.wlv=0;lava=[];pools=[];shadows=[];score=0;kills=0;wave=0;combo=0;comboT=0;toSpawn=0;
@@ -6004,7 +6240,7 @@ jz.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)joyMove(e)});
 function joyEnd(e){if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;knob.style.transform=''}}
 jz.addEventListener('pointerup',joyEnd);jz.addEventListener('pointercancel',joyEnd);
 /* weapon select: pick a weapon type. The skin you equipped for that type in the shop is the one you take */
-const WTYPES=[['f','Fists'],['k','Knife'],['g','Gun'],['b','Bomb'],['r','Boomerang'],['m','Magic'],['a','Bow'],['c','Mace']],WPREV={k:'kn1',g:'gu1',b:'bo1',f:'pu1'};
+const WTYPES=[['f','Fists'],['k','Knife'],['g','Gun'],['b','Bomb'],['r','Boomerang'],['m','Wand'],['a','Bow'],['c','Mace']],WPREV={k:'kn1',g:'gu1',b:'bo1',f:'pu1'};
 const wpnTypeSkin=t=>(eq[t]&&typeOpen(t))?skinBase(eq[t]):null;
 function renderWpn(){
   if(!eq[wType]||!typeOpen(wType))wType='f';
@@ -6012,7 +6248,7 @@ function renderWpn(){
   const list=WTYPES.map(x=>({t:x[0],n:x[1],s:wpnTypeSkin(x[0])}));
   $('wpngrid').innerHTML=list.map(x=>{const r=x.s?RAR[RI[x.s.r]]:['','','#5a6078'];return '<button type="button" class="chc'+(x.t===wType?' on':'')+(x.s?'':' lock')+'" data-w="'+x.t+'" style="--tc:'+r[2]+'"><canvas width="96" height="96"></canvas><b>'+x.n+'</b><small>'+(x.s?x.s.n:'Locked · buy the '+EVO_NAME[EVO_T[EVO_T.indexOf(x.t)-1]]+' upgrades in the shop')+'</small></button>'}).join('');
   [...$('wpngrid').children].forEach((b,i)=>{
-    const x=list[i],sk=maxF(x.s||DEVIDS[{k:'dev_rainbow',g:'dev_gun',b:'dev_bomb',f:'dev_fist'}[x.t]]||STARTERS.find(z=>z.tab===x.t)),c=b.firstChild.getContext('2d'),k=Math.min(2.4,84/(sk.len+22));
+    const x=list[i],sk=maxF(x.s||DEVIDS[DEV_OF[x.t]]||STARTERS.find(z=>z.tab===x.t)),c=b.firstChild.getContext('2d'),k=Math.min(2.4,84/(sk.len+22));
     c.save();c.globalAlpha=x.s?1:.25;c.translate(48-((sk.len-12)/2)*k,54);c.rotate(-.2);c.scale(k,k);weaponShape(c,sk,1,true);c.restore();
   });
   const cur=wpnTypeSkin(wType);
@@ -6021,7 +6257,7 @@ function renderWpn(){
 }
 $('wpngrid').addEventListener('click',e=>{
   const b=e.target.closest('[data-w]');if(!b)return;const t=b.dataset.w;
-  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('wpninfo').textContent='Locked. Master the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)-1]].toLowerCase()+' (all 10 steps in Shop > Upgrades) to unlock the '+EVO_NAME[t].toLowerCase()+'.';return}
+  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('wpninfo').textContent='Locked. Buy the '+EVO_NAME[t].toLowerCase()+' in Shop > Unlocks ('+fmtP(UNLOCK_P[t]||0)+' coins).';return}
   wType=t;syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);renderWpn();openSub('world',$('wpngo'));
 });
 $('wpngo').addEventListener('click',()=>{closeSub();openSub('world',$('wpngo'))});
@@ -6086,6 +6322,8 @@ function renderCfg(){
   $('cfgwnote').textContent=b?(b.n+' \u00b7 '+(f.fn||f.n)+(b.wl?' \u00b7 path: '+b.wl.join(' \u2192 '):'')):'';
   $('cfgworld').innerHTML=[1,2,3,4,5].map(w=>{const o=worldOpen(w);return '<button type="button" class="cwd'+(w===selWorld?' on':'')+(o?'':' lock')+'" data-wd="'+w+'"><small>WORLD '+w+(o?'':' \u00b7 LOCKED')+'</small><b>'+WNAME[w]+'</b></button>'}).join('');
   $('cfgmods').innerHTML=MODS.map(m=>'<button type="button" class="cmod'+(cfgMods[m[0]]?' on':'')+'" data-m="'+m[0]+'" aria-pressed="'+!!cfgMods[m[0]]+'"><b>'+m[1]+'</b><small>'+m[2]+'</small><em>+'+m[3]+'%</em></button>').join('');
+  $('cfgdiff').innerHTML=Object.keys(DIFFS).map(k=>{const d=DIFFS[k];return '<button type="button" class="cdf'+(k===diff?' on':'')+'" data-df="'+k+'" style="--tc:'+d.c+'" aria-pressed="'+(k===diff)+'"><b>'+d.n+'</b><small>'+d.s+'</small></button>'}).join('');
+  $('cfgdnote').textContent=DIFFS[diff].r;
   const rw=modRew(cfgMods);$('cfgrew').textContent=rw?'\u00b7 rewards +'+rw+'% XP and coins':'\u00b7 optional, each one adds a reward bonus';
   const ch=CH();$('cfgwho').innerHTML='<b style="color:'+ch.acc+'">'+ch.n+'</b><small>'+(f?(f.fn||f.n):'')+' \u00b7 World '+selWorld+'</small>';
 }
@@ -6095,11 +6333,13 @@ function drawCfgPrev(now){
   try{drawFighter(g,ch,cSkin(ch.id),f,W2/2-10,H2-34,6,t,selWorld)}catch(e){}
 }
 $('cfgwpn').addEventListener('click',e=>{const b=e.target.closest('[data-w]');if(!b)return;const t=b.dataset.w;
-  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('cfgwnote').textContent='Locked. Master the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)-1]].toLowerCase()+' (all 10 steps in Shop > Upgrades) to unlock the '+EVO_NAME[t].toLowerCase()+'.';return}
+  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('cfgwnote').textContent='Locked. Buy the '+EVO_NAME[t].toLowerCase()+' in Shop > Unlocks ('+fmtP(UNLOCK_P[t]||0)+' coins).';return}
   wType=t;syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);renderCfg()});
 $('cfgworld').addEventListener('click',e=>{const b=e.target.closest('[data-wd]');if(!b)return;const w=+b.dataset.wd;
   if(!worldOpen(w)){sfx(110,.1,'square',.05,.7);$('cfgwnote').textContent='World '+w+' is locked. Beat wave 100 in World '+(w-1)+' to open it.';return}
   selWorld=w;sfx(520,.08,'triangle',.05,1.4);renderCfg()});
+/* 0.6: the difficulty is picked here for each run (it is remembered for next time) */
+$('cfgdiff').addEventListener('click',e=>{const b=e.target.closest('[data-df]');if(!b)return;diff=b.dataset.df;try{LS.setItem('cinder-diff',diff)}catch(x){}sfx(520,.08,'triangle',.05,1.4);renderDiffs();renderCfg()});
 $('cfgmods').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const k=b.dataset.m;if(cfgMods[k])delete cfgMods[k];else cfgMods[k]=1;
   try{LS.setItem('cinder-mods',JSON.stringify(cfgMods))}catch(x){}sfx(cfgMods[k]?660:420,.08,'triangle',.05,1.4);renderCfg()});
 $('cfggo').addEventListener('click',()=>{if(!wpnTypeSkin(wType)||!worldOpen(selWorld))return;worldGo=true;closeSub();worldGo=false;beginRun()});
@@ -6473,7 +6713,7 @@ function gunSfx(k,heavy){
   else{sfx(105,.07,'sawtooth',.06,.4);noise(.06,.06)}
   if(heavy)sfx(70,.2,'square',.05,.5);
 }
-function fireRanged(sk,w,heavy,a){
+function fireRanged(sk,w,heavy,a,ch){
   const m=p.mods,cdm=Math.pow(.85,m.haste)/(p.swiftT>0?1.15:1)*(p.cdM||1)*(cheat.rapid?.35:1)*(1-(p.gramp||0));
   p.cd=w.cd*(heavy?1.7:1)*cdm;if(m.gover)p.gramp=Math.min(.5,(p.gramp||0)+.05);p.sw=p.swMax=(w.rng==='bomb'||w.rng==='boom')?.3:.09;p.swHeavy=false;p.rec=0;
   const dmg=w.dmg+sharpOf(m)+(p.dmgB||0),rm=(1+.15*m.reach)*(p.reachM||1),col=slashCol()||sk.tr||'#ffd36b';
@@ -6488,7 +6728,7 @@ function fireRanged(sk,w,heavy,a){
     if(plasma){n=1;spread=0}
     for(let i=0;i<n;i++){
       const aa=a+(n>1?(i/(n-1)-.5)*spread:0)+(R()-.5)*2*w.sp;
-      pbul.push({x:mx,y:my,vx:Math.cos(aa)*w.spd,vy:Math.sin(aa)*w.spd,a:aa,d:0,rg:w.rg*rm*(1+.2*(m.grange||0)),dmg:dmg*(plasma?5:1)*(snip?2:1),pr:(plasma||snip)?99:w.pr+(heavy?1:0)+(m.gpierce||0),rc:m.gric||0,de:!!m.gdead,hit:new Set(),col:plasma?'#ff4dd8':col,big:heavy||w.pr>0||plasma||!!m.gpierce});
+      pbul.push({x:mx,y:my,vx:Math.cos(aa)*w.spd,vy:Math.sin(aa)*w.spd,a:aa,d:0,rg:w.rg*rm*(1+.2*(m.grange||0)),dmg:dmg*(plasma?5:1)*(snip?2:1),pr:(plasma||snip)?99:w.pr+(heavy?1:0)+(m.gpierce||0)+(isDevId(eq.g)?0:Math.floor(wmSum('g','pierce'))),rc:m.gric||0,de:!!m.gdead,hit:new Set(),col:plasma?'#ff4dd8':col,big:heavy||w.pr>0||plasma||!!m.gpierce});
     }
     spark(mx,my,'#ffe9a8',heavy?8:4,260);
     parts.push({x:mx,y:my,vx:0,vy:0,l:.07,m:.07,c:'#ffffff',s:heavy?12:8});
@@ -6497,18 +6737,32 @@ function fireRanged(sk,w,heavy,a){
     shake=Math.max(shake,heavy?3:.8);
     gunSfx(sk.k,heavy);
   }else if(w.rng==='boom'){ /* 0.5: Boomerang. Flies out, cuts through everything, comes back and cuts again */
-    const mxN=w.tri?2:1;if(boomers.filter(q=>!q.dead).length>=mxN){p.cd=.06;return}
+    const mxN=(w.tri?2:1)+(m.rmulti||0);if(boomers.filter(q=>!q.dead).length>=mxN){p.cd=.06;return}
     const sp=w.spd;
     boomers.push({x:p.x+Math.cos(a)*14,y:p.y+Math.sin(a)*14,a,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,sp,d:0,rg:w.rg*rm*(heavy?1.3:1),back:false,dmg:dmg*(heavy?1.6:1),hit:new Set(),sk,t:0,big:heavy||!!w.tri,rad:w.tri?17:13,dead:false});
     sfx(520,.09,'triangle',.018,1.7);noise(.06,.015);
-  }else if(w.rng==='magic'){ /* 0.5: Magic. Homing bolts; the Staff casts two */
-    const d0=p.r*.45+sk.len*.9,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0,n=(w.n||1)+(heavy?1:0),gc=sk.glow||sk.g||'#b98aff';
-    for(let i=0;i<n;i++){const aa=a+(n>1?(i/(n-1)-.5)*.5:0);pbul.push({kind:'magic',x:mx,y:my,vx:Math.cos(aa)*w.spd,vy:Math.sin(aa)*w.spd,a:aa,d:0,rg:w.rg*rm,dmg:dmg*(heavy?1.5:1),pr:heavy?1:0,rc:0,de:false,hit:new Set(),col:gc,big:heavy,home:w.home})}
-    spark(mx,my,gc,heavy?10:5,200);sfx(880+R()*200,.12,'sine',.028,1.8);setTimeout(()=>sfx(1320,.08,'sine',.018,1.5),40);
-  }else if(w.rng==='bow'){ /* 0.5: Bow. Piercing arrows; every third shot is a charged power arrow */
-    const d0=p.r*.45+sk.len*.7,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0,sp=w.spd*(heavy?1.3:1),bolt=sk.k==='xbow';
-    const shoot=aa=>pbul.push({kind:'arrow',bolt,x:mx,y:my,vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp,a:aa,d:0,rg:w.rg*rm*(heavy?1.25:1),dmg:dmg*(heavy?2.2:1),pr:w.pr+(heavy?3:0),rc:0,de:false,hit:new Set(),col:heavy?'#ffd36b':'#e8e0c8',big:heavy});
-    shoot(a);if(heavy&&wType==='a'&&wmSpec('a')&&!isDevId(eq.a)){shoot(a-.13);shoot(a+.13)}
+  }else if(w.rng==='magic'){ /* 0.6: the Wand. Casts a magic circle on the ground (at the cursor, or on the nearest enemy); after a short charge it bursts and hits everything inside. The Staff casts two */
+    const gc=sk.glow||sk.g||'#b98aff',rg=w.rg*(p.reachM||1),R0=w.ar*(1+.2*(m.mbig||0))*(1+wmSum('m','aoe'))*(p.reachM||1)*(heavy?1.3:1);
+    const d0=p.r*.45+sk.len*.9,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0;
+    const n=(w.n||1)+(m.mtwin||0),spots=[];
+    let tx,ty;
+    if(aimMode==='mouse'){const dd=Math.min(rg,Math.hypot(mouse.x-p.x,mouse.y-p.y));tx=p.x+Math.cos(a)*dd;ty=p.y+Math.sin(a)*dd}
+    else{let b=null,bd=rg+40;for(const e of enemies){if(e.dead||e.spawnT>0||e.ghost)continue;const dd=Math.hypot(e.x-p.x,e.y-p.y);if(dd<bd&&angDiff(Math.atan2(e.y-p.y,e.x-p.x),a)<.7){bd=dd;b=e}}
+      const dd=b?bd:aimMode==='pad'?Math.max(90,rg*paim.m):150;tx=b?b.x:p.x+Math.cos(a)*dd;ty=b?b.y:p.y+Math.sin(a)*dd}
+    spots.push([tx,ty]);
+    if(n>1){const far=enemies.filter(e=>!e.dead&&e.spawnT<=0&&!e.ghost&&Math.hypot(e.x-p.x,e.y-p.y)<rg+60).sort((u,v)=>Math.hypot(u.x-p.x,u.y-p.y)-Math.hypot(v.x-p.x,v.y-p.y));
+      for(const e of far){if(spots.length>=n)break;if(spots.every(q=>Math.hypot(q[0]-e.x,q[1]-e.y)>R0*1.2))spots.push([e.x,e.y])}
+      for(let i=spots.length;i<n;i++){const aa=a+(i%2?1:-1)*.5*Math.ceil(i/2);spots.push([p.x+Math.cos(aa)*120,p.y+Math.sin(aa)*120])}}
+    p.casts=(p.casts||0)+1;const storm=m.mstorm&&p.casts%6===0;
+    for(const q of spots)wcast.push({x:Math.max(M,Math.min(W-M,q[0])),y:Math.max(M,Math.min(H-M,q[1])),r:R0,t:0,del:heavy?.34:.26,dmg:dmg*(heavy?1.5:1),col:gc,heavy,ling:(m.mling||0)*1.2,lk:0,storm,burst:false,echo:wmSpec('m')&&!isDevId(eq.m)?1:0,a});
+    spark(mx,my,gc,heavy?10:5,200);sfx(700+R()*120,.14,'sine',.026,1.5);setTimeout(()=>sfx(1050,.08,'sine',.016,1.4),50);
+  }else if(w.rng==='bow'){ /* 0.6: Bow. Hold attack to draw, let go to shoot: a quick tap is a light arrow, a full draw hits for up to 2.6x, flies faster and pierces more */
+    p.cd=w.cd*cdm;
+    const c=Math.max(0,Math.min(1,ch||0)),pw=.7+1.9*c*(1+(m.adraw||0)*.15+wmSum('a','charge'));
+    const d0=p.r*.45+sk.len*.7,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0,sp=w.spd*(1+.4*c),bolt=sk.k==='xbow';
+    const shoot=aa=>pbul.push({kind:'arrow',bolt,x:mx,y:my,vx:Math.cos(aa)*sp,vy:Math.sin(aa)*sp,a:aa,d:0,rg:w.rg*rm*(1+.3*c),dmg:dmg*pw,pr:w.pr+(heavy?3:c>=.5?1:0)+(m.apierce||0)+(isDevId(eq.a)?0:Math.floor(wmSum('a','pierce'))),rc:0,de:false,hit:new Set(),col:heavy?'#ffd36b':'#e8e0c8',big:heavy,burnD:m.afire&&c>=.5?m.afire:0});
+    if(heavy&&m.asplit){shoot(a-.09);shoot(a+.09)}
+    shoot(a);if(heavy&&wType==='a'&&wmSpec('a')&&!isDevId(eq.a)&&!m.asplit){shoot(a-.13);shoot(a+.13)}
     if(heavy){spark(mx,my,'#ffd36b',10,240);sfx(160,.22,'triangle',.045,.5)}sfx(bolt?260:220,.1,'triangle',.035,.45);noise(.04,.015);
   }else{
     const dm=aimMode==='mouse'?Math.hypot(mouse.x-p.x,mouse.y-p.y):aimMode==='pad'?90+(w.bd*rm-90)*paim.m:w.bd,dist=Math.max(90,Math.min(w.bd*rm,dm));
@@ -6559,6 +6813,74 @@ function explodeBomb(b){
   if(hits){combo+=hits;comboT=2.4}
   enemies=enemies.filter(e=>!e.dead);
 }
+/* 0.6: wand circles. A circle charges for a moment (runes spin in), then bursts: everything inside takes the hit, plus poison, fire or frost from the run's wand abilities. Lingering circles keep hurting for a while */
+function poisonE(e,d,t){if(e.dead)return;e.psT=Math.max(e.psT||0,t||3);e.psD=Math.max(e.psD||0,d);e.psA=e.psA||0}
+function wcastHit(q,dmg,heavy){
+  const m=p.mods;let n=0;
+  for(const e of enemies){if(e.dead||e.spawnT>0||e.ghost||e.burrowed)continue;
+    if(Math.hypot(e.x-q.x,e.y-q.y)<q.r+e.r*.6){const ga=Math.atan2(e.y-q.y,e.x-q.x);gunShot=true;try{swordHit(e,dmg,ga,heavy,q.a,q.r,TAU)}finally{gunShot=false}n++;
+      if(e.dead)continue;
+      if(m.mpois)poisonE(e,m.mpois,3);
+      if(m.mfire){e.burnT=Math.max(e.burnT||0,1.5);e.burnD=Math.max(e.burnD||0,m.mfire);e.burnA=e.burnA||0}
+      if(m.mfrost){e.slowT=Math.max(e.slowT||0,1.5)}
+      if(q.storm&&!e.dead)lightning(e,3,0)}}
+  if(n){combo+=n;comboT=2.4}
+  return n;
+}
+function wcastTick(dt){
+  for(const q of wcast){q.t+=dt;
+    if(!q.burst&&q.t>=q.del){q.burst=true;q.bt=q.t;
+      const n=wcastHit(q,q.dmg,q.heavy);
+      ringFx(q.x,q.y,q.r,.28);for(let i=0;i<(q.heavy?22:14);i++){const aa=R()*TAU,rr=R()*q.r;parts.push({x:q.x+Math.cos(aa)*rr,y:q.y+Math.sin(aa)*rr,vx:Math.cos(aa)*60,vy:-60-R()*90,l:.45,m:.45,c:R()<.4?'#ffffff':q.col,s:2+R()*3})}
+      sfx(q.heavy?330:440,.16,'sine',.04,.55);fnoise(.12,.025,'bandpass',1800);if(n){shake=Math.max(shake,q.heavy?5:2.5);hitstop=Math.max(hitstop,.02)}
+      if(q.echo)q.et=.35;}
+    if(q.burst&&q.et>0){q.et-=dt;if(q.et<=0){q.et=0;q.echo=0;wcastHit(q,q.dmg*.5,false);ringFx(q.x,q.y,q.r*.85,.22)}}
+    if(q.burst&&q.ling>0){q.lk-=dt;if(q.lk<=0){q.lk=.35;wcastHit(q,q.dmg*.25,false)}}
+    if(q.burst&&q.t-q.bt>=Math.max(.3,q.ling)&&!(q.et>0))q.dead=true;
+  }
+  wcast=wcast.filter(q=>!q.dead);
+}
+function drawWcast(){
+  for(const q of wcast){const t=q.t,k=Math.min(1,t/q.del),x=q.x,y=q.y,r=q.r,m=p.mods;
+    const tint=m.mfire?'#ff8a3d':m.mpois?'#8aff4d':m.mfrost?'#9ad8ff':q.col;
+    ctx.save();
+    if(!q.burst){ /* charging: a dashed rune ring closes in and the floor glows brighter */
+      ctx.globalAlpha=.16+.3*k;ctx.fillStyle=q.col;ctx.beginPath();ctx.ellipse(x,y,r,r*.78,0,0,TAU);ctx.fill();
+      ctx.globalAlpha=.9;ctx.strokeStyle=q.col;ctx.lineWidth=3;ctx.setLineDash([9,6]);ctx.lineDashOffset=-t*60;ctx.beginPath();ctx.ellipse(x,y,r*(1.25-.25*k),r*(1.25-.25*k)*.78,0,0,TAU);ctx.stroke();ctx.setLineDash([]);
+      ctx.strokeStyle=tint;ctx.lineWidth=2;ctx.globalAlpha=.75;ctx.beginPath();ctx.ellipse(x,y,r*.55,r*.43,0,0,TAU);ctx.stroke();
+      for(let i=0;i<6;i++){const aa=i*TAU/6+t*3;ctx.fillStyle=i%2?'#ffffff':tint;ctx.fillRect(Math.round(x+Math.cos(aa)*r*.8)-2,Math.round(y+Math.sin(aa)*r*.62)-2,4,4)}
+    }else{ /* burst, then a fading (or lingering) pool */
+      const bt=t-q.bt,life=Math.max(.3,q.ling),f=Math.max(0,1-bt/life);
+      if(bt<.12){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-bt/.12;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.ellipse(x,y,r*1.05,r*.82,0,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over'}
+      ctx.globalAlpha=.32*f+(q.ling>0?.1*Math.sin(t*14):0);ctx.fillStyle=tint;ctx.beginPath();ctx.ellipse(x,y,r,r*.78,0,0,TAU);ctx.fill();
+      ctx.globalAlpha=.8*f;ctx.strokeStyle=tint;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,r,r*.78,0,0,TAU);ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+/* 0.6: the bow. Hold attack to draw (the charge fills while you hold), let go to shoot. A tap fires a light arrow straight away */
+const bowNow=()=>{const w=rangedW();return !!(w&&w.rng==='bow')};
+function bowTick(dt,held){
+  if(state!=='play'){p.bowOn=0;p.bowC=0;return}
+  if(held){
+    if(p.cd>0||p.dashT>0)return;
+    const w=rangedW(),m=p.mods;
+    if(!p.bowOn){p.bowOn=1;p.bowC=0;p.bowFull=0;sfx(260,.12,'triangle',.016,1.6)}
+    const ct=(w.ct||.75)*Math.pow(.85,m.haste)*Math.pow(.82,m.aquick||0)*(1-wmSum('a','spd'))*(p.cdM||1)/(p.swiftT>0?1.15:1)*(cheat.rapid?.35:1);
+    p.bowC=Math.min(1,p.bowC+dt/Math.max(.08,ct));p.face=aimAngle();
+    if(p.bowC>=1&&!p.bowFull){p.bowFull=1;sfx(1250,.08,'triangle',.03,1.3);spark(p.x+Math.cos(p.face)*16,p.y+Math.sin(p.face)*16,'#ffd36b',8,140)}
+    btnTap=false;return;
+  }
+  if(p.bowOn){const c=p.bowC;p.bowOn=0;p.bowC=0;p.bowFull=0;attack(c);btnTap=false;return}
+  if(btnTap&&p.cd<=0&&p.dashT<=0){const s0=p.swings;attack(0);if(p.swings!==s0)btnTap=false}
+}
+function drawBowCharge(){
+  if(!p.bowOn||state!=='play')return;
+  const c=p.bowC,w=34,x=Math.round(p.x-w/2),y=Math.round(p.y-p.r-30);
+  ctx.save();ctx.fillStyle='rgba(8,9,14,.8)';ctx.fillRect(x-2,y-2,w+4,8);ctx.fillStyle=c>=1?(((time*12)|0)%2?'#ffffff':'#ffd36b'):'#e8e0c8';ctx.fillRect(x,y,Math.round(w*c),4);
+  if(c<1){ctx.fillStyle='#ffd36b';ctx.fillRect(x+w-1,y-1,2,6)}
+  ctx.restore();
+}
 function wpnTick(dt){
   for(const b of pbul){
     if(b.home){let tg=null,bd=380;for(const e of enemies){if(e.dead||e.spawnT>0||e.ghost||b.hit.has(e))continue;const dd=Math.hypot(e.x-b.x,e.y-b.y);if(dd<bd){bd=dd;tg=e}}
@@ -6570,7 +6892,7 @@ function wpnTick(dt){
       if(e.dead||e.spawnT>0||e.ghost||b.hit.has(e))continue;
       if(Math.hypot(e.x-b.x,e.y-b.y)<e.r+(b.big?6:4)){
         b.hit.add(e);gunShot=true;try{swordHit(e,b.dmg*(b.de?1+Math.min(.6,b.d/1000):1),b.a,false,b.a,60,Math.PI)}finally{gunShot=false}combo++;comboT=2.4;spark(b.x,b.y,b.kind==='magic'?b.col:'#ffe9a8',3,160);
-        if(b.kind==='magic'&&wType==='m'&&wmSpec('m')&&!isDevId(eq.m)){ringFx(b.x,b.y,46,.2);nearE(b.x,b.y,46,o=>{if(o!==e&&!b.hit.has(o))hurtE(o,b.dmg*.4,b.a,false)})}
+        if(b.burnD&&!e.dead){e.burnT=Math.max(e.burnT||0,1.5);e.burnD=Math.max(e.burnD||0,b.burnD);e.burnA=e.burnA||0}
         if(b.rc>0){
           const t=enemies.filter(o=>!o.dead&&o.spawnT<=0&&!o.ghost&&!b.hit.has(o)&&Math.hypot(o.x-b.x,o.y-b.y)<320).sort((u,v)=>Math.hypot(u.x-b.x,u.y-b.y)-Math.hypot(v.x-b.x,v.y-b.y))[0];
           if(t){b.rc--;const aa=Math.atan2(t.y-b.y,t.x-b.x),sp=Math.hypot(b.vx,b.vy);b.vx=Math.cos(aa)*sp;b.vy=Math.sin(aa)*sp;b.a=aa;b.d=Math.max(0,b.d-220);sfx(1200,.05,'triangle',.03,.8);break}
@@ -6580,12 +6902,13 @@ function wpnTick(dt){
     }
   }
   pbul=pbul.filter(b=>!b.dead);
+  wcastTick(dt);
   for(const q of boomers){q.t+=dt;
     if(!q.back){q.x+=q.vx*dt;q.y+=q.vy*dt;q.d+=q.sp*dt;if(q.d>=q.rg||q.x<M||q.x>W-M||q.y<M||q.y>H-M){q.back=true;q.hit.clear();sfx(420,.1,'triangle',.016,.75)}}
     else{const dx=p.x-q.x,dy=p.y-q.y,dd=Math.hypot(dx,dy)||1,s2=q.sp*1.15;q.x+=dx/dd*s2*dt;q.y+=dy/dd*s2*dt;if(dd<p.r+12){q.dead=true;sfx(900,.05,'triangle',.02,1.4);continue}}
     if(R()<.4)parts.push({x:q.x,y:q.y,vx:0,vy:0,l:.14,m:.14,c:q.sk.b||'#c8894a',s:2});
     for(const e of enemies){if(e.dead||e.spawnT>0||e.ghost||e.burrowed||q.hit.has(e))continue;
-      if(Math.hypot(e.x-q.x,e.y-q.y)<e.r+q.rad){q.hit.add(e);const ret=q.back&&wType==='r'&&wmSpec('r')&&!isDevId(eq.r);gunShot=true;try{swordHit(e,q.dmg*(ret?1.4:1),Math.atan2(e.y-q.y,e.x-q.x),q.big,q.a,60,Math.PI)}finally{gunShot=false}combo++;comboT=2.4;spark(e.x,e.y,'#ffe9a8',4,180)}}
+      if(Math.hypot(e.x-q.x,e.y-q.y)<e.r+q.rad){q.hit.add(e);const ret=q.back&&wType==='r'&&wmSpec('r')&&!isDevId(eq.r);gunShot=true;try{swordHit(e,q.dmg*(ret?1.4:1)*(q.back&&!isDevId(eq.r)?1+wmSum('r','ret'):1),Math.atan2(e.y-q.y,e.x-q.x),q.big,q.a,60,Math.PI)}finally{gunShot=false}if(p.mods.rfire&&!e.dead){e.burnT=Math.max(e.burnT||0,1.5);e.burnD=Math.max(e.burnD||0,p.mods.rfire);e.burnA=e.burnA||0}combo++;comboT=2.4;spark(e.x,e.y,'#ffe9a8',4,180)}}
     if(q.t>6)q.dead=true;
   }
   boomers=boomers.filter(q=>!q.dead);
@@ -6604,14 +6927,14 @@ function wpnTick(dt){
     p.wlv=lv;
   }
 }
-function attack(){
+function attack(ch){
   if(p.cd>0||state!=='play'||p.dashT>0)return;
   if(room==='vault'&&vault.chest==='closed'){const c=chestPos();if(Math.hypot(c.x-p.x,c.y-p.y)<120)openChest()}
   const m=p.mods,every=m.fury?2:(p.every||3);
-  const heavy=p.swings%every===every-1;p.swings++;
+  const heavy=ch!==undefined?ch>=1:p.swings%every===every-1;p.swings++;
   const a=aimAngle();p.face=a;
   const wsk=skinOf(equip),wst=(wsk&&wsk.wst)||{};
-  if(wst.rng){fireRanged(wsk,wst,heavy,a);return}
+  if(wst.rng){fireRanged(wsk,wst,heavy,a,ch||0);return}
   p.cd=(heavy?.44:.25)*(wst.cd||1)*Math.pow(.85,m.haste)/(p.swiftT>0?1.15:1)*(p.cdM||1)*(cheat.rapid?.35:1);
   p.sw=p.swMax=heavy?.26:.18;p.swHeavy=heavy;p.rec=0;
   const rad=(heavy?98:76)*(wst.rad||1)*(1+.15*m.reach)*(p.reachM||1),arc=heavy?TAU:Math.PI*(MACEK[(wsk||DEFSK).k]?1.25:.9),dmg=(heavy?2:1)+(wst.dmg||0)+sharpOf(m)+(p.dmgB||0);
@@ -6632,6 +6955,8 @@ function attack(){
   if(MACEK[(sk0||DEFSK).k]){ /* 0.5: the mace sends what it hits flying, and a mastered mace's spin smash sends out a shockwave */
     const kbm=wst.kb||1.5;for(const e of hitList){e.kx*=kbm;e.ky*=kbm}
     if(hits){shake=Math.max(shake,heavy?12:7);sfx(85,.16,'square',.06,.5)}
+    if(heavy&&m.cstun)for(const e of hitList){if(!e.dead&&!(e.stcd>0)){e.frz=e.t==='boss'?.5:1;if(e.t==='boss')e.stcd=4;spark(e.x,e.y,'#ffe56b',8,200)}}
+    if(m.cquake&&p.swings%4===0){ringFx(p.x,p.y,rad*1.9,.35);spark(p.x,p.y,'#c9a066',14,280);shake=Math.max(shake,9);nearE(p.x,p.y,rad*1.9,o=>{if(hitList.indexOf(o)<0)hurtE(o,4,Math.atan2(o.y-p.y,o.x-p.x),true)})}
     if(heavy&&wType==='c'&&wmSpec('c')&&!isDevId(eq.c)){ringFx(p.x,p.y,rad*1.6,.35);nearE(p.x,p.y,rad*1.6,o=>{if(hitList.indexOf(o)<0){const ga=Math.atan2(o.y-p.y,o.x-p.x);hurtE(o,dmg*.6,ga,true)}})}
   }
   bullets=bullets.filter(b=>{
@@ -6682,6 +7007,14 @@ function swordHit(e,dmg,a,heavy,aim,rad,arc){
   const m=p.mods,n=++p.hits;let mult=1,pierce=false;
   const wmS=wmSpec(wType)&&!isDevId(eq[wType]); /* mastery step 9 special for the weapon in hand */
   mult*=1+wmSum(wType,'dmg');
+  mult*=WPOW[wType]||1; /* 0.6: pricier weapons hit harder */
+  const wu=!isDevId(eq[wType]); /* 0.6: tiered weapon upgrades (dev skins skip them) */
+  if(wu){const bs=wmSum(wType,'boss');if(bs&&(e.t==='boss'||(TYPES[e.t]&&TYPES[e.t].mb)))mult*=1+bs;
+    const cr=wmSum(wType,'crit');if(cr&&R()<cr){mult*=2;spark(e.x,e.y,'#ffe56b',6,220)}
+    const bu=wmSum(wType,'burn');if(bu&&R()<bu){e.burnT=Math.max(e.burnT||0,2);e.burnD=Math.max(e.burnD||0,1+Math.floor(wuTot(wType)/20));e.burnA=e.burnA||0}
+    const po=wmSum(wType,'pois');if(po&&R()<po)poisonE(e,1+Math.floor(wuTot(wType)/20),3);
+    const sl=wmSum(wType,'slow');if(sl&&R()<sl)e.slowT=Math.max(e.slowT||0,1.5);
+    const st=wmSum(wType,'stun');if(st&&R()<st&&!(e.stcd>0)){e.frz=Math.max(e.frz||0,e.t==='boss'?.4:.8);e.stcd=e.t==='boss'?4:1.2}}
   if(p.cp.exec&&e.hp<=e.maxhp*.35){mult*=1+p.cp.exec;if(ok('exec',120))spark(e.x,e.y,'#ff4d5e',5,180)}
   if(p.cp.lastStand&&p.hp<=2)mult*=1+p.cp.lastStand;
   if(((p.cp.crit||0)+(wmS&&wType==='k'?.1:0))>0&&R()<(p.cp.crit||0)+(wmS&&wType==='k'?.1:0)){mult*=2;spark(e.x,e.y,'#ffe56b',8,240)}
@@ -6707,6 +7040,7 @@ function swordHit(e,dmg,a,heavy,aim,rad,arc){
     shadows.push({x:p.x+Math.cos(sa)*34,y:p.y+Math.sin(sa)*34,a:aim,rad:rad,arc:arc,heavy:heavy,dmg:tot*.5,t:.18,life:.18});
   }
   hurtE(e,tot,ang,heavy,pierce);
+  if(!e.dead&&!isDevId(eq[wType])){const kb=wmSum(wType,'kb');if(kb){e.kx*=1+kb;e.ky*=1+kb}}
   if(m.fone&&n%2===0&&!e.dead)hurtE(e,tot*.5,ang,false,pierce);
   if(m.fknock&&!e.dead){const kk=1+.3*m.fknock;e.kx*=kk;e.ky*=kk}
   if(m.fstun&&n%4===0&&!e.dead&&!(e.stcd>0)){e.frz=e.t==='boss'?.7:1;if(e.t==='boss')e.stcd=4;spark(e.x,e.y,'#ffe56b',10,200);sfx(300,.1,'square',.05,.6)}
@@ -6824,13 +7158,13 @@ function spillLoot(x,y,k,total,n){
     drops.push({k:k,v:k==='coin'?Math.floor(total/n)+(i<Math.round(total)%n?1:0):total/n,x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,age:0,life:25,sd:R()*TAU})}
 }
 function kill(e){
-  e.dead=true;kills++;stats.kills++;if(e.t==='boss'&&!e.dkb&&!brMode)stats.boss++;if(world>=2&&!brMode){const wk='w'+world;stats[wk+'k']=(stats[wk+'k']||0)+1;if(e.t==='boss')stats[wk+'b']=(stats[wk+'b']||0)+1}
+  e.dead=true;kills++;if(state==='play'&&!isDevId(eq[wType])){const hl=wmSum(wType,'heal');if(hl&&R()<hl)healP(1)}stats.kills++;if(e.t==='boss'&&!e.dkb&&!brMode)stats.boss++;if(world>=2&&!brMode){const wk='w'+world;stats[wk+'k']=(stats[wk+'k']||0)+1;if(e.t==='boss')stats[wk+'b']=(stats[wk+'b']||0)+1}
   if(e.t==='boss'&&!e.dkb){
     if(e.cfg)bossCall(e.cfg.boss,'dead');
     for(const o of enemies)if(o!==e&&!o.dead){o.dead=true;spark(o.x,o.y,o.c,10,240)}
     bullets=[];hitstop=.25;shake=22;rumble(500,1,1);if(wave<LOOP_WAVES&&!brMode)dropKey(e);
     for(let i=0;i<6;i++)spark(e.x+(R()-.5)*50,e.y+(R()-.5)*50,i%2?'#ffd36b':'#ff8a3d',14,380);
-    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;if(!brMode&&!cheatsOn()){if(!stats.wwin||typeof stats.wwin!=='object')stats.wwin={};if(!p.runMix){const wk=e.fk+p.runW;stats.wwin[wk]=(stats.wwin[wk]||0)+1}if(!p.runHurt)stats['nohit'+e.fk]=1;if(e.fk===3&&!p.runDied)stats.laststand=1;if(diff==='hard'||diff==='nowin')stats['hwin'+e.fk]=1}for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
+    if(e.fin){stats['fin'+e.fk]=(stats['fin'+e.fk]||0)+1;if(!brMode&&!cheatsOn()){if(!stats.wwin||typeof stats.wwin!=='object')stats.wwin={};if(!p.runMix){const wk=e.fk+p.runW;stats.wwin[wk]=(stats.wwin[wk]||0)+1}if(!p.runHurt)stats['nohit'+e.fk]=1;if(e.fk===3&&!p.runDied)stats.laststand=1;if(diff==='hard'||diff==='nowin')stats['hwin'+e.fk]=1;if(!devWarp){if(!stats.dwin||typeof stats.dwin!=='object')stats.dwin={};if((stats.dwin[diff]||0)<e.fk)stats.dwin[diff]=e.fk}}for(let i=0;i<16;i++)spark(e.x+(R()-.5)*90,e.y+(R()-.5)*70,i%2?'#ffd36b':'#ff5a2a',16,460);shake=30;sfx(50,1.2,'sawtooth',.12,.3)}
     else if(wave===LOOP_WAVES)spawnFinal(); /* the room boss falls, the vault guardian wakes */
   }
   if(world===3&&e.t!=='boss'&&R()<.3){for(let i=0;i<5;i++){const a=R()*TAU;bullets.push({x:e.x,y:e.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,r:4,l:2.5,c:'#ffcc4a'})}}
@@ -7331,7 +7665,9 @@ function update(dt){
   if(p.cp.regen){p.rgT+=dt;if(p.rgT>=p.cp.regen){p.rgT=0;healP(1)}}
   if(p.sw>0){p.sw-=dt;if(p.sw<=0&&!p.swHeavy)p.rec=.16}else if(p.rec>0)p.rec-=dt;
   if(pa('dash'))dash();
-  if(isDown('attack')||btnAtk||btnTap||pd('attack')){const s0=p.swings;attack();if(p.swings!==s0)btnTap=false}
+  {const held=isDown('attack')||btnAtk||pd('attack');
+   if(bowNow())bowTick(dt,held);
+   else{if(p.bowOn){p.bowOn=0;p.bowC=0}if(held||btnTap){const s0=p.swings;attack();if(p.swings!==s0)btnTap=false}}}
   if(p.dashT>0){
     p.dashT-=dt;p.vx=p.ddx*640;p.vy=p.ddy*640;
     parts.push({x:p.x,y:p.y,vx:0,vy:0,l:.25,m:.25,c:(p.ch?p.ch.acc:'#f1ead8'),s:8});
@@ -7422,6 +7758,11 @@ function update(dt){
       e.burnT-=dt;e.burnA+=dt;
       if(R()<dt*24)parts.push({x:e.x+(R()-.5)*e.r,y:e.y+(R()-.5)*e.r,vx:0,vy:-60,l:.35,m:.35,c:R()<.5?'#ff8a3d':'#ffd36b',s:3});
       if(e.burnA>=.25){e.burnA-=.25;dotE(e,e.burnD*.25);if(e.dead)continue}
+    }
+    if(e.psT>0){ /* 0.6: poisoned by the wand: damage every half second until it wears off */
+      e.psT-=dt;e.psA=(e.psA||0)+dt;
+      if(R()<dt*18)parts.push({x:e.x+(R()-.5)*e.r,y:e.y+(R()-.5)*e.r,vx:0,vy:-34,l:.45,m:.45,c:R()<.5?'#a8ff3d':'#5fb52a',s:3});
+      if(e.psA>=.5){e.psA-=.5;dotE(e,e.psD*.5);if(e.dead)continue}
     }
     if(e.frz>0){e.frz-=dt;continue}
     const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;
@@ -9851,6 +10192,7 @@ function draw(){
     drawHeartPx(h.x,h.y+Math.round(Math.sin(time*4)*2),3); /* 0.5.1: the same pixel heart as the HUD */
   }
   drawKeyItem();
+  drawWcast();
   for(const z of lava){
     const k=Math.min(1,z.t/.5);ctx.save();ctx.globalAlpha=.85*k;
     const g=ctx.createRadialGradient(z.x,z.y,2,z.x,z.y,z.r);g.addColorStop(0,'#ffd36b');g.addColorStop(.5,'#ff6a2a');g.addColorStop(1,'rgba(120,20,10,0)');
@@ -9992,6 +10334,7 @@ function draw(){
     ctx.globalAlpha=sfade*.9;ctx.strokeStyle='#bfe9ff';ctx.lineWidth=3;ctx.stroke();ctx.restore();
   }
   if(p.revT>0){ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=2;ctx.setLineDash([3,5]);ctx.beginPath();ctx.arc(p.x,p.y,p.r+5,0,TAU);ctx.stroke();ctx.restore()}
+  drawBowCharge();
   if(p.kp)for(const k of p.kp)drawKnife(k.x,k.y,k.a);
   if(aimMode==='pad'&&state==='play'){const wt=rangedW();if(wt){
     const aa=paim.set?paim.a:p.face,ca=Math.cos(aa),sa=Math.sin(aa),rm=(1+.15*p.mods.reach)*(p.reachM||1);let dd=240,rr=0;
@@ -10338,7 +10681,7 @@ TABS.forEach(t=>$('t'+t).addEventListener('click',()=>setTab(t)));
 $('packs').addEventListener('click',e=>{
   const ut=e.target.closest('[data-ut]');
   if(ut){upgTab=ut.dataset.ut;sfx(520,.05,'triangle',.04,1.3);renderCos();return}
-  const b=e.target.closest('.item');if(b&&b.dataset.pk)openBox(b.dataset.pk);else if(b&&b.dataset.up)buyUpg(b.dataset.up);else if(b&&b.dataset.evo)buyEvo(b.dataset.evo[0],+b.dataset.evo.slice(1));
+  const b=e.target.closest('.item');if(b&&b.dataset.pk)openBox(b.dataset.pk);else if(b&&b.dataset.up)buyUpg(b.dataset.up);else if(b&&b.dataset.wu){const q=b.dataset.wu.split(':');buyWU(q[0],q[1])}else if(b&&b.dataset.unl)buyUnlock(b.dataset.unl);
 });
 $('coll').addEventListener('change',e=>{
   const t=e.target,id=t&&t.id;if(id!=='ownpk'&&id!=='ownsort')return;
@@ -10398,7 +10741,7 @@ requestAnimationFrame(frame);
   function run(cmd){
     cmd=cmd.trim().toLowerCase();
     if(cmd==='dev_skins_ssc'){
-      dev.skin=true;saveDev();eq.k='dev_rainbow';eq.g='dev_gun';eq.b='dev_bomb';eq.f='dev_fist';syncEq();saveOwn();
+      dev.skin=true;saveDev();for(const t in DEV_OF)eq[t]=DEV_OF[t];syncEq();saveOwn();
       say('Prism fists, knife, gun and bomb granted and equipped.');
     }else if(cmd==='dev_home'){ /* DEV_HOME: back to the title screen (before picking a save). Remove this branch to remove the command */
       closeAdmin();pxWipe(()=>{if(sub)closeSub();if(state!=='menu')showHome();if(window.__title)window.__title.show(1)});
@@ -10520,6 +10863,13 @@ function tsSize(){
   for(let x=0;x<w;x++)if(hsh(x*2.7)<.025){const c=hsh(x)<.5?'#fff3a8':'#ff9ab0';g.fillStyle='#1f5a22';g.fillRect(x-1,gy-6,3,3);g.fillStyle=c;g.fillRect(x-1,gy-5,3,1);g.fillRect(x,gy-6,1,3);g.fillStyle='#ffd36b';g.fillRect(x,gy-5,1,1)}
   g.fillStyle='#4a2c16';g.fillRect(0,gy+8,w,2);
   tScene.bg=bg;tScene.hx=Math.round(w*.2);
+  /* 0.6: the high sky above the title scene, for the opening shot: deep blue up top with stars, easing into the scene's top sky band */
+  {const EX=Math.round(h*1.4),sk=document.createElement('canvas');sk.width=w;sk.height=EX;const q=sk.getContext('2d');
+    const HS=['#070c26','#0b1440','#10215a','#152e72','#1a3c88','#1f4c9e','#2459b2','#285fbf','#2a6fd0'],bh2=EX/HS.length;
+    HS.forEach((c,i)=>{q.fillStyle=c;q.fillRect(0,Math.floor(i*bh2),w,Math.ceil(bh2)+1);if(i){q.fillStyle=HS[i-1];for(let x=(i%2);x<w;x+=2)q.fillRect(x,Math.floor(i*bh2),1,1)}});
+    for(let i=0;i<w*EX/260;i++){const x=(hsh(i*3.7+1)*w)|0,y=(hsh(i*5.9+2)*EX*.55)|0,b=hsh(i*7.3);q.fillStyle=b<.15?'#ffe9a8':b<.5?'#ffffff':'#9ab8ff';q.globalAlpha=.35+.65*(1-y/(EX*.55));q.fillRect(x,y,b<.08?2:1,b<.08?2:1)}
+    q.globalAlpha=1;tScene.sky=sk;tScene.ex=EX;
+    tScene.hcl=[];for(let i=0;i<9;i++)tScene.hcl.push({x:hsh(i*4.3+3)*w,y:-EX*.08-hsh(i*8.1)*EX*.6,s:.8+hsh(i*1.9)*1.1,v:3+hsh(i*5.1)*5})}
   if(!tScene.cl.length)for(let i=0;i<7;i++)tScene.cl.push({x:hsh(i*9.1)*w,y:6+hsh(i*4.7)*gy*.42,s:.7+hsh(i*2.3)*.9,v:2+hsh(i*6.1)*4});
 }
 function tsCloud(g,c){
@@ -10531,6 +10881,7 @@ function tsCloud(g,c){
 function tsUpdate(dt){
   const S=tScene,TY=['goblin','goblin','thief','wizard','jester','archer'];
   for(const c of S.cl){c.x-=c.v*dt;if(c.x<-50*c.s)c.x=S.w+10}
+  if(S.intro&&S.hcl)for(const c of S.hcl){c.x-=c.v*dt;if(c.x<-50*c.s)c.x=S.w+10}
   S.spT-=dt;if(S.spT<=0&&S.mobs.length<3){S.spT=1.4+R()*1.4;S.mobs.push({t:TY[(R()*TY.length)|0],x:S.w+16,v:46+R()*16,ph:R()*9,hitT:0})}
   S.atk=Math.max(0,S.atk-dt);
   S.wT-=dt;if(S.wT<=0||S.wi<0){const L=tsMyth();S.wi=L.length?(S.wi+1+((R()*(L.length-1))|0))%L.length:-1;S.wT=10;S.sw=S.wi>=0?L[S.wi]:null;if(S.sw)try{S.sw=maxF(S.sw)||S.sw}catch(e){} /* always the fully evolved form */
@@ -10564,6 +10915,8 @@ function tsUpdate(dt){
 }
 function tsDraw(){
   const S=tScene,g=S.g,t=performance.now()/1000;if(!g)return;
+  const off=S.intro?S.intro.off:0;
+  if(off>0){g.save();g.translate(0,Math.round(off));g.drawImage(S.sky,0,-S.sky.height);for(const c of S.hcl)tsCloud(g,c)}
   g.drawImage(S.bg,0,0);for(const c of S.cl)tsCloud(g,c);
   const ch=CH(),sk=cSkin(ch.id);
   g.fillStyle='rgba(0,0,0,.22)';g.fillRect(S.hx-7,S.gy,14,2);
@@ -10591,8 +10944,31 @@ function tsDraw(){
     if(sw&&sw.tab==='b'){g.save();g.translate(x,y);g.rotate(b.t*9);g.scale(.42,.42);g.translate(-14,0);try{weaponShape(g,sw,t)}catch(e){}g.restore();continue} /* the thrown bomb is the equipped bomb skin, spinning */
    g.fillStyle='#0a0a10';g.fillRect(x-3,y-5,6,10);g.fillRect(x-5,y-3,10,6);g.fillStyle='#2e2e3e';g.fillRect(x-2,y-4,4,8);g.fillRect(x-4,y-2,8,4);g.fillStyle='#6a6a80';g.fillRect(x-2,y-2,2,2);g.fillStyle='#8a6a3a';g.fillRect(x+1,y-7,1,3);g.fillStyle=((t*20)|0)%2?'#ffd36b':(sw&&sw.glow)||'#ff5a3a';g.fillRect(x+1,y-9,2,2)}
   for(const q of S.fx){g.globalAlpha=Math.min(1,q.l*2);g.fillStyle=q.c;g.fillRect(Math.round(q.x),Math.round(q.y),2,2)}g.globalAlpha=1;
+  if(off>0)g.restore();
 }
-function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
+/* 0.6: the opening animation. The camera starts high in the sky with PIXEL RUSH and the credits, then pans down to the title scene.
+   Click, tap or any key skips it */
+const INTRO_HOLD=2,INTRO_PAN=2.4;
+function tsIntro(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const S=tScene;if(!S.sky)tsSize();
+  S.intro={t:0,off:S.ex,snd:0};$('title').classList.add('intro');const ti=$('tintro');ti.hidden=false;ti.style.transform='translateY(0px)';ti.style.opacity='0';
+}
+function tsIntroTick(dt){
+  const S=tScene,I=S.intro;if(!I)return;I.t+=dt;
+  const k=Math.max(0,Math.min(1,(I.t-INTRO_HOLD)/INTRO_PAN)),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+  I.off=S.ex*(1-e);
+  const ti=$('tintro');ti.style.opacity=String(Math.min(1,Math.max(0,(I.t-.25)/.7)));ti.style.transform='translateY('+(-(S.ex-I.off)*S.k).toFixed(1)+'px)';
+  if(!I.snd&&I.t>.3){I.snd=1;sfx(523,.5,'triangle',.035,1.5);setTimeout(()=>sfx(784,.6,'triangle',.03,1.5),160)}
+  if(I.snd===1&&I.t>INTRO_HOLD){I.snd=2;fnoise(1.6,.02,'lowpass',700)}
+  if(I.t>=INTRO_HOLD+INTRO_PAN)tsIntroEnd();
+}
+function tsIntroEnd(){
+  const S=tScene;if(!S.intro)return;S.intro=null;
+  const ti=$('tintro');ti.hidden=true;$('title').classList.remove('intro');
+  setTimeout(()=>{const b=$('tplay');if(b&&!$('tscr1').hidden)b.focus()},0);
+}
+function tsFrame(now){if(!tScene.on)return;const dt=Math.min(.05,(now-tScene.last)/1000||.016);tScene.last=now;try{tsIntroTick(dt);tsUpdate(dt);tsDraw()}catch(e){}requestAnimationFrame(tsFrame)}
 function tsStart(){if(tScene.on)return;tScene.on=true;tsSize();tScene.last=performance.now();requestAnimationFrame(tsFrame)}
 addEventListener('resize',()=>{if(tScene.on)setTimeout(tsSize,60)});
 
@@ -10662,7 +11038,7 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
     sbox.innerHTML=[1,2,3].map(n=>{
       const i=info(n),on=n===selSlot;
       if(confirmDel===n)return '<div class="tsl del" data-n="'+n+'"><b>DELETE SAVE '+n+'?</b><small>Everything in this save is erased: level, coins, unlocks and settings. This cannot be undone.</small><div class="tsr"><button type="button" class="btn dng" data-act="yes">YES, DELETE</button><button type="button" class="btn ghost" data-act="no">CANCEL</button></div></div>';
-      return '<div class="tsl'+(on?' on':'')+(i?'':' empty')+'" data-n="'+n+'" tabindex="0" role="button" aria-pressed="'+on+'"><canvas class="tslc" width="84" height="84" aria-hidden="true"></canvas><div class="tslt"><b>SAVE '+n+'</b>'+(i?'<span class="tl">LV '+i.lv+'</span><small>'+DIFFS[slotDiff(n)].n+'<br>Best wave '+i.bw+'<br>'+i.wl+'</small>':'<span class="tl new">NEW GAME</span><small>Empty save</small>')+'</div>'+(i?'<button type="button" class="tdel" data-act="del" aria-label="Delete save '+n+'">DELETE</button>':'')+'</div>';
+      return '<div class="tsl'+(on?' on':'')+(i?'':' empty')+'" data-n="'+n+'" tabindex="0" role="button" aria-pressed="'+on+'"><canvas class="tslc" width="84" height="84" aria-hidden="true"></canvas><div class="tslt"><b>SAVE '+n+'</b>'+(i?'<span class="tl">'+(slotName(n)?escH(slotName(n))+' &middot; ':'')+'LV '+i.lv+'</span><small>Best wave '+i.bw+'<br>'+i.wl+'</small>':'<span class="tl new">NEW GAME</span><small>Empty save</small>')+'</div>'+(i?'<button type="button" class="tdel" data-act="del" aria-label="Delete save '+n+'">DELETE</button>':'')+'</div>';
     }).join('');
     sbox.querySelectorAll('.tsl[data-n]').forEach(card=>{const cv=card.querySelector('canvas.tslc');if(!cv)return;const n=+card.dataset.n,g=cv.getContext('2d');g.imageSmoothingEnabled=false;
       let id='ember';try{id=localStorage.getItem(slotKey('cinder-char',n))||'ember'}catch(e){}
@@ -10672,10 +11048,12 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
     dbox.innerHTML=Object.keys(DIFFS).map(k=>{const d=DIFFS[k];return '<button type="button" class="td'+(k===selDiff?' on':'')+'" data-d="'+k+'" style="--tc:'+d.c+'"><span>'+d.n+'</span><small>'+d.s+'</small></button>'}).join('');
     $('tddesc').textContent=DIFFS[selDiff].r;
     go.disabled=!selSlot;go.textContent=selSlot&&info(selSlot)?'CONTINUE':'START'; /* a save with progress continues; an empty one starts fresh */
+    if(nmSlot!==selSlot){nmSlot=selSlot;$('tnamein').value=selSlot?slotName(selSlot):'';$('tnerr').textContent=''}
   }
+  let nmSlot=-1;
   function show(screen){
     T.hidden=false;document.body.classList.add('ontitle');tsStart();s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
-    if(screen===2){selSlot=1;selDiff=slotDiff(1);drawSlots();drawDiffs();setTimeout(()=>go.focus(),0)} /* Save 1 is picked by default */
+    if(screen===2){selSlot=1;selDiff=slotDiff(1);nmSlot=-1;drawSlots();drawDiffs();setTimeout(()=>{if(!slotName(1))$('tnamein').focus();else go.focus()},0)} /* Save 1 is picked by default */
     else setTimeout(()=>$('tplay').focus(),0);
   }
   function hide(){T.hidden=true;tScene.on=false;document.body.classList.remove('ontitle');try{fitMenus()}catch(e){}}
@@ -10706,9 +11084,18 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
     const b=e.target.closest('.td');if(!b)return;
     selDiff=b.dataset.d;sfx(520,.08,'triangle',.05,1.4);drawDiffs();
   });
+  /* 0.6: a save needs a player name before you can play it */
+  function badName(on){$('tnbad').hidden=!on;if(on){sfx(140,.18,'square',.05,.7);setTimeout(()=>$('tnbadok').focus(),0)}else setTimeout(()=>{const i=$('tnamein');i.focus();i.select()},0)}
+  $('tnbadok').addEventListener('click',()=>badName(false));
+  $('tnamein').addEventListener('input',()=>{$('tnerr').textContent=''});
   go.addEventListener('click',()=>{
     if(!selSlot)return;
     const n=selSlot;
+    {const nm=$('tnamein').value.trim().replace(/\s+/g,' '),pr=nameProblem(nm);
+      if(pr==='bad'){badName(true);return}
+      if(pr){$('tnerr').textContent=pr;sfx(110,.1,'square',.05,.7);$('tnamein').focus();return}
+      try{localStorage.setItem(slotKey('cinder-name',n),nm)}catch(x){}
+      if(n===SLOT){try{Online.Core.cfg.name=nm;Online.Core.save()}catch(x){}}}
     if(n!==SLOT){
       /* another save: bank this one, write the new save's difficulty, then reload straight into its main menu */
       try{saveMeta();saveOwn();localStorage.setItem(slotKey('cinder-diff',n),selDiff);localStorage.setItem('cinder-slot',String(n));sessionStorage.setItem('cinder-boot','home')}catch(x){}
@@ -10722,14 +11109,18 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
   /* keep keys from reaching the game while the title is up; Esc goes back one step */
   addEventListener('keydown',e=>{
     if(T.hidden)return;
-    if(e.key==='Escape'&&!s2.hidden){e.preventDefault();show(1)}
+    if(!$('tnbad').hidden){if(e.key==='Enter'||e.key==='Escape'||e.key===' '){e.preventDefault();badName(false)}e.stopPropagation();return}
+    if(tScene.intro&&e.key!=='Tab'){e.preventDefault();tsIntroEnd()}
+    else if(e.key==='Escape'&&!s2.hidden){e.preventDefault();show(1)}
+    else if(e.key==='Enter'&&e.target&&e.target.id==='tnamein'){e.preventDefault();go.click()}
     e.stopPropagation();
   },true);
   addEventListener('keyup',e=>{if(!T.hidden)e.stopPropagation()},true);
   window.__title={show:show,hide:hide,slotKeysOf:slotKeysOf};
   let boot=null;try{boot=sessionStorage.getItem('cinder-boot');sessionStorage.removeItem('cinder-boot')}catch(e){}
   /* the game opens on the title screen (the menu battle plays behind it); switching saves reloads straight into the main menu */
-  if(boot==='home'){hide();bootDone()}else show(boot==='select'?2:1);
+  if(boot==='home'){hide();bootDone()}else{show(boot==='select'?2:1);if(boot!=='select')tsIntro()}
+  T.addEventListener('pointerdown',e=>{if(tScene.intro){e.preventDefault();tsIntroEnd()}},true);
 
   /* ---------- save switcher + manager (very top right of the main menu) ---------- */
   {
