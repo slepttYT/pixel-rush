@@ -10011,4 +10011,8 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 .dlyst{margin-left:auto;font-family:'Silkscreen',monospace;font-size:9px;letter-spacing:.12em;padding:2px 6px;background:#1e6b2c;color:#e9ffe0}.dlyst.claim{background:#ffd36b;color:#1a1204}.dlyst.done{background:#2a2f3a;color:#9aa0b8}
 #home .menulist #hdaily{grid-column:1/-1} /* its own row so the two-column phone menu keeps its pairs */
 </style>
+<script>/* 0.5: in the Windows EXE (Neutralino serves the game from localhost) load its native bridge, so Export/Import Save Data use real file dialogs. In a browser this does nothing */
+(function(){try{if(!/^https?:$/.test(location.protocol)||!/^(localhost|127\.0\.0\.1)$/.test(location.hostname))return;
+ var ld=function(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){};document.head.appendChild(s)};
+ ld('/js/neutralino.js',function(){ld('/__neutralino_globals.js',function(){try{if(window.Neutralino&&typeof NL_PORT!=='undefined')Neutralino.init()}catch(e){}})})}catch(e){}})();</script>
 </body></html>

@@ -98,7 +98,9 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 
 ### 17. HTML + EXE release
 - [ ] `Pixel_Rush_0.5.html` standalone.
-- [ ] Windows EXE wrapping the same HTML (shared code). Saves work in the EXE (its own storage) and transfer via export/import.
+- [~] Windows EXE wrapping the same HTML (shared code). desktop/build.sh <ver> -> releases/Pixel_Rush_<ver>.exe (Neutralino 6.5.0, single exe with embedded resources, ~5 MB). Verified with the Linux build of the same package under Xvfb: game renders, native API works (Neutralino.os/filesystem), localStorage persists across launches.
+  - Gotchas found: Neutralino 6.0.0 win binary cannot embed (no .rsrc) -> use 6.5.0; injectGlobals does nothing for our page -> the game HTML loads /js/neutralino.js then /__neutralino_globals.js itself when served from localhost; tokenSecurity must be "none" (one-time token broke the page); FIXED port 47923 is required or saves vanish (localStorage is keyed by port).
+  - Rebuild the EXE at release from the final HTML; commit releases/Pixel_Rush_0.5.exe then. Saves work in the EXE (its own storage) and transfer via export/import.
 
 ### 18. Final QA (all must pass)
 Five worlds work; menu rotation 30 s; button colors per world; previews show weapon; exact evolution paths; evolution animation; punches front-only; spawn cooldowns per type; ambience balanced; BPM sort; cheat/pause never overlap and never resume; Save & Exit restores; daily resets at local 07:00; postcards accurate; PBs save; existing bosses/enemies/progression/cosmetics/achievements intact; HTML + EXE work; keyboard, mouse, controller, touch.
