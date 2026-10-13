@@ -48,9 +48,9 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 - [x] Punch = forward jab (inJab strip hitbox, tested front/diag/behind on all 3 forms): arm visibly extends, narrow short hitbox in front only (no sweep). Distinct from slash. Holds through Bare Fist → Knuckle Wrap → Brass Knuckles (each stronger).
 
 ### 4. Main menu rotating worlds
-- [ ] Menu background cycles W1 → W2 → W3 → W4 → W5 → W1 every 30 s with a smooth pixel transition. Keep menu animations.
-- [ ] Button theme per world: W1 grass green, W2 stone gray, W3 sandy tan, W4 electric blue, W5 dark swamp green.
-- [ ] New animated pixel backgrounds for World 4 (robot/cyber) and World 5 (spooky swamp).
+- [x] Menu background cycles W1 → W2 → W3 → W4 → W5 → W1 every 30 s with a smooth pixel transition (drawMenuWorlds: block dissolve with a bright leading edge, 1.4 s; instant under reduced motion). Menu fight, embers, pet all kept; menu mobs wear the shown world's colours.
+- [x] Button theme per world: W1 grass green, W2 stone gray, W3 sandy tan, W4 electric blue, W5 dark swamp green (#home[data-mw] CSS vars, colours fade over 1.2 s; frame, buttons, NEW RUN, stats, Continue).
+- [x] New animated pixel backgrounds for World 4 (robot/cyber: plates, circuit pulses, blinking lights, chasing ring lights, scanline) and World 5 (spooky swamp: pools with bubbles, fireflies, fog, glowing mushrooms, graves). W2 (torches, crystal glints) and W3 (blowing sand) menu scenes too.
 
 ### 5. Save select & difficulty screen
 - [x] Pixel-art borders, consistent type, clear slot selection, character preview per slot, better spacing. (desktop + landscape phone checked)
@@ -144,3 +144,6 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 
 ## Known bugs
 (append as found)
+
+- Stage C: World 4/5 achievements (w4a–e,w4k,w4bs,w5a–e,w5k,w5bs,slayomega,slaylevi) and 50-boss Boss Rush (BR_N) committed and tested through boss 50.
+- Phone menu: ONLINE spans the full row (VERSUS badge no longer overflows).
