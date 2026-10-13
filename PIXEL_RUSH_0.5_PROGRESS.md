@@ -160,3 +160,9 @@ Earlier standing requests (pre-0.5, still apply): runs to wave 100 ~45 min on ev
 - "fix go again screen remove the start run as blank at the bottom of the character section screen keep it so when you click on a character it opens run config"
 - "make sure world 4 and 5 have their own projectile tiles and boss attacks"
 - "make it so bosses don't have to be normal shapes squares and circles only. Make better pixel art to match real shapes of how the bosses would look"
+- [x] Coins/XP: mob pickups now go to runWallet/runXp (HUD) via lootAcc so every piece is >=1; reroll purse paid directly; collectLoot() on vault entry and bankXp.
+- [x] GO AGAIN -> fighters (panel hidden) -> click fighter -> Configure Run; BACK returns to panel; #chgo removed.
+- [x] W4/W5 boss attacks (W45_ATK: laser turrets magnet grid overload bombs / tongue bubbles spores hands hex swarm) with telegraphs (drawW45Tele); zone + final atk lists updated.
+- [x] W4/W5 projectiles (P45 pixel sprites per boss, k45 tag; mob shots bolt/spore; homing b.home).
+- [x] Bosses redrawn from real shapes (vecSpr: vector shapes -> palette snap -> top-left light -> ink outline): all 20 W4/W5 + 10 W3 incl. The Pharaoh (final scale 1.05). Hot glow follows outline (no disc).
+- User then asked: "Fix dragon boss attack lines and fire ring not fully showing" (in progress).
