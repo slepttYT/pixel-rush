@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+<!doctype html><html><head><script>/* 0.5: loading a save reloads the page; show the loading screen from the very first frame so the title/save screen never flashes */try{var _b=sessionStorage.getItem('cinder-boot');if(_b==='home')document.documentElement.classList.add('booting')}catch(e){}</script><style>#bootld{display:none}html.booting #bootld{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:#08100a;transition:opacity .35s steps(5)}html.booting #bootld.out{opacity:0}#bootld .bl{display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 30px;background:#0b0d12;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c}#bootld b{font:400 22px 'Press Start 2P',monospace;color:#fff;text-shadow:3px 3px 0 #0b3a15;letter-spacing:.04em}#bootld p{margin:0;font:700 12px 'Silkscreen',monospace;letter-spacing:.24em;color:#b4f7a8}#bootld .bb{width:220px;height:14px;background:#0a140c;box-shadow:inset 0 0 0 2px #1e6b2c;padding:3px;box-sizing:border-box}#bootld .bb i{display:block;height:100%;width:8%;background:repeating-linear-gradient(90deg,#3cb04c 0 10px,#2a8a3a 10px 12px);transition:width .5s steps(10)}</style><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
 /* save slots, very top right of the menu */
 #slots{position:fixed;top:calc(env(safe-area-inset-top,0px) + 4px);right:12px;z-index:6;display:flex;align-items:center;gap:6px}
 #slots .sl-l{font-size:9px;letter-spacing:.22em;color:var(--dim);margin-right:2px}
@@ -29,7 +29,7 @@
 html,body{background:#000!important;overflow:clip!important}
 #stage{container-type:size;contain:layout;transform:translateZ(0);position:absolute!important;inset:0;margin:auto}
 </style>
-</head><body>
+</head><body><div id="bootld" aria-live="polite"><div class="bl"><b>PIXEL RUSH</b><p id="bootmsg">LOADING SAVE</p><div class="bb"><i id="bootbar"></i></div></div></div><script>try{var _n=localStorage.getItem('cinder-slot')||'1';document.getElementById('bootmsg').textContent='LOADING SAVE '+_n;setTimeout(function(){var b=document.getElementById('bootbar');if(b)b.style.width='60%'},30)}catch(e){}</script>
 <title>Pixel Rush</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Rubik+Mono+One&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap">
 <style>
@@ -647,6 +647,7 @@ summary:hover{color:var(--bone)}
     </div>
   </div>
 
+  <div id="evo" hidden aria-live="polite"><canvas id="evocv"></canvas><p id="evotx"></p><small id="evoskip">CLICK OR PRESS ANY KEY TO SKIP</small></div>
   <div id="ask" class="ov" hidden role="alertdialog" aria-modal="true" aria-labelledby="askt"><div class="box"><h2 id="askt"></h2><div id="askb"></div><div class="row"><button class="btn ghost" id="askno" type="button">CANCEL</button><button class="btn gold" id="askok" type="button">OK</button></div></div></div>
   <div id="panel" class="ov" hidden>
     <div class="box">
@@ -3301,7 +3302,9 @@ function buyEvo(t,n){
   if(!typeOpen(t)||wmLv(t)!==n-1||n>WM_MAX)return;
   const c=wmCost(t,n);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
   const was=EVO_T.filter(x=>typeOpen(x));
+  const evB=evoLv(t),evSk=skinBase(eq[t])||skinBase(EVO_ST[t]||'st_fist');
   wallet-=c;upg['wm'+t]=n;evoGrant();saveMeta();saveOwn();syncEq();sfx(660,.16,'triangle',.07,1.6);
+  {const evN=evoLv(t);if(evN>evB&&evSk&&evSk.forms)setTimeout(()=>playEvo(evSk.forms[evB],evSk.forms[evN]),120)} /* this step evolved the weapon */
   const nu=EVO_T.find(x=>typeOpen(x)&&was.indexOf(x)<0);
   renderCos();
   $('cosres').textContent=nu?'Mastered! Unlocked: Basic '+EVO_NAME[nu]+'. Equip it from the weapon screen; its mastery track is open.':EVO_NAME[t]+' mastery '+n+' / '+WM_MAX+': '+wmText(t,n-1)[0]+'.';
@@ -5632,6 +5635,7 @@ function readPad(){
 const xh={x:0,y:0,on:false,el:null,t:0};
 function xhOff(){if(xh.on){xh.on=false;$('xh').style.display='none';if(xh.el)xh.el.classList.remove('padhov');xh.el=null}}
 function padNav(){
+  if(evoA){for(let i=0;i<17;i++)if(padHit(i)){evoSkip();break}return}
   const now=performance.now(),dt=Math.min(.05,(now-xh.t)/1000);xh.t=now;
   if(!pad.on){xhOff();return}
   if(plisten){
@@ -5792,7 +5796,7 @@ function wpnTick(dt){
   enemies=enemies.filter(e=>!e.dead);
   const s=skinOf(equip),lv=s&&s.forms?s.lv:0;
   if(lv&&lv!==p.wlv){
-    if(p.wlv&&lv>p.wlv){banner('EVOLVED · '+s.fn.toUpperCase());ringFx(p.x,p.y,90,.4);spark(p.x,p.y,'#ffd36b',22,320);sfx(660,.15,'triangle',.07,1.5);setTimeout(()=>sfx(990,.25,'triangle',.07,1.4),120)}
+    if(p.wlv&&lv>p.wlv){const sb=skinBase(equip);if(sb&&sb.forms)playEvo(sb.forms[p.wlv-1],s);banner('EVOLVED · '+s.fn.toUpperCase());ringFx(p.x,p.y,90,.4);spark(p.x,p.y,'#ffd36b',22,320);sfx(660,.15,'triangle',.07,1.5);setTimeout(()=>sfx(990,.25,'triangle',.07,1.4),120)}
     p.wlv=lv;
   }
 }
@@ -6256,6 +6260,48 @@ function endRun(){
 }
 /* 0.5: one pixel popup for every 'are you sure?' (abandon a run, overwrite a saved run, import save data).
    Cancel has focus first so Enter never destroys anything by accident. */
+/* 0.5: weapon evolution animation (Pokemon style): the old weapon, a flashing white silhouette that swaps between the old and new shapes faster and faster,
+   a white flash, then the new weapon revealed with sparkles and a jingle. About 3.5 s, skippable. Plays when a mastery step evolves a weapon */
+let evoA=null;
+function evoSil(sk,U){const L=(sk.len||36),w=Math.ceil((L+60)*U),h=Math.ceil(60*U),cv=document.createElement('canvas');cv.width=w;cv.height=h;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+  g.save();g.translate(Math.round(w/2-(L/2)*U*.9),Math.round(h/2));g.scale(U,U);try{weaponShape(g,sk,1,true)}catch(e){}g.restore();
+  const col=document.createElement('canvas');col.width=w;col.height=h;col.getContext('2d').drawImage(cv,0,0);
+  g.globalCompositeOperation='source-in';g.fillStyle='#ffffff';g.fillRect(0,0,w,h);return {sil:cv,col}}
+function playEvo(from,to,done){
+  if(!from||!to||evoA){if(done)done();return}
+  const el=$('evo'),cv=$('evocv'),g=cv.getContext('2d'),r=stage.getBoundingClientRect();
+  cv.width=Math.max(320,Math.round(r.width/2));cv.height=Math.max(180,Math.round(r.height/2));g.imageSmoothingEnabled=false;
+  const U=Math.max(2,Math.min(5,Math.floor(cv.height/34)));
+  const A=evoSil(from,U),B=evoSil(to,U),inRun=state==='play';
+  if(inRun)state='evo';
+  evoA={t0:performance.now(),last:-1,done,inRun,ph:0,sparks:[]};el.hidden=false;
+  $('evotx').innerHTML='What? Your <b>'+(from.fn||from.n)+'</b> is evolving!';
+  const fin=()=>{if(!evoA)return;const d=evoA.done,ir=evoA.inRun;evoA=null;el.hidden=true;if(ir&&state==='evo')state='play';if(d)d()};
+  evoA.fin=fin;
+  const f=n=>{if(!evoA)return;const t=(n-evoA.t0)/1000,W2=cv.width,H2=cv.height,cx=W2/2,cy=H2*.46;
+    g.fillStyle='#07090e';g.fillRect(0,0,W2,H2);
+    /* rotating light rays */
+    g.save();g.translate(cx,cy);g.rotate(t*.6);const ra=Math.min(1,t/.6)*(t<2.2?.18+.25*Math.min(1,(t-.7)/1.5):.35);g.globalAlpha=Math.max(0,ra);g.fillStyle=t<2.3?'#8ee8ff':'#ffd36b';
+    for(let i=0;i<12;i++){g.rotate(TAU/12);g.beginPath();g.moveTo(0,0);g.lineTo(W2,-W2*.08);g.lineTo(W2,W2*.08);g.closePath();g.fill()}g.restore();g.globalAlpha=1;
+    const draw=(img,sc)=>{const w=img.width*sc,h=img.height*sc;g.drawImage(img,Math.round(cx-w/2),Math.round(cy-h/2),Math.round(w),Math.round(h))};
+    if(t<.7){draw(A.col,1+Math.sin(t*6)*.02)}
+    else if(t<2.2){const k=(t-.7)/1.5,fr=3+k*k*16,ph=Math.floor((t-.7)*fr)%2;if(ph!==evoA.ph){evoA.ph=ph;sfx(380+k*700,.05,'square',.025,1.2)}
+      const sc=1+.08*Math.sin(t*fr*Math.PI);draw(ph?B.sil:A.sil,sc);
+      if(Math.random()<.5)evoA.sparks.push({a:Math.random()*TAU,r:Math.max(W2,H2)*.55,v:-(160+Math.random()*120),c:'#ffffff'})}
+    else if(t<2.5){if(evoA.last<2.2){[523,659,784,1046].forEach((q,i)=>setTimeout(()=>sfx(q,.5,'triangle',.05,1.1),i*40));for(let i=0;i<40;i++)evoA.sparks.push({a:Math.random()*TAU,r:8,v:180+Math.random()*260,c:i%2?'#ffd36b':'#ffffff'})}
+      draw(B.col,1.1);g.fillStyle='#ffffff';g.globalAlpha=1-(t-2.2)/.3;g.fillRect(0,0,W2,H2);g.globalAlpha=1}
+    else{if(evoA.last<2.5){$('evotx').innerHTML='Your <b>'+(from.fn||from.n)+'</b> evolved into <b class="evn">'+(to.fn||to.n)+'</b>!';[784,988,1175,1568].forEach((q,i)=>setTimeout(()=>sfx(q,.18,'triangle',.06,1.3),i*110))}
+      draw(B.col,1+.04*Math.sin(t*4))}
+    for(const q of evoA.sparks){q.r+=q.v/60;g.fillStyle=q.c;g.fillRect(Math.round(cx+Math.cos(q.a)*q.r)-1,Math.round(cy+Math.sin(q.a)*q.r)-1,3,3)}
+    evoA.sparks=evoA.sparks.filter(q=>q.r>4&&q.r<Math.max(W2,H2));
+    evoA.last=t;
+    if(t>3.7){fin();return}
+    requestAnimationFrame(f)};
+  requestAnimationFrame(f);
+}
+function evoSkip(){if(evoA&&performance.now()-evoA.t0>250)evoA.fin()}
+$('evo').addEventListener('click',evoSkip);
+addEventListener('keydown',e=>{if(!evoA)return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)evoSkip()},true);
 let askCb=null,askPrev=null;
 function pxAsk(o,cb){
   $('askt').textContent=o.t||'';$('askb').innerHTML=o.b||'';$('askok').textContent=o.ok||'OK';$('askno').textContent=o.no||'CANCEL';
@@ -6410,7 +6456,7 @@ $('htut').addEventListener('click',()=>{if(state==='menu')startTutorial()});
 let mvx=0,mvy=0;
 let hbT=0,lowHp=false;
 function update(dt){
-  if(state==='menu'||state==='pause')return;
+  if(state==='menu'||state==='pause'||state==='evo')return;
   if(state==='play'||state==='shop')runT+=dt;
   if(hitstop>0){hitstop-=dt;return}
   time+=dt;
@@ -8971,6 +9017,12 @@ function pxWipe(mid,hold){
 }
 
 /* after switching saves the game reloads behind the blocks: start covered, then clear */
+/* 0.5: the save loading screen fills its bar once the game has set itself up, then fades away onto the main menu */
+function bootDone(){
+  const el=document.getElementById('bootld');if(!el||!document.documentElement.classList.contains('booting')){pxReveal();return}
+  const bar=document.getElementById('bootbar');requestAnimationFrame(()=>{if(bar)bar.style.width='100%'});
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>{document.documentElement.classList.remove('booting');el.remove()},380)},560);
+}
 function pxReveal(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const C=16,RW=9,ST=16,el=document.createElement('div');el.className='pxwipe in';el.style.gridTemplateColumns='repeat('+C+',1fr)';el.style.gridTemplateRows='repeat('+RW+',1fr)';
@@ -9028,7 +9080,7 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
   function drawDiffs(){
     dbox.innerHTML=Object.keys(DIFFS).map(k=>{const d=DIFFS[k];return '<button type="button" class="td'+(k===selDiff?' on':'')+'" data-d="'+k+'" style="--tc:'+d.c+'"><span>'+d.n+'</span><small>'+d.s+'</small></button>'}).join('');
     $('tddesc').textContent=DIFFS[selDiff].r;
-    go.disabled=!selSlot;
+    go.disabled=!selSlot;go.textContent=selSlot&&info(selSlot)?'CONTINUE':'START'; /* a save with progress continues; an empty one starts fresh */
   }
   function show(screen){
     T.hidden=false;document.body.classList.add('ontitle');tsStart();s1.hidden=screen!==1;s2.hidden=screen!==2;confirmDel=0;
@@ -9086,7 +9138,7 @@ const PACE_TXT={easy:'~45 min per world',medium:'~45 min per world',hard:'~45 mi
   window.__title={show:show,hide:hide,slotKeysOf:slotKeysOf};
   let boot=null;try{boot=sessionStorage.getItem('cinder-boot');sessionStorage.removeItem('cinder-boot')}catch(e){}
   /* the game opens on the title screen (the menu battle plays behind it); switching saves reloads straight into the main menu */
-  if(boot==='home'){hide();pxReveal()}else show(boot==='select'?2:1);
+  if(boot==='home'){hide();bootDone()}else show(boot==='select'?2:1);
 
   /* ---------- save switcher + manager (very top right of the main menu) ---------- */
   {
@@ -9648,5 +9700,12 @@ body:has(#panel:not([hidden])) #achpops,body:has(#panel:not([hidden])) #joy,body
 #pause .box{background:#0b0d12!important;border:0!important;border-radius:0!important;padding:20px 24px!important;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c,0 18px 50px rgba(0,0,0,.6)!important}
 #pause h2{font-family:'Press Start 2P',monospace}#pause .btn{border-radius:0!important;font-family:'Silkscreen',monospace;font-weight:700;letter-spacing:.14em}
 #set .sdnote{font-size:12px;line-height:1.5;color:#b8c4b8;margin:0 0 6px}#sdmsg{min-height:1.2em;color:#b4f7a8;font-size:12px}#sdmsg.bad{color:#ff8a9a}
+/* ===== 0.5: evolution animation overlay ===== */
+#evo{position:absolute;inset:0;z-index:70;background:#07090e;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+#evo[hidden]{display:none}
+#evocv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+#evotx{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:min(92%,720px);margin:0;padding:14px 18px;background:#0b0d12;box-shadow:0 0 0 4px #1e6b2c,0 0 0 8px #0b3a15,0 0 0 12px #3cb04c;font-family:'Press Start 2P',monospace;font-size:clamp(11px,1.6vw,16px);line-height:1.6;color:#fff;text-align:center}
+#evotx b{color:#8ee8ff}#evotx .evn{color:#ffd36b}
+#evoskip{position:absolute;bottom:4%;font-family:'Silkscreen',monospace;font-size:10px;letter-spacing:.2em;color:#7a8296}
 </style>
 </body></html>

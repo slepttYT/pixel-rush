@@ -8,7 +8,7 @@ Quality over speed. Never claim something works unless it was tested.
 - Never remove enemies, bosses, animations, cosmetics or mechanics.
 - Original pixel art in the game's style. Test features alone and together. Fix regressions.
 - Do not silently skip hard features. If a choice has options, pick the recommended one (user's standing instruction: don't ask, choose the recommended option).
-- Do NOT add: a loading screen, rotating gameplay tips, loading-screen hints, new animated main-menu icons, world-skipping mechanics.
+- Do NOT add: a loading screen (EXCEPTION, user asked later: a save-loading screen when picking a save, instead of bouncing to the saves screen — done, #bootld), rotating gameplay tips, loading-screen hints, new animated main-menu icons, world-skipping mechanics.
 - Keep the main menu's existing animations.
 
 ## Versioning / delivery
@@ -42,7 +42,7 @@ Flow: New Run → Select Character → Configure Run → Start Game.
 ### 2. Weapon evolution overhaul
 - [x] Rename/redraw lines exactly as the table above (WLINES punch/gun/bomb; new art wrap, dbarrel, grenade, cball, bigger bomb, brass bar; weapon-box skins use the exact stage names, their look stays on the final stage). Each form visually distinct; the in-hand sprite matches the evolution.
 - [ ] New families: Boomerang (thrown, returns, pierces), Magic (homing bolt), Bow (charged arrows that pierce), Mace (slow heavy spin smash with knockback). Each with mastery track, unlock chain after Bomb (Bomb → Boomerang → Magic → Bow → Mace), shop/upgrade tabs only when unlocked.
-- [ ] Evolution animation (Pokémon-like): old weapon shown big, flashing silhouette, transform burst, new weapon revealed, evolution jingle. Short, skippable by click.
+- [x] Evolution animation (Pokémon-like) (playEvo; triggered by mastery Evolve steps and in-run evolutions; tested, skip works): old weapon shown big, flashing silhouette, transform burst, new weapon revealed, evolution jingle. Short, skippable by click.
 
 ### 3. Fist combat fix
 - [x] Punch = forward jab (inJab strip hitbox, tested front/diag/behind on all 3 forms): arm visibly extends, narrow short hitbox in front only (no sweep). Distinct from slash. Holds through Bare Fist → Knuckle Wrap → Brass Knuckles (each stronger).
@@ -124,6 +124,7 @@ Five worlds work; menu rotation 30 s; button colors per world; previews show wea
 - Save & Exit/Continue: checkpoint at wave start + wave clear/shop close (runSnap), stored in cinder-run per save, consumed on continue, validated; not in boss rush/tutorial; difficulty of the run used then restored on showHome. pxAsk() generic confirm popup (Esc/back = cancel, Cancel focused first).
 - Export/import: format 'pixel-rush-save' fv1 {data:{cinder-*}}; backup in pxr-backup-prev + RESTORE button; invalid/oversized files rejected; quota failure restores old data.
 - Shotgun fires pellets (w.pel); Cannonball rolls along the ground (w.roll), bursts on the first enemy it touches, quiet roll rumble.
+- User requests mid-0.5: Easy keeps name EASY; save screen button says CONTINUE for saves with data (START for empty); save loading screen on save switch reload (#bootld, html.booting set in <head>).
 
 ## Known bugs
 (append as found)
