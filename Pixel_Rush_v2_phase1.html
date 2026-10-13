@@ -1464,7 +1464,7 @@ const ELEM_B=[['Sulfur','common','#e8d84a','#8a7a1a','#3a3a0a'],['Brick','common
 const STARTERS=[KL('st_fist','punch','common','Bare Fists','#e8b98a','#c99568','#6b4a2a'),
   KL('st_knife','knife','common','Basic Knife','#c9d2dc','#8a6a3a','#5a3a1f',{},WLINES.knife),
   KL('st_gun','gun','common','Basic Pistol','#8a8f9c','#5a5d68','#3a2a1a',{},WLINES.gun),
-  KL('st_bomb','bomb','common','Basic Bomb','#3a3d48','#ff8a3d','#1a1a22',{},WLINES.bomb)]; /* you begin with fists; the others unlock through the evolution upgrades */
+  KL('st_bomb','bomb','common','Basic Bomb','#3a3d48','#ff8a3d','#1a1a22',{},WLINES.bomb)]; /* you begin with fists; the others unlock by mastering the weapon before it (Upgrades) */
 STARTERS.filter(x=>!x.forms).forEach(toKnife);
 const isStarter=id=>id==='st_fist'||id==='st_knife'||id==='st_gun'||id==='st_bomb';
 const DEFSK={id:'',n:'Classic Sword',r:'common',k:'sword',len:34,b:'#dfe9f5',g:'#ffd36b',h:'#9a5b34',glow:'#ffffff',tr:'#ffd36b'};
@@ -1535,18 +1535,37 @@ SKINS.length=0;
   }));
 }
 const skinBase=id=>id?(isDevId(id)?(dev.skin?DEVIDS[id]:null):SKINS.find(s=>s.id===id)||STARTERS.find(s=>s.id===id)||null):DEFSK;
-/* ---------- evolution upgrades (Shop > Upgrades). Fists, knife, gun and bomb each have two: the first lets the weapon evolve after the first boss, the second after the second boss.
-   Buying both for one weapon unlocks the next one (fists > knife > gun > bomb). Costs go up by 50 each: 50, 100, 150, 200 ... 400 ---------- */
+/* ---------- weapon mastery (Shop > Upgrades). Each weapon has a 10-step track of small upgrades instead of two big ones.
+   Steps 4 and 8 evolve it into its next form, step 9 gives it a special, and step 10 masters it and unlocks the next weapon (fists > knife > gun > bomb).
+   Bonuses are percentages, so a slow heavy weapon gains exactly as much as a fast light one and a later weapon is never just better.
+   Track costs (about 1,500 / 2,450 / 3,500 / 4,460 coins) are tuned toward roughly an hour of play per weapon ---------- */
 const EVO_T=['f','k','g','b'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb'};
-const evoCost=(t,n)=>(EVO_T.indexOf(t)*2+n)*50;
-const evoLv=t=>Math.min(2,upg['ev'+t]||0);
-const evoDone=t=>evoLv(t)>=2;
+const WM_MAX=10,WM_BASE={f:70,k:115,g:165,b:210};
+const WM_SPEC={f:['Knockout','Heavy punches stun enemies for a moment'],k:['Precision','+10% chance to crit for double damage'],g:['Armor Piercing','+25% damage to mini bosses and bosses'],b:['Napalm','Blasts set enemies on fire']};
+const WM_STEPS={
+ f:[['dmg',.08],['spd',.06],['reach',.06],['form'],['dmg',.08],['spd',.06],['reach',.06],['form'],['spec'],['dmg',.1]],
+ k:[['dmg',.08],['reach',.07],['spd',.05],['form'],['dmg',.08],['reach',.07],['spd',.05],['form'],['spec'],['dmg',.1]],
+ g:[['spd',.06],['dmg',.08],['reach',.08],['form'],['spd',.06],['dmg',.08],['reach',.08],['form'],['spec'],['dmg',.1]],
+ b:[['dmg',.08],['reach',.07],['spd',.05],['form'],['dmg',.08],['reach',.07],['spd',.05],['form'],['spec'],['dmg',.1]]
+};
+const WM_LINE={f:'punch',k:'knife',g:'gun',b:'bomb'};
+/* old saves: evolution upgrade 1 becomes mastery step 4, both upgrades become a mastered track so nothing that was unlocked locks again */
+for(const t of ['f','k','g','b']){const o=upg['ev'+t]||0;if(o&&!(upg['wm'+t]>0))upg['wm'+t]=o>=2?10:4;delete upg['ev'+t]}
+const wmLv=t=>Math.min(WM_MAX,upg['wm'+t]||0);
+const wmCost=(t,n)=>Math.round(WM_BASE[t]*(1+.25*(n-1))/5)*5;
+const wmSum=(t,k)=>{let s=0;const L=wmLv(t);for(let i=0;i<L;i++)if(WM_STEPS[t][i][0]===k)s+=WM_STEPS[t][i][1];return s};
+const wmSpec=t=>wmLv(t)>=9;
+function wmText(t,i){const st=WM_STEPS[t][i],nm=EVO_NAME[t].toLowerCase(),fm=WLINES[WM_LINE[t]];
+  if(i===WM_MAX-1)return['Mastery','+'+Math.round(st[1]*100)+'% damage. Masters the '+nm+(EVO_T[EVO_T.indexOf(t)+1]?' and unlocks the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)+1]].toLowerCase():'')];
+  if(st[0]==='form'){const f=fm[i===3?1:2][1];return['Evolve: '+f,'Evolves into the '+f+', its next form']}
+  if(st[0]==='spec')return[WM_SPEC[t][0],WM_SPEC[t][1]];
+  const pc=Math.round(st[1]*100);return st[0]==='dmg'?['Damage','+'+pc+'% damage']:st[0]==='spd'?['Speed','+'+pc+'% attack speed']:['Reach','+'+pc+'% '+(t==='b'?'blast size':t==='g'?'range':'reach')]}
+const evoLv=t=>wmLv(t)>=8?2:wmLv(t)>=4?1:0;
+const evoDone=t=>wmLv(t)>=WM_MAX;
 const typeOpen=t=>t==='f'||!!dev.skin||evoDone(EVO_T[EVO_T.indexOf(t)-1]);
 /* hand over the basic common weapon of every weapon that is open but has nothing equipped */
 function evoGrant(){for(const t of ['k','g','b'])if(typeOpen(t)&&!eq[t])eq[t]=EVO_ST[t]}
-/* every evolution upgrade you buy makes EVERY form of that weapon hit harder (fists, knife and gun +0.5 each, bombs +1 each), on top of the extra damage the evolved forms already have */
-const evoBonus=()=>isDevId(eq[wType])?0:evoLv(wType)*(wType==='b'?1:.5);
-function wLevel(){if(isDevId(eq[wType]))return Math.min(Math.floor(clearedWaves()/10),2);return evoLv(wType)} /* buying an evolution upgrade evolves the weapon right away: 0 bought = first form, 1 = second form, 2 = final form. Dev skins still evolve once per boss */
+function wLevel(){if(isDevId(eq[wType]))return Math.min(Math.floor(clearedWaves()/10),2);return evoLv(wType)} /* mastery steps 4 and 8 evolve the weapon right away: steps 0-3 first form, 4-7 second form, 8-10 final form. Dev skins still evolve once per boss */
 const skinOf=id=>{const s=skinBase(id);if(s&&s.forms&&id===equip&&(state==='play'||state==='pause'||state==='over'||state==='win'||state==='shop'))return s.forms[Math.min(wLevel(),s.forms.length-1)];return s};
 const maxF=s=>s&&s.forms&&s.forms.length?s.forms[s.forms.length-1]:s; /* menus always show the final (max level) form of a weapon */
 let wallet=0,coinLevel=1,own=new Set(),equip='';
@@ -2140,11 +2159,11 @@ function renderCos(){
   const P=cosTab==='p',eqId=P?petEq:eq[cosTab];
   TABS.forEach(t=>$('t'+t).classList.toggle('on',cosTab===t));
   $('wallet').innerHTML='<i class="coin"></i>'+wallet+' coins';
-  if(!P&&!typeOpen(cosTab)){ /* this weapon is still locked behind the evolution upgrades of the one before it */
+  if(!P&&!typeOpen(cosTab)){ /* this weapon is still locked until the one before it is mastered */
     const pt=EVO_T[EVO_T.indexOf(cosTab)-1];
     $('qtybar').hidden=true;$('qtybar').style.display='none';{const on=$('oddsnote');if(on)on.style.display='none'}
     $('cosname').textContent=EVO_NAME[cosTab]+' · locked';
-    $('packs').innerHTML='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[cosTab]+' boxes are locked</b><span>Buy both '+EVO_NAME[pt]+' evolution upgrades in the Upgrades tab to unlock the basic '+EVO_NAME[cosTab].toLowerCase()+' and these boxes.</span></div>';
+    $('packs').innerHTML='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[cosTab]+' boxes are locked</b><span>Master the '+EVO_NAME[pt].toLowerCase()+' in the Upgrades tab to unlock the basic '+EVO_NAME[cosTab].toLowerCase()+' and these boxes.</span></div>';
     $('coll').innerHTML='';return;
   }
   boxQty=Math.max(1,Math.min(boxQty,MAXQ));
@@ -2600,6 +2619,7 @@ function drawPortrait(cv,ch,locked,t){
 function applyChar(){
   const c=CH();p.ch=c;p.spdM=c.spd||1;p.cdM=c.cd||1;p.dmgB=c.dm||0;p.reachM=c.reach||1;p.dashM=c.dash||1;p.every=c.every||0;p.coinM=c.coin||1;p.xpM=c.xp||1;
   p.cp=brMode?{}:Object.assign({},c.cp||{});p.r=c.r||11;p.rgT=0;p.hitW=false;p.wardUsed=false;
+  if(!isDevId(eq[wType])){p.cdM/=1+wmSum(wType,'spd');p.reachM*=1+wmSum(wType,'reach')}
   if(c.wb&&c.wb.w===wType){const b=c.wb;p.dmgB+=b.dm||0;p.cdM*=b.cd||1;p.reachM*=b.reach||1;if(b.crit)p.cp.crit=(p.cp.crit||0)+b.crit}
   if(diff!=='nowin'&&c.hp){p.maxhp=Math.max(1,p.maxhp+c.hp);p.hp=p.maxhp}
   if(!brMode)(c.start||[]).forEach(id=>{const a=abilById(id);if(a&&abilOk(a))applyAbility(id)});
@@ -2895,13 +2915,13 @@ function buyUpg(k){
 }
 let upgTab='f';
 function buyEvo(t,n){
-  if(!typeOpen(t)||evoLv(t)!==n-1)return;
-  const c=evoCost(t,n);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
+  if(!typeOpen(t)||wmLv(t)!==n-1||n>WM_MAX)return;
+  const c=wmCost(t,n);if(wallet<c){sfx(110,.1,'square',.05,.7);return}
   const was=EVO_T.filter(x=>typeOpen(x));
-  wallet-=c;upg['ev'+t]=n;evoGrant();saveMeta();saveOwn();syncEq();sfx(660,.16,'triangle',.07,1.6);
+  wallet-=c;upg['wm'+t]=n;evoGrant();saveMeta();saveOwn();syncEq();sfx(660,.16,'triangle',.07,1.6);
   const nu=EVO_T.find(x=>typeOpen(x)&&was.indexOf(x)<0);
   renderCos();
-  $('cosres').textContent=nu?'Unlocked: Basic '+EVO_NAME[nu]+'! Equip it from the weapon screen, and its evolution upgrades are open.':EVO_NAME[t]+' evolution '+n+' bought.';
+  $('cosres').textContent=nu?'Mastered! Unlocked: Basic '+EVO_NAME[nu]+'. Equip it from the weapon screen; its mastery track is open.':EVO_NAME[t]+' mastery '+n+' / '+WM_MAX+': '+wmText(t,n-1)[0]+'.';
   checkAch();
 }
 function renderUpg(){
@@ -2914,21 +2934,19 @@ function renderUpg(){
   let h='<div class="tabs" style="grid-column:1/-1">'+NM.map(n=>{const lk=n[0]==='p'?!permaOpen():!typeOpen(n[0]);return '<button type="button" class="btn ghost sm'+(upgTab===n[0]?' on':'')+'" data-ut="'+n[0]+'">'+(lk?'&#128274; ':'')+n[1]+'</button>'}).join('')+'</div>';
   if(upgTab==='p'&&!permaOpen()){
     const have=EVO_T.filter(typeOpen).length,nxt=EVO_T.find(x=>!typeOpen(x));
-    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked · '+have+' / '+EVO_T.length+' weapons unlocked</small><b>Perma upgrades are locked</b><span>Unlock every weapon first.'+(nxt?' Next up is the '+EVO_NAME[nxt].toLowerCase()+': buy both '+EVO_NAME[EVO_T[EVO_T.indexOf(nxt)-1]]+' evolution upgrades.':'')+'</span></div>';
+    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked · '+have+' / '+EVO_T.length+' weapons unlocked</small><b>Perma upgrades are locked</b><span>Unlock every weapon first.'+(nxt?' Next up is the '+EVO_NAME[nxt].toLowerCase()+': master the '+EVO_NAME[EVO_T[EVO_T.indexOf(nxt)-1]].toLowerCase()+' in Upgrades.':'')+'</span></div>';
   }else if(upgTab==='p'){
     h+=Object.keys(UPG).map(k=>{const u=UPG[k],lv=upg[k]||0,mx=lv>=u.max,c=upgCost(k);
       return '<button type="button" class="item'+(mx?' maxed':'')+'" data-up="'+k+'" style="--tc:#ffd36b"'+(!mx&&wallet<c?' disabled':'')+'><small>'+(u.max>1?'Level '+lv+' / '+u.max:(mx?'Owned':'Not stackable'))+'</small><b>'+u.n+'</b><span>'+u.d+'</span><em class="price">'+(mx?(u.max>1?'Maxed':'Owned'):'<i class="coin"></i>'+c)+'</em></button>'}).join('');
   }else if(!typeOpen(upgTab)){
     const pt=EVO_T[EVO_T.indexOf(upgTab)-1];
-    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[upgTab]+' upgrades are locked</b><span>Buy both '+EVO_NAME[pt]+' evolution upgrades first.</span></div>';
+    h+='<div class="item maxed" style="--tc:#5a6078;grid-column:1/-1;cursor:default"><small>Locked</small><b>'+EVO_NAME[upgTab]+' upgrades are locked</b><span>Master the '+EVO_NAME[pt].toLowerCase()+' (all 10 steps) first.</span></div>';
   }else{
-    const t=upgTab,lv=evoLv(t),nx=EVO_T[EVO_T.indexOf(t)+1],ln=WLINES[{f:'punch',k:'knife',g:'gun',b:'bomb'}[t]].map(x=>x[1]).join(' → ');
-    const card=n=>{
-      const c=evoCost(t,n),own=lv>=n,need=lv<n-1;
-      const bn=t==='b'?'+1':'+0.5',d=(n===1?'Your '+EVO_NAME[t].toLowerCase()+' evolves into its next form the moment you buy this.':'Your '+EVO_NAME[t].toLowerCase()+' evolves into its final form the moment you buy this.')+' Every form of it hits '+bn+' harder.';
-      return '<button type="button" class="item'+(own?' maxed':'')+'" data-evo="'+t+n+'" style="--tc:#ffd36b"'+(!own&&(need||wallet<c)?' disabled':'')+'><small>'+(own?'Owned':need?'Buy upgrade 1 first':'Upgrade '+n)+'</small><b>'+EVO_NAME[t]+' evolution '+n+'</b><span>'+d+'</span><em class="price">'+(own?'Owned':'<i class="coin"></i>'+c)+'</em></button>'};
-    h+=card(1)+card(2);
-    h+='<p class="note" style="grid-column:1/-1;margin:2px 0 0">Evolution path: '+ln+'.'+(nx?(evoDone(t)?' Both bought, so the basic '+EVO_NAME[nx].toLowerCase()+' is unlocked.':' Buy both to unlock the basic '+EVO_NAME[nx].toLowerCase()+'.'):' This is the last weapon.')+'</p>';
+    const t=upgTab,lv=wmLv(t),nx=EVO_T[EVO_T.indexOf(t)+1];
+    h+='<p class="note" style="grid-column:1/-1;margin:0 0 2px">'+EVO_NAME[t]+' mastery <b style="color:var(--gold)">'+lv+' / '+WM_MAX+'</b> · now: '+[Math.round(wmSum(t,'dmg')*100)+'% damage',Math.round(wmSum(t,'spd')*100)+'% speed',Math.round(wmSum(t,'reach')*100)+'% '+(t==='b'?'blast':t==='g'?'range':'reach')].map(x=>'+'+x).join(' · ')+(wmSpec(t)?' · '+WM_SPEC[t][0]:'')+'</p>';
+    for(let n=1;n<=WM_MAX;n++){const c=wmCost(t,n),own=lv>=n,next=n===lv+1,tx=wmText(t,n-1),big=WM_STEPS[t][n-1][0]==='form'||n>=9;
+      h+='<button type="button" class="item'+(own?' maxed':'')+'" data-evo="'+t+n+'" style="--tc:'+(big?'#ffd36b':'#8fd3ff')+(own||next?'':';opacity:.55')+'"'+(!own&&(!next||wallet<c)?' disabled':'')+'><small>'+(own?'Owned':next?'Step '+n:'Locked · step '+n)+'</small><b>'+tx[0]+'</b><span>'+tx[1]+'</span><em class="price">'+(own?'Owned':'<i class="coin"></i>'+c)+'</em></button>'}
+    h+='<p class="note" style="grid-column:1/-1;margin:2px 0 0">Forms: '+WLINES[WM_LINE[t]].map(x=>x[1]).join(' → ')+' (steps 4 and 8).'+(nx?(evoDone(t)?' Mastered, so the '+EVO_NAME[nx].toLowerCase()+' is unlocked.':' Master it (step 10) to unlock the '+EVO_NAME[nx].toLowerCase()+'.'):' This is the last weapon.')+'</p>';
   }
   $('packs').innerHTML=h;
   $('coll').innerHTML='';
@@ -2936,8 +2954,14 @@ function renderUpg(){
 $('tu').addEventListener('click',()=>{if(cosBusy||cosTab==='u')return;cosTab='u';pv=[];$('cosres').textContent='';renderCos()});
 
 /* ---------- updates: what is new, newest first ---------- */
-const UPD_VER='4.2';
+const UPD_VER='4.3';
 const UPDATES=[
+ ['v4.3','Pixel Rush 2.0, part 4: weapon mastery','#8fd3ff',[
+  'The two big evolution upgrades are gone. Each weapon now has a 10-step mastery track in Shop > Upgrades with small upgrades you can feel: damage, attack speed and reach (range for the gun, blast size for bombs).',
+  'Steps 4 and 8 evolve the weapon into its next form. Step 9 gives it a special: Knockout (fists stun), Precision (knife crits), Armor Piercing (gun vs bosses) or Napalm (bombs burn). Step 10 masters it and unlocks the next weapon.',
+  'Every bonus is a percentage, so the bomb no longer gains more per upgrade than the fists. Each weapon is meant to carry a full run.',
+  'Each track is paced for about an hour of play. Old saves keep everything: evolution upgrade 1 became step 4, and a weapon with both upgrades is fully mastered.',
+  'Mobs are drawn a bit smaller, with hitboxes to match.']],
  ['v4.2','Pixel Rush 2.0, part 3: enemy evolution','#ff6a1a',[
   'Mobs now evolve through a run instead of only getting more health. Early waves are basic, the middle of a world brings Evolved mobs (glowing outline) and late waves bring Elites (a crown and a pulsing outline).',
   'Evolved mobs move and recover faster, hit harder and can inflict their world\u2019s element: burn in World 1, chill in World 2 (slows you), poison in World 3. Elites always do.',
@@ -4972,7 +4996,7 @@ function renderWpn(){
 }
 $('wpngrid').addEventListener('click',e=>{
   const b=e.target.closest('[data-w]');if(!b)return;const t=b.dataset.w;
-  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('wpninfo').textContent='Locked. Buy both '+EVO_NAME[EVO_T[EVO_T.indexOf(t)-1]]+' evolution upgrades in the shop (Upgrades tab) to unlock the '+EVO_NAME[t].toLowerCase()+'.';return}
+  if(!wpnTypeSkin(t)){sfx(110,.1,'square',.05,.7);$('wpninfo').textContent='Locked. Master the '+EVO_NAME[EVO_T[EVO_T.indexOf(t)-1]].toLowerCase()+' (all 10 steps in Shop > Upgrades) to unlock the '+EVO_NAME[t].toLowerCase()+'.';return}
   wType=t;syncEq();saveOwn();sfx(520,.08,'triangle',.05,1.4);renderWpn();openSub('world',$('wpngo'));
 });
 $('wpngo').addEventListener('click',()=>{closeSub();openSub('world',$('wpngo'))});
@@ -5135,7 +5159,7 @@ function gunSfx(k,heavy){
 function fireRanged(sk,w,heavy,a){
   const m=p.mods,cdm=Math.pow(.85,m.haste)/(p.swiftT>0?1.15:1)*(p.cdM||1)*(cheat.rapid?.35:1)*(1-(p.gramp||0));
   p.cd=w.cd*(heavy?1.7:1)*cdm;if(m.gover)p.gramp=Math.min(.5,(p.gramp||0)+.05);p.sw=p.swMax=w.rng==='bomb'?.3:.09;p.swHeavy=false;p.rec=0;
-  const dmg=w.dmg+evoBonus()+sharpOf(m)+(p.dmgB||0),rm=(1+.15*m.reach)*(p.reachM||1),col=slashCol()||sk.tr||'#ffd36b';
+  const dmg=w.dmg+sharpOf(m)+(p.dmgB||0),rm=(1+.15*m.reach)*(p.reachM||1),col=slashCol()||sk.tr||'#ffd36b';
   if(w.rng==='gun'){
     const d0=p.r*.45+sk.len*.92,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0,n0=heavy?w.hn:1,spread0=heavy?.55:0;
     let n=n0,spread=spread0;
@@ -5233,7 +5257,7 @@ function attack(){
   if(wst.rng){fireRanged(wsk,wst,heavy,a);return}
   p.cd=(heavy?.44:.25)*(wst.cd||1)*Math.pow(.85,m.haste)/(p.swiftT>0?1.15:1)*(p.cdM||1)*(cheat.rapid?.35:1);
   p.sw=p.swMax=heavy?.26:.18;p.swHeavy=heavy;p.rec=0;
-  const rad=(heavy?98:76)*(wst.rad||1)*(1+.15*m.reach)*(p.reachM||1),arc=heavy?TAU:Math.PI*.9,dmg=(heavy?2:1)+(wst.dmg||0)+evoBonus()+sharpOf(m)+(p.dmgB||0);
+  const rad=(heavy?98:76)*(wst.rad||1)*(1+.15*m.reach)*(p.reachM||1),arc=heavy?TAU:Math.PI*.9,dmg=(heavy?2:1)+(wst.dmg||0)+sharpOf(m)+(p.dmgB||0);
   const sc0=slashCol(),sk0=skinOf(equip);
   slashes.push({x:p.x,y:p.y,a,arc,R:rad,t:0,life:heavy?.26:.18,heavy,col:sc0,bc:sk0&&sk0.b,kd:(sk0&&sk0.k)||'sword',my:!!sc0,sk:sk0||DEFSK,rr:p.r});
   if(sc0&&sk0.vfx)for(let i=0;i<(heavy?40:18);i++){const aa=heavy?R()*TAU:a-arc/2+R()*arc,rr=rad*(.8+R()*.18);emitVfx(sk0,p.x+Math.cos(aa)*rr,p.y+Math.sin(aa)*rr,1,parts)}
@@ -5289,7 +5313,12 @@ function lightning(e,main,side){
 }
 function swordHit(e,dmg,a,heavy,aim,rad,arc){
   const m=p.mods,n=++p.hits;let mult=1,pierce=false;
-  if(p.cp.crit&&R()<p.cp.crit){mult*=2;spark(e.x,e.y,'#ffe56b',8,240)}
+  const wmS=wmSpec(wType)&&!isDevId(eq[wType]); /* mastery step 9 special for the weapon in hand */
+  mult*=1+wmSum(wType,'dmg');
+  if(((p.cp.crit||0)+(wmS&&wType==='k'?.1:0))>0&&R()<(p.cp.crit||0)+(wmS&&wType==='k'?.1:0)){mult*=2;spark(e.x,e.y,'#ffe56b',8,240)}
+  if(wmS&&wType==='g'&&(e.t==='boss'||(TYPES[e.t]&&TYPES[e.t].mb)))mult*=1.25;
+  if(wmS&&wType==='f'&&heavy&&e.t!=='boss'&&!(e.stcd>0)){e.frz=Math.max(e.frz||0,.35);e.stcd=1.2}
+  if(wmS&&wType==='b'){e.burnT=1.5;e.burnD=Math.max(e.burnD||0,1);e.burnA=e.burnA||0}
   if(m.heavysw&&n%5===0)mult*=2;
   if(m.critsw&&n%6===0){mult*=2;spark(e.x,e.y,'#ffe56b',10,260)}
   if(m.revenge&&p.revT>0){mult*=2;p.revT=0;spark(e.x,e.y,'#ff4d5e',10,240)}
@@ -7642,7 +7671,7 @@ TABS.forEach(t=>$('t'+t).addEventListener('click',()=>setTab(t)));
 $('packs').addEventListener('click',e=>{
   const ut=e.target.closest('[data-ut]');
   if(ut){upgTab=ut.dataset.ut;sfx(520,.05,'triangle',.04,1.3);renderCos();return}
-  const b=e.target.closest('.item');if(b&&b.dataset.pk)openBox(b.dataset.pk);else if(b&&b.dataset.up)buyUpg(b.dataset.up);else if(b&&b.dataset.evo)buyEvo(b.dataset.evo[0],+b.dataset.evo[1]);
+  const b=e.target.closest('.item');if(b&&b.dataset.pk)openBox(b.dataset.pk);else if(b&&b.dataset.up)buyUpg(b.dataset.up);else if(b&&b.dataset.evo)buyEvo(b.dataset.evo[0],+b.dataset.evo.slice(1));
 });
 $('coll').addEventListener('change',e=>{
   const t=e.target,id=t&&t.id;if(id!=='ownpk'&&id!=='ownsort')return;
@@ -7718,8 +7747,8 @@ requestAnimationFrame(frame);
       warpToWave100(cmd==='dev_2_ssc'||cmd==='dev_show_2ssc'?2:cmd==='dev_show_3ssc'?3:1);closeAdmin();
       return;
     }else if(cmd==='dev_evo_ssc'){
-      EVO_T.forEach(t=>{upg['ev'+t]=2});evoGrant();saveMeta();saveOwn();syncEq();
-      say('All evolution upgrades bought: fists, knife, gun and bomb are unlocked and evolve after bosses 1 and 2.');
+      EVO_T.forEach(t=>{upg['wm'+t]=WM_MAX});evoGrant();saveMeta();saveOwn();syncEq();
+      say('Every weapon mastered: fists, knife, gun and bomb are unlocked at their final forms.');
     }else if(cmd==='dev_show_cheats_ssc'){
       dev.cheats=true;saveDev();say('Cheat menu unlocked.');
     }else if(cmd==='dev_unlock_all_ssc'){
@@ -7729,7 +7758,7 @@ requestAnimationFrame(frame);
       stats.w2=1;stats.w3=1;
       CHARS.forEach(c=>{stats.cxp[c.id]=Math.max(cxpOf(c.id),CXP[CL_MAX-1])});
       for(const k in UPG)upg[k]=UPG[k].max;
-      EVO_T.forEach(t=>{upg['ev'+t]=2});evoGrant();
+      EVO_T.forEach(t=>{upg['wm'+t]=WM_MAX});evoGrant();
       SKINS.forEach(x=>own.add(x.id));PETS.forEach(x=>own.add(x.id));
       dev.skin=true;dev.cheats=true;saveDev();
       ['k','g','b','f'].forEach(t=>{if(!eq[t]){const sk=SKINS.find(x=>x.tab===t);if(sk)eq[t]=sk.id}});syncEq();
