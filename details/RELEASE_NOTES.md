@@ -1,3 +1,16 @@
+## Pixel Rush 0.7: The Rebuild Update
+
+- **New enemies in Worlds 2 to 5** and **new bosses everywhere**: no more World 1 reskins, and no Stone Lizard followed by a Sand Lizard.
+- **Boss stagger meter** on every boss, plus fixes for bosses overlapping the HUD or spawning on you.
+- **Day and night** on every map from your computer clock.
+- **Halloween, Christmas and Easter events** (enemies, hats, maps and a wave-50 boss each). Turn them off in Settings.
+- **Mandatory menu tutorial** (shop, upgrades, unlocks, free first Fists upgrade), then the tutorial world.
+- **EXIT button**, **Xbox / PlayStation button prompts**, pixel-art ability screen, ability icons, achievement pop-ups, boss key and death screen.
+- **Gun and Bomb rework**: no-spread Pistol and Rifle stream, rolling Grenade, Sticky Bomb, Impact Bomb.
+- **Weapon upgrades cost 10k coins per world tier**, bosses pay coin bounties, full-body hitboxes, an attack-speed floor, attack warnings for the jester, wizard and archer.
+- New combat and death-screen sounds and feedback.
+- Multiplayer and the online server are gone.
+
 ## Pixel Rush 0.6.1
 
 **Fixes in 0.6.1**

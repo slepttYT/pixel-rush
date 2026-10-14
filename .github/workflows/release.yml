@@ -1,6 +1,6 @@
-# Publishes a GitHub Release with the game EXE.
+# Publishes a GitHub Release with the game EXE and the HTML game.
 # Runs when main changes the EXE or details/VERSION (the release is named after the version in that file),
-# or by hand from the Actions tab. If the release already exists, its EXE is replaced.
+# or by hand from the Actions tab. If the release already exists, its files are replaced.
 name: Release
 on:
   push:
@@ -20,8 +20,9 @@ jobs:
         run: |
           VER="$(tr -d ' \r\n' < details/VERSION)"
           TAG="v${VER}"
+          HTML="details/Pixel_Rush_${VER}.html"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" Pixel-Rush-Game.exe --clobber
+            gh release upload "$TAG" Pixel-Rush-Game.exe "$HTML" --clobber
           else
-            gh release create "$TAG" Pixel-Rush-Game.exe --target "$GITHUB_SHA" --title "Pixel Rush ${VER}" --notes-file details/RELEASE_NOTES.md --latest
+            gh release create "$TAG" Pixel-Rush-Game.exe "$HTML" --target "$GITHUB_SHA" --title "Pixel Rush ${VER}" --notes-file details/RELEASE_NOTES.md --latest
           fi

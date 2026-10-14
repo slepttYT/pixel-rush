@@ -1,8 +1,8 @@
 #!/bin/bash
 # Builds the Windows EXE from the SAME game file as the HTML release (one shared codebase).
-# Usage: details/desktop/build.sh 0.6   -> Pixel-Rush-Game.exe at the top of the repository
+# Usage: details/desktop/build.sh 0.7   -> Pixel-Rush-Game.exe at the top of the repository
 set -euo pipefail
-VER="${1:-0.6}"
+VER="${1:-0.7}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"   # the details folder (game file lives here)
 REPO="$(cd "$ROOT/.." && pwd)"   # the top of the repository, where the EXEs go
