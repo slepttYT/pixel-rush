@@ -246,3 +246,14 @@ make tut start in the menu have it go through how the shop upgrades and unlocks 
 make bosses better shouldnt be a overlap like they is now make evey boss get staggered after a bit and make make every boss diffrent there shouldnt be a stone lizzard and then a sand lizzard fix vaults to have the pixel art style and make special ability icons in the pixel art style do a enimies over haul i dont care if they have the same mechanics but they shouldnt just be reskins of world 1 they should actual unique desgins 
 also add day and night for every map that goes off system clock 
 also add halloween themed bosses maps and enimies in the month of october *make this abled to be turned off in settings* also add x-mas in december easter in the month easters in and those will be the main 3 for now run a bug fix run a ui fix to make sure text size is right and overlap is gone"
+
+## 0.7 status
+- [x] Multiplayer removed; mandatory menu tutorial (free first Fists upgrade); EXIT button; Xbox/PS prompts; pixel ability screen + icons; intro always plays.
+- [x] Day/night from the system clock on every map.
+- [x] Enemies redrawn for Worlds 2-5 (8 creatures each); 15 new boss designs + Mire Kraken; stagger meter on every boss; boss HUD clearance, spawn away from player, summons outside the boss.
+- [x] Halloween / Christmas / Easter: creatures, hats, map decor, air effects, wave-50 bosses, Settings toggle.
+- [x] Pixel-art vaults, guardians, chest, doors and a bright pixel boss key.
+- [x] Gun/Bomb: Pistol and Rifle no spread (Rifle = bullet stream), rolling Grenade (0.5 s fuse), Sticky Bomb, Impact Bomb. Tested (tools/gb7.js).
+- [x] Hitboxes on the sprite body, attack-speed floor, telegraphs for jester/wizard/archer, shop shows the reached evolution, upgrade prices 10k per world tier, boss coin bounty, achievement popup at the bottom in pixel style.
+- [x] Juice: crit, combo milestones, multi-kill, flawless, pickup ladder, wave start, slow-mo death, NEW BEST on the death screen.
+- Known: the phone shop font test threshold (stage scaled ~0.44) is accepted; old tools evo/joincode are obsolete (buyEvo/Online were removed).
