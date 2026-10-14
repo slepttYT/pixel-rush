@@ -1,7 +1,4 @@
-# made when the EXEs run (server settings and data, Neutralino storage and logs)
-online_config.json
-pixel-rush-data/
+# made when the EXE runs (Neutralino storage and logs)
 .storage/
 neutralinojs.log
 *.log
-JOIN-CODE.txt

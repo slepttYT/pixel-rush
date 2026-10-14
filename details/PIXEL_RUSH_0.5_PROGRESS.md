@@ -213,3 +213,36 @@ and for the upgrades tab make sub sections for each weapon and make 5 total upgg
 ## User request (verbatim)
 "fix full screen not working and add setting and juke box to the pause menu"
 - [x] 0.6.1: fullscreen fixed (EXE uses Neutralino.window.setFullScreen/exitFullScreen + F11; browsers use the Fullscreen API with webkit fallback; blocked pages show a note in Settings). Pause menu has SETTINGS and JUKEBOX (back returns to pause; save import/export hidden mid-run). Tests: tools/fs6.js 12/12, qa.js 42/42.
+
+## User request (0.7, verbatim)
+"make bosses better shouldnt be a overlap like they is now make evey boss get staggered after a bit and make make every boss diffrent there shouldnt be a stone lizzard and then a sand lizzard fix vaults to have the pixel art style and make special ability icons in the pixel art style do a enimies over haul i dont care if they have the same mechanics but they shouldnt just be reskins of world 1 they should actual unique desgins 
+also add day and night for every map that goes off system clock 
+also add halloween themed bosses maps and enimies in the month of october *make this abled to be turned off in settings* also add x-mas in december easter in the month easters in and those will be the main 3 for now run a bug fix run a ui fix to make sure text size is right and overlap is gone"
+
+## User request (0.7 tutorial, verbatim, sent mid-turn)
+"make tut start in the menu have it go through how the shop upgrades and unlocks work *make first fists upgrade free* make tut manitory now *you have to do it* then take them to the tut world"
+
+## User request (0.7 exit button, verbatim, sent mid-turn)
+"add a exit button below saves in a red box that closes the server and the game"
+
+## User requests (0.7, sent mid-turn, verbatim, in order)
+- "make the choseing abbility screen more in that pixel are style and add the home screen animation like i said earlyer"
+- "remove multiplayer"
+- "also add controller detection so for xbox it has xbox buttons for ps it has ps buttons"
+- "add new sounds death screen and more to make the gamplay feel really addicting"
+
+## User request (0.7, after the usage limit reset, verbatim)
+"I hit my usage limit while you were working, but it has reset now. Please continue from where you left off."
+
+## User request (0.7, verbatim) - retry everything that failed and do everything not done yet
+"re try everything that failed"
+"DO EVERYTHING YOU HAVEN ALREADY AND IF YOU TRIED AND IT FAILED DO IT AGAIN
+add new sounds death screen and more to make the gamplay feel really addicting
+also add controller detection so for xbox it has xbox buttons for ps it has ps buttons
+remove multiplayer
+make the choseing abbility screen more in that pixel art style and add the home screen animation like i said earlyer
+add a exit button below saves in a red box that closes the server and the game on the main menu
+make tut start in the menu have it go through how the shop upgrades and unlocks work *make first fists upgrade free* make tut manitory now *you have to do it* then take them to the tut world
+make bosses better shouldnt be a overlap like they is now make evey boss get staggered after a bit and make make every boss diffrent there shouldnt be a stone lizzard and then a sand lizzard fix vaults to have the pixel art style and make special ability icons in the pixel art style do a enimies over haul i dont care if they have the same mechanics but they shouldnt just be reskins of world 1 they should actual unique desgins 
+also add day and night for every map that goes off system clock 
+also add halloween themed bosses maps and enimies in the month of october *make this abled to be turned off in settings* also add x-mas in december easter in the month easters in and those will be the main 3 for now run a bug fix run a ui fix to make sure text size is right and overlap is gone"
