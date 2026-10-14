@@ -257,3 +257,11 @@ also add halloween themed bosses maps and enimies in the month of october *make 
 - [x] Hitboxes on the sprite body, attack-speed floor, telegraphs for jester/wizard/archer, shop shows the reached evolution, upgrade prices 10k per world tier, boss coin bounty, achievement popup at the bottom in pixel style.
 - [x] Juice: crit, combo milestones, multi-kill, flawless, pickup ladder, wave start, slow-mo death, NEW BEST on the death screen.
 - Known: the phone shop font test threshold (stage scaled ~0.44) is accepted; old tools evo/joincode are obsolete (buyEvo/Online were removed).
+
+## 0.7 performance pass (user request: "Run any patches needed to make the game better run more smooth and better")
+- [x] Glows use one cached soft-disc sprite per colour instead of a new gradient per call (glowAt); elite glow too.
+- [x] Evolved/elite outlines are pre-built once per sprite and drawn in a single call.
+- [x] The calendar season is looked up every 20 s, not several times per enemy per frame.
+- [x] Adaptive quality governor (PERF 0-2): after ~2 s of slow frames it drops seasonal glows/air, extra night lights and most sparks, and restores them once smooth again.
+- [x] Sprites for the world's enemies and the next boss are pre-built during quiet moments (no hitch on first appearance).
+- Measured: 45 s soak with 14-26 enemies, night + Halloween: JS heap flat at 14 MB, no errors.

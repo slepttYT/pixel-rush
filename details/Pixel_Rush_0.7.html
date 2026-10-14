@@ -1057,8 +1057,10 @@ function seasonOf(d){const m=d.getMonth()+1;return m===10?'hw':m===12?'xm':m===e
 let seasonForce=null; /* tests and the cheat menu can force one ('hw' 'xm' 'ea' or '' for none) */
 let clockForce=null;  /* tests: a fixed hour 0-24 */
 const SEASONS={hw:{n:'Halloween',c:'#ff8a1a'},xm:{n:'Christmas',c:'#e8f6ff'},ea:{n:'Easter',c:'#ffb3e6'}};
-function season(){if(!set.events)return '';if(seasonForce!==null)return seasonForce;return seasonOf(new Date())}
-function seasonNow(){return seasonForce!==null?seasonForce:seasonOf(new Date())} /* the season on the calendar, even when turned off */
+let _calT=-1e9,_calV=''; /* the calendar season is looked up at most every 20 s (season() is called many times per frame) */
+const calSeason=()=>{const n=performance.now();if(n-_calT>20000){_calT=n;_calV=seasonOf(new Date())}return _calV};
+function season(){if(!set.events)return '';if(seasonForce!==null)return seasonForce;return calSeason()}
+function seasonNow(){return seasonForce!==null?seasonForce:calSeason()} /* the season on the calendar, even when turned off */
 const seasonHooks=[];function seasonChanged(){for(const f of seasonHooks)try{f()}catch(e){}} /* caches that depend on the season or the clock clear themselves here */
 function clockH(){if(clockForce!==null)return clockForce;const d=new Date();return d.getHours()+d.getMinutes()/60+d.getSeconds()/3600}
 /* phones held upright: the game is landscape only, so the whole stage is turned 90 degrees to fill the screen sideways.
@@ -2614,7 +2616,15 @@ const ZONES5=[
 const BR_N=50; /* 0.5: Boss Rush now runs through all five worlds (10 bosses each) */
 let ZONES=ZONES1;
 const WZONES={1:ZONES1,2:ZONES2,3:ZONES3,4:ZONES4,5:ZONES5};
-function setWorld(w){world=w;ZONES=WZONES[w]||ZONES1;DECOR=w===2?DECOR2:w>=3?DECOR3:DECOR1;bgc=null}
+/* sprites are built lazily; building the world's roles one by one while the run starts (and the next boss a few waves early) avoids a hitch the first time each one appears */
+let _pwT=0;
+function prewarmWorld(w){
+  clearTimeout(_pwT);const roles=['goblin','thief','wizard','jester','archer','lancer','golem','worm'].concat(w===3?['lizard','crab','phoenix']:w===2?['diamond']:[]);let i=0;
+  const step=()=>{if(i>=roles.length)return;try{mobSpr(w,roles[i],'w0');const se=season();if(se&&SEASON_MOB[se]&&SEASON_MOB[se][roles[i]])mobSpr(w,'~'+roles[i],'w0')}catch(e){}i++;_pwT=setTimeout(step,40)};
+  _pwT=setTimeout(step,300);
+}
+function prewarmBoss(){try{const z=zoneOf(wave+1);if(z&&z.ph&&z.boss){for(const q of['w0','w1','atk']){sandBossSpr(z.boss,q,false);sandBossSpr(z.boss,q,true)}}}catch(e){}}
+function setWorld(w){world=w;try{prewarmWorld(w)}catch(e){}ZONES=WZONES[w]||ZONES1;DECOR=w===2?DECOR2:w>=3?DECOR3:DECOR1;bgc=null}
 const w5Open=()=>!!stats.w5||dev.cheats;
 const w4Open=()=>!!stats.w4||dev.cheats;
 const w3Open=()=>!!stats.w3||dev.cheats;
@@ -6566,7 +6576,7 @@ function buildHp(){$('hp').innerHTML='';for(let i=0;i<p.maxhp;i++)$('hp').append
 function banner(t){if(bossIn||cine)return; /* the boss name card is already up: no second line of text over it */const b=$('banner');b.classList.toggle('low',enemies.some(e=>e.t==='boss'&&!e.dead));b.textContent=t;b.classList.remove('show');void b.offsetWidth;b.classList.add('show')}
 function nextWave(){
   if(brMode)brAdvance();
-  wave++;spawnT=0;waveActive=true;p.hitW=false;p.wardUsed=false;waveStartSfx(wave%10===0);
+  wave++;spawnT=0;waveActive=true;p.hitW=false;p.wardUsed=false;waveStartSfx(wave%10===0);if(wave%10===8)setTimeout(prewarmBoss,200);
   snapRun(wave);
   if(wave<=1&&loop===0)dynS=1; /* new run starts neutral */
   {const t=dynTarget();dynS+=(t-dynS)*.6;dynS=Math.round(dynS*100)/100;if(brMode)dynS=1} /* ease toward the target so one pick never swings it */
@@ -9482,10 +9492,15 @@ function hud(){
 }
 
 /* ---------- boss key, vault door and vault room ---------- */
+/* glows are one cached soft-disc sprite per colour, scaled and faded when drawn (a fresh gradient every call was the biggest single cost in busy scenes) */
+const GLOW_SPR={};
 function glowAt(x,y,r,rgb,a){
-  const g=ctx.createRadialGradient(x,y,0,x,y,r);
-  g.addColorStop(0,'rgba('+rgb+','+a+')');g.addColorStop(1,'rgba('+rgb+',0)');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();
+  if(!(r>0)||!(a>0))return;
+  let s=GLOW_SPR[rgb];
+  if(!s){s=GLOW_SPR[rgb]=document.createElement('canvas');s.width=s.height=96;const g=s.getContext('2d'),gr=g.createRadialGradient(48,48,0,48,48,48);gr.addColorStop(0,'rgba('+rgb+',1)');gr.addColorStop(1,'rgba('+rgb+',0)');g.fillStyle=gr;g.fillRect(0,0,96,96)}
+  const ga=ctx.globalAlpha,sm=ctx.imageSmoothingEnabled;ctx.globalAlpha=ga*Math.min(1,a);if(!sm)ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(s,x-r,y-r,r*2,r*2);
+  ctx.globalAlpha=ga;if(!sm)ctx.imageSmoothingEnabled=false;
 }
 /* ---------- 0.7: pixel-art vaults. Every static piece is painted once on the arena's 3 px grid (or as a 2 px sprite with an ink outline) and cached; only glows, flames, sparkles and breathing move ---------- */
 const VU=3;
@@ -10411,7 +10426,7 @@ function bossFx(e,dt){
   if(e.t!=='boss'||e.fin||!e.cfg)return;
   const cf=e.cfg;
   if(e.pbs!==e.bs){e.pbs=e.bs;if(e.bs!=='idle')spark(e.x,e.y,cf.bl||cf.bc,10,200)}
-  if(parts.length>700)return;
+  if(parts.length>(PERF>=1?260:700))return;
   const tb=world===3?BFX3:world===2?BFX2:BFX1,ty=FXT[tb[ZONES.indexOf(cf)]]||FXT.ember;
   let c=dt*ty.n*(1+((e.phase||1)-1)*.5);
   while(c>0){
@@ -12394,7 +12409,7 @@ const angTo=e=>Math.atan2(p.y-e.y,p.x-e.x);
 function drawMob(e,fl){
   const T=TYPES[e.t];if(!T)return;
   const t=e.t,r=e.r,st=e.st;
-  if(e.el){const gc=e.el==='g'?'93,255,122':'255,225,77',pl=.5+.25*Math.sin(time*6+e.ph);ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(e.x,e.y,r*.4,e.x,e.y,r*2.7);g.addColorStop(0,'rgba('+gc+','+pl+')');g.addColorStop(1,'rgba('+gc+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(e.x,e.y,r*2.7,0,TAU);ctx.fill();ctx.fillStyle='rgb('+gc+')';for(let i=0;i<3;i++){const a=time*3+i*2.1;ctx.fillRect(e.x+Math.cos(a)*r*1.6-1.5,e.y+Math.sin(a)*r*1.6-1.5,3,3)}ctx.restore()}
+  if(e.el){const gc=e.el==='g'?'93,255,122':'255,225,77',pl=.5+.25*Math.sin(time*6+e.ph);ctx.save();ctx.globalCompositeOperation='lighter';glowAt(e.x,e.y,r*2.7,gc,pl);ctx.fillStyle='rgb('+gc+')';for(let i=0;i<3;i++){const a=time*3+i*2.1;ctx.fillRect(e.x+Math.cos(a)*r*1.6-1.5,e.y+Math.sin(a)*r*1.6-1.5,3,3)}ctx.restore()}
   if(t!=='phoenix'){const sh=mobSpr(world,e.sv&&season()&&SEASON_MOB[season()]&&SEASON_MOB[season()][t]?'~'+t:t,'w0').c.height*MOB_U*.5;ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(e.x,e.y+sh,r*1.1,r*.4,0,0,TAU);ctx.fill()}
   let f=((time*6+e.ph*3)|0)%2?'w1':'w0',bob=0;
   if(st==='wind')f='wind';else if(st==='act')f='act';else if(st==='dash')f='dash';
@@ -12411,9 +12426,13 @@ function drawMob(e,fl){
 }
 function mobTint(s,col){s.tc=s.tc||{};if(!s.tc[col]){const c=document.createElement('canvas');c.width=s.wc.width;c.height=s.wc.height;const g=c.getContext('2d');g.drawImage(s.wc,0,0);g.globalCompositeOperation='source-in';g.fillStyle=col;g.fillRect(0,0,c.width,c.height);s.tc[col]=c}return s.tc[col]}
 function drawMobAura(w,t,f,x,y,flip,col,ev){
-  const s=mobSpr(w,t,f),U=MOB_U,tc=mobTint(s,col),off=ev>=2?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]:[[-1,0],[1,0],[0,-1],[0,1]];
+  /* the outline is built once per sprite and colour (the sprite stamped one cell up/down/left/right, and diagonally for elites) and drawn in one go */
+  const s=mobSpr(w,t,f),U=MOB_U,tc=mobTint(s,col),k=col+(ev>=2?'8':'4');s.au=s.au||{};
+  let au=s.au[k];
+  if(!au){au=s.au[k]=document.createElement('canvas');au.width=tc.width+2;au.height=tc.height+2;const g=au.getContext('2d');
+    for(const o of(ev>=2?[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]:[[-1,0],[1,0],[0,-1],[0,1]]))g.drawImage(tc,1+o[0],1+o[1])}
   ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha*=ev>=2?.75+.25*Math.sin(time*8):.85;
-  for(const o of off){ctx.save();ctx.translate(Math.round(x)+o[0]*U,Math.round(y)+o[1]*U);if(flip)ctx.scale(-1,1);ctx.drawImage(tc,-s.ax*U,-s.c.height*U+U,s.c.width*U,s.c.height*U);ctx.restore()}
+  ctx.translate(Math.round(x),Math.round(y));if(flip)ctx.scale(-1,1);ctx.drawImage(au,-(s.ax+1)*U,-(s.c.height+1)*U+U,au.width*U,au.height*U);
   ctx.restore();
 }
 const CROWN_CACHE={};
@@ -12517,8 +12536,17 @@ function dnLight(){if(dnLit)return dnLit;const c=document.createElement('canvas'
   gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(.45,'rgba(0,0,0,.85)');gr.addColorStop(.8,'rgba(0,0,0,.3)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);return dnLit=c}
 let dnCv=null,dnG=null;
 /* draws the darkness over the floor. lights: [x,y,radius,strength] in game units */
+/* 0.7 quality governor: when frames run slow for a couple of seconds the game quietly drops the optional extras (seasonal glows and air, extra night lights, most sparks) and brings them back once it is smooth again */
+let PERF=0,perfAvg=16.7,perfSlowT=0,perfFastT=0;
+function perfTick(raw){
+  perfAvg+=(raw-perfAvg)*.05;
+  if(perfAvg>25){perfSlowT+=raw/1000;perfFastT=0}else if(perfAvg<19){perfFastT+=raw/1000;perfSlowT=0}else{perfSlowT=0;perfFastT=0}
+  if(perfSlowT>2&&PERF<2){PERF++;perfSlowT=0}
+  else if(perfFastT>8&&PERF>0){PERF--;perfFastT=0}
+}
 function drawNight(lights,ox,oy){
   if(DN.a<.02)return;
+  if(PERF>=1&&lights.length>(PERF>=2?8:16))lights=lights.slice(0,PERF>=2?8:16);
   const u=PXS,cw=Math.ceil(W/u)+2,ch=Math.ceil(H/u)+2;
   if(!dnCv){dnCv=document.createElement('canvas');dnG=dnCv.getContext('2d')}
   if(dnCv.width!==cw||dnCv.height!==ch){dnCv.width=cw;dnCv.height=ch}
@@ -12906,7 +12934,7 @@ function seaLights(L){if(SEA_CUR)for(const l of SEA_CUR.L)L.push([l[0],l[1],l[2]
 const SEA_GS={};
 function seaGlowSpr(rgb){return SEA_GS[rgb]||(SEA_GS[rgb]=(()=>{const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba('+rgb+',1)');gr.addColorStop(1,'rgba('+rgb+',0)');g.fillStyle=gr;g.fillRect(0,0,32,32);return c})())}
 function seaGlow(){
-  if(!SEA_CUR)return;const t=(state==='menu'?mt:time),k=Math.min(1,DN.a/.25);let n=0;
+  if(!SEA_CUR||PERF>=1)return;const t=(state==='menu'?mt:time),k=Math.min(1,DN.a/.25);let n=0;
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const l of SEA_CUR.L){if(n++>22)break;
     if(l[2]==='pump'){const f=.75+.25*Math.sin(t*9+l[0]);ctx.globalAlpha=Math.min(1,(.1+.3*k)*f);ctx.drawImage(seaGlowSpr('255,150,30'),l[0]-30,l[1]-34,60,60)}
@@ -12922,6 +12950,7 @@ function seaMk(se,i,init){const x=R()*W,y=init?R()*H:-8,r=R();
 }
 SEASON_FX.hw=SEASON_FX.xm=SEASON_FX.ea={n:{hw:36,xm:70,ea:34}};
 function seaAir(t){
+  if(PERF>=1&&state!=='menu')return;
   const se=season();if(!se){SEA_P.length=0;SEA_PS='';return}
   if(SEA_PS!==se){SEA_PS=se;SEA_P=[];for(let i=0;i<SEASON_FX[se].n[se];i++)SEA_P.push(seaMk(se,i,true))}
   let dt=t-SEA_T;SEA_T=t;if(dt<0||dt>.1)dt=0;const U=PXS,B={},add=(c,x,y,w,h)=>{(B[c]||(B[c]=[])).push(x,y,w*U,h*U)};
@@ -13418,7 +13447,7 @@ function drawMenu(){
 let last=performance.now(),fpsN=0,fpsT=0,achT=0;
 function frame(now){
   requestAnimationFrame(frame);
-  let dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
+  let dt=Math.max(0,Math.min(.05,(now-last)/1000));if(state!=='menu'&&state!=='pause'&&!document.hidden&&now-last<250)perfTick(now-last);last=now;
   if(deathSlow>0){deathSlow-=dt;dt*=.25} /* 0.7: the moment you die the world drops into slow motion */
   try{
     {fpsN++;if(now-fpsT>500){const v=Math.round(fpsN*1000/(now-fpsT));fpsN=0;fpsT=now;if(set.fps)$('fps').textContent=v+' FPS'}if(now-achT>800){achT=now;checkAch()}}
