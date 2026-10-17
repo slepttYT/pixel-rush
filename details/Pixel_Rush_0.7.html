@@ -1696,9 +1696,9 @@ const SKINS=[
 ];
 
 /* ---------- weapon lines: punch, knife, gun and bomb. Every skin evolves during a run: once each time you beat a boss (every 10 waves) ---------- */
-Object.assign(LEN,{fist:20,knuckle:22,gauntlet:26,knife:24,dagger:30,machete:38,pistol:30,rifle:44,ak:50,bomb:26,dynamite:26,mega:30,wrap:21,dbarrel:38,grenade:22,cball:24,boomer:22,mboomer:24,tboomer:26,stick:30,wand:30,staff:44,bow:26,cbow:24,xbow:34,mace:34,mace2:36,mace3:38});
-const NEWK={fist:1,knuckle:1,gauntlet:1,knife:1,dagger:1,machete:1,pistol:1,rifle:1,ak:1,bomb:1,dynamite:1,mega:1,wrap:1,dbarrel:1,grenade:1,cball:1,boomer:1,mboomer:1,tboomer:1,stick:1,wand:1,staff:1,bow:1,cbow:1,xbow:1,mace:1,mace2:1,mace3:1};
-const BOOMK={boomer:1,mboomer:1,tboomer:1},MAGK={stick:1,wand:1,staff:1},BOWK={bow:1,cbow:1,xbow:1},MACEK={mace:1,mace2:1,mace3:1};
+Object.assign(LEN,{fist:20,knuckle:22,gauntlet:26,knife:24,dagger:30,machete:38,pistol:30,rifle:44,ak:50,bomb:26,dynamite:26,mega:30,wrap:21,dbarrel:38,grenade:22,cball:24,boomer:22,mboomer:24,tboomer:26,stick:30,wand:30,staff:44,bow:26,cbow:24,xbow:34,mace:34,mace2:36,mace3:38,stone:22,rock:28,boulder:36});
+const NEWK={fist:1,knuckle:1,gauntlet:1,knife:1,dagger:1,machete:1,pistol:1,rifle:1,ak:1,bomb:1,dynamite:1,mega:1,wrap:1,dbarrel:1,grenade:1,cball:1,boomer:1,mboomer:1,tboomer:1,stick:1,wand:1,staff:1,bow:1,cbow:1,xbow:1,mace:1,mace2:1,mace3:1,stone:1,rock:1,boulder:1};
+const BOOMK={boomer:1,mboomer:1,tboomer:1},MAGK={stick:1,wand:1,staff:1},BOWK={bow:1,cbow:1,xbow:1},MACEK={mace:1,mace2:1,mace3:1},STONEK={stone:1,rock:1,boulder:1};
 const FISTK={fist:1,knuckle:1,gauntlet:1,wrap:1};
 /* [kind, name, stats]. rad / cd / dmg scale or add to the melee swing; rng weapons shoot or throw instead */
 const WLINES={
@@ -1710,7 +1710,9 @@ const WLINES={
  boomer:[['boomer','Default Boomerang',{rng:'boom',cd:.7,dmg:1.4,rg:250,spd:520}],['mboomer','Metal Boomerang',{rng:'boom',cd:.62,dmg:2,rg:290,spd:580}],['tboomer','Three-Prong Boomerang',{rng:'boom',cd:.55,dmg:2.6,rg:320,spd:620,tri:1}]],
  magic:[['stick','Stick',{rng:'magic',cd:.6,dmg:2,rg:300,ar:46}],['wand','Magic Wand',{rng:'magic',cd:.55,dmg:2.6,rg:330,ar:54}],['staff','Staff',{rng:'magic',cd:.55,dmg:2.8,rg:360,ar:60,n:2}]], /* 0.6: the Wand casts a magic circle on the ground that bursts and hits everything inside */
  bow:[['bow','Bow and Arrow',{rng:'bow',cd:.22,dmg:1.8,spd:900,rg:620,pr:1,ct:.75}],['cbow','Compact Bow',{rng:'bow',cd:.18,dmg:1.9,spd:950,rg:600,pr:1,ct:.6}],['xbow','Crossbow',{rng:'bow',cd:.26,dmg:3.4,spd:1150,rg:760,pr:3,ct:.9}]], /* 0.6: hold to draw the bow (ct = seconds to full charge), let go to shoot */
- mace:[['mace','Mace',{rad:.95,cd:1.15,dmg:1.5,kb:1.6}],['mace2','Two-Headed Mace',{rad:1.05,cd:1.1,dmg:2.2,kb:1.8}],['mace3','Three-Headed Mace',{rad:1.15,cd:1.05,dmg:3,kb:2}]] /* 0.5: the exact evolution paths. Each stage keeps the old stage's numbers so balance is unchanged */
+ mace:[['mace','Mace',{rad:.95,cd:1.15,dmg:1.5,kb:1.6}],['mace2','Two-Headed Mace',{rad:1.05,cd:1.1,dmg:2.2,kb:1.8}],['mace3','Three-Headed Mace',{rad:1.15,cd:1.05,dmg:3,kb:2}]],
+ /* 1.0: the Stone line (Grug's weapon): you THROW it. Stone -> Rock -> Boulder: slower, bigger, harder, and the heavier ones plough through more enemies. sz = drawn radius, hv = knocks enemies back like a heavy hit */
+ stone:[['stone','Stone',{rng:'rock',cd:.6,dmg:2.4,spd:600,rg:440,pr:0,sz:6,hv:0}],['rock','Rock',{rng:'rock',cd:.7,dmg:3.4,spd:560,rg:460,pr:1,sz:8.5,hv:1}],['boulder','Boulder',{rng:'rock',cd:.85,dmg:5,spd:520,rg:480,pr:2,sz:12,hv:1}]] /* 0.5: the exact evolution paths. Each stage keeps the old stage's numbers so balance is unchanged */
 };
 const KL=(id,pk,r,n,b,g,h,o,line)=>{
   const ln=line||WLINES[pk],base=Object.assign({id,pk,r,n,b,g,h,glow:b,tr:b,wl:ln.map(x=>x[1])},o||{});
@@ -1815,7 +1817,8 @@ const STARTERS=[KL('st_fist','punch','common','Bare Fists','#e8b98a','#c99568','
   KL('st_boom','boomer','common','Basic Boomerang','#c8894a','#7a4a22','#4a2a12',{},WLINES.boomer),
   KL('st_magic','magic','common','Basic Stick','#8a5a2a','#b98aff','#4a2a12',{glow:'#b98aff',tr:'#b98aff'},WLINES.magic),
   KL('st_bow','bow','common','Basic Bow','#a8743a','#e8e0c8','#4a2a12',{},WLINES.bow),
-  KL('st_mace','mace','common','Basic Mace','#9aa3b2','#6a4a2a','#3a2a1a',{},WLINES.mace)]; /* you begin with fists; the others unlock by mastering the weapon before it (Upgrades) */
+  KL('st_mace','mace','common','Basic Mace','#9aa3b2','#6a4a2a','#3a2a1a',{},WLINES.mace),
+  KL('st_stone','stone','common','Stone','#9a9aa2','#c8c8d0','#4a4a52',{},WLINES.stone)]; /* you begin with fists; the others unlock by mastering the weapon before it (Upgrades) */
 STARTERS.filter(x=>!x.forms).forEach(toKnife);
 const isStarter=id=>id==='st_fist'||id==='st_knife'||id==='st_gun'||id==='st_bomb';
 const DEFSK={id:'',n:'Classic Sword',r:'common',k:'sword',len:34,b:'#dfe9f5',g:'#ffd36b',h:'#9a5b34',glow:'#ffffff',tr:'#ffd36b'};
@@ -1838,10 +1841,11 @@ const DEVBOOM=KL('dev_boom','boomer','dev','Prism Boomerang','#ffffff','#ffffff'
 const DEVWAND=KL('dev_wand','magic','dev','Prism Wand','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.magic);
 const DEVBOW=KL('dev_bow','bow','dev','Prism Bow','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.bow);
 const DEVMACE=KL('dev_mace','mace','dev','Prism Mace','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.mace);
-const DEV_OF={k:'dev_rainbow',g:'dev_gun',b:'dev_bomb',f:'dev_fist',r:'dev_boom',m:'dev_wand',a:'dev_bow',c:'dev_mace'};
-const DEVSKS=[DEVSK,DEVGUN,DEVBOMB,DEVFIST,DEVBOOM,DEVWAND,DEVBOW,DEVMACE],DEVIDS={dev_rainbow:DEVSK,dev_gun:DEVGUN,dev_bomb:DEVBOMB,dev_fist:DEVFIST,dev_boom:DEVBOOM,dev_wand:DEVWAND,dev_bow:DEVBOW,dev_mace:DEVMACE},isDevId=id=>!!id&&Object.prototype.hasOwnProperty.call(DEVIDS,id);
+const DEVSTONE=KL('dev_stone','stone','dev','Prism Stone','#ffffff','#ffffff','#1a1a2a',Object.assign({},DEVO),WLINES.stone);
+const DEV_OF={k:'dev_rainbow',g:'dev_gun',b:'dev_bomb',f:'dev_fist',r:'dev_boom',m:'dev_wand',a:'dev_bow',c:'dev_mace',s:'dev_stone'};
+const DEVSKS=[DEVSK,DEVGUN,DEVBOMB,DEVFIST,DEVBOOM,DEVWAND,DEVBOW,DEVMACE,DEVSTONE],DEVIDS={dev_rainbow:DEVSK,dev_gun:DEVGUN,dev_bomb:DEVBOMB,dev_fist:DEVFIST,dev_boom:DEVBOOM,dev_wand:DEVWAND,dev_bow:DEVBOW,dev_mace:DEVMACE,dev_stone:DEVSTONE},isDevId=id=>!!id&&Object.prototype.hasOwnProperty.call(DEVIDS,id);
 /* which shop tab each skin belongs to */
-const tabFor=pk=>(pk==='punch'||pk.indexOf('f_')===0)?'f':(pk==='gun'||pk.indexOf('g_')===0)?'g':(pk==='bomb'||pk.indexOf('b_')===0)?'b':(pk==='boomer'||pk.indexOf('r_')===0)?'r':(pk==='magic'||pk.indexOf('m_')===0)?'m':(pk==='bow'||pk.indexOf('a_')===0)?'a':(pk==='mace'||pk.indexOf('c_')===0)?'c':'k';
+const tabFor=pk=>(pk==='punch'||pk.indexOf('f_')===0)?'f':(pk==='gun'||pk.indexOf('g_')===0)?'g':(pk==='bomb'||pk.indexOf('b_')===0)?'b':(pk==='boomer'||pk.indexOf('r_')===0)?'r':(pk==='magic'||pk.indexOf('m_')===0)?'m':(pk==='bow'||pk.indexOf('a_')===0)?'a':(pk==='mace'||pk.indexOf('c_')===0)?'c':(pk==='stone'||pk.indexOf('s_')===0)?'s':'k';
 SKINS.concat(STARTERS,DEVSKS,[DEFSK]).forEach(x=>{x.tab=x.pk?tabFor(x.pk):'k';if(x.forms)x.forms.forEach(f=>{f.tab=x.tab})});
 /* every fist, gun and bomb skin gets its own design: style 0 is plain, higher numbers get fancier with rarity */
 {const grp={};SKINS.forEach(x=>{if(x.tab!=='k')(grp[x.pk]=grp[x.pk]||[]).push(x)});
@@ -1888,7 +1892,7 @@ SKINS.length=0;
        ['hammer','War Hammer Pack','War Hammer','Maces to war hammers','#ff8a3d',[],'warhammer'],
        ['flanged','Flanged Pack','Flanged Mace','Maces to flanged maces','#ffd36b',[],'flanged']]
   };
-  const LINEOF={k:'knife',g:'gun',b:'bomb',f:'punch',r:'boomer',m:'magic',a:'bow',c:'mace'},PSETS=[ELEM,ELEM_G,ELEM_B];
+  const LINEOF={k:'knife',g:'gun',b:'bomb',f:'punch',r:'boomer',m:'magic',a:'bow',c:'mace',s:'stone'},PSETS=[ELEM,ELEM_G,ELEM_B];
   PACKS.k=[];PACKS.g=[];PACKS.b=[];PACKS.f=[];PACKS.r=[];PACKS.m=[];PACKS.a=[];PACKS.c=[];
   ['k','g','b','f','r','m','a','c'].forEach(tab=>BOXES[tab].forEach((bx,bi)=>{
     const id=tab+'_'+bx[0],base=WLINES[LINEOF[tab]];
@@ -1912,21 +1916,21 @@ const skinBase=id=>id?(isDevId(id)?(dev.skin?DEVIDS[id]:null):SKINS.find(s=>s.id
    Bonuses are percentages, so a slow heavy weapon gains exactly as much as a fast light one and a later weapon is never just better.
    Unlock prices: mastering the fists costs 1,000 coins (unlocks the knife), the knife 2,000 (gun), the gun about 3,000 (bomb); the bomb track is about 4,000.
    Each step costs a little more than the last, so the first steps come quickly and the last ones are a goal ---------- */
-const EVO_T=['f','k','g','b','r','m','a','c'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb',r:'st_boom',m:'st_magic',a:'st_bow',c:'st_mace'};
+const EVO_T=['f','k','g','b','r','m','a','c','s'],EVO_NAME={f:'Fists',k:'Knife',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace',s:'Stone'},EVO_ST={k:'st_knife',g:'st_gun',b:'st_bomb',r:'st_boom',m:'st_magic',a:'st_bow',c:'st_mace',s:'st_stone'};
 const WM_MAX=10;
 const WM_SPEC={f:['Knockout','Heavy punches stun enemies for a moment'],k:['Precision','+10% chance to crit for double damage'],g:['Armor Piercing','+25% damage to mini bosses and bosses'],b:['Napalm','Blasts set enemies on fire'],r:['Sharp Return','Boomerangs deal +40% damage on the way back'],m:['Arcane Echo','Every wand circle bursts a second time for 50% damage'],a:['Volley','A full draw fires three arrows'],c:['Earthshaker','Spin smashes send out a shockwave']};
-const WM_LINE={f:'punch',k:'knife',g:'gun',b:'bomb',r:'boomer',m:'magic',a:'bow',c:'mace'};
+const WM_LINE={f:'punch',k:'knife',g:'gun',b:'bomb',r:'boomer',m:'magic',a:'bow',c:'mace',s:'stone'};
 /* 0.6: weapons are bought in Shop > Unlocks (fists are free). Prices go up with how strong the weapon is */
-const UNLOCK_P={r:500,k:1000,c:1500,a:2000,g:2500,b:3000,m:5000},UNLOCK_ORD=['f','r','k','c','a','g','b','m'];
+const UNLOCK_P={r:500,s:750,k:1000,c:1500,a:2000,g:2500,b:3000,m:5000},UNLOCK_ORD=['f','r','s','k','c','a','g','b','m']; /* the Stone's 750 is provisional */
 const fmtP=n=>n>=1000?(Math.round(n/100)/10)+'K':String(n);
 /* each weapon's own power scale (applied to every hit it lands), so a pricier weapon is a stronger weapon. Measured from damage per second
    on one target and on a crowd, with ranged weapons counted a bit higher because they are safer to use */
-const WPOW={f:1,r:1.02,k:1.15,c:.7,a:1.3,g:1.8,b:1.4,m:1.3};
+const WPOW={f:1,r:1.02,s:1.05,k:1.15,c:.7,a:1.3,g:1.8,b:1.4,m:1.3};
 /* 0.6: per-weapon upgrades in tiers (Shop > Upgrades). Tier I has 5 upgrades of 2 ranks each (0/10). Beating World 1 with a weapon opens
    its Tier II (10/20) with new upgrades, World 2 opens Tier III (20/30) and so on up to Tier VI (50/60). A tier can be bought once the one
    before it is complete. The weapon evolves at 4 and 8 points, and completing Tier I gives it its special */
 const WU_TIERS=6,WU_PER=5,WU_RK=2;
-const WU_S={f:['kb','stun','kb','stun'],r:['ret','burn','ret','slow'],k:['crit','pois','crit','heal'],c:['stun','kb','stun','kb'],a:['charge','pierce','charge','pierce'],g:['pierce','crit','pierce','boss'],b:['burn','reach','burn','slow'],m:['aoe','pois','aoe','burn']};
+const WU_S={f:['kb','stun','kb','stun'],r:['ret','burn','ret','slow'],k:['crit','pois','crit','heal'],c:['stun','kb','stun','kb'],s:['kb','pierce','kb','stun'],a:['charge','pierce','charge','pierce'],g:['pierce','crit','pierce','boss'],b:['burn','reach','burn','slow'],m:['aoe','pois','aoe','burn']};
 const WU_PAT=[['dmg','spd','reach','S0','S1'],['dmg','crit','boss','S2','S3'],['dmg','spd','burn','pois','heal'],['dmg','crit','reach','S0','slow'],['dmg','boss','spd','S1','heal'],['dmg','crit','burn','pois','S2']];
 const WU_V={dmg:.06,spd:.04,reach:.05,crit:.02,boss:.06,burn:.05,pois:.05,slow:.05,heal:.02,kb:.12,stun:.03,ret:.12,charge:.1,pierce:.5,aoe:.07};
 const WU_FB=['spd','reach','slow','heal','boss','crit','burn','pois','kb'];
@@ -1934,7 +1938,7 @@ const WU={};
 for(const t of EVO_T)WU[t]=WU_PAT.map((pat,ti)=>{const used=new Set();return pat.map(k=>{let key=k[0]==='S'?WU_S[t][+k[1]]:k;if(used.has(key))key=WU_FB.find(x=>!used.has(x));used.add(key);
   return {id:key+(ti+1),k:key,tier:ti+1,v:key==='pierce'?.5:Math.round(WU_V[key]*(1+.25*ti)*1000)/1000}})});
 const ROMAN=['','I','II','III','IV','V','VI'];
-const WU_BASE={f:45,r:60,k:75,c:90,a:105,g:120,b:135,m:160};
+const WU_BASE={f:45,r:60,s:68,k:75,c:90,a:105,g:120,b:135,m:160};
 for(const t of ['f','k','g','b']){const o=upg['ev'+t]||0;if(o&&!(upg['wm'+t]>0))upg['wm'+t]=o>=2?10:4;delete upg['ev'+t]} /* very old saves: evolution upgrades become mastery steps */
 if(!upg.wu||typeof upg.wu!=='object'){ /* old saves: the 10-step mastery becomes Tier I points, and every weapon that was open stays owned */
   const OLD=['f','k','g','b','r','m','a','c'];upg.wu={};upg.own=upg.own||{};
@@ -2198,6 +2202,13 @@ function newArt(c,s,t,bc,L,k,grip,ball){
     c.save();c.strokeStyle='#e8e0c8';c.lineWidth=1;c.beginPath();c.moveTo(13,-12);c.lineTo(3,0);c.lineTo(13,12);c.stroke();c.restore();
     c.save();c.lineCap='round';c.beginPath();c.moveTo(13,-12);c.quadraticCurveTo(21,0,13,12);c.strokeStyle='#12141c';c.lineWidth=5;c.stroke();c.strokeStyle=s.g;c.lineWidth=3;c.stroke();c.restore();
     box(3,-.9,19,1.8,'#c9a06a');poly([[22,-2.8],[26.5,0],[22,2.8]],'#c9d2dc');
+  }else if(STONEK[k]){ /* 1.0 Stone line: a stone, a jagged rock, a huge cracked boulder (held up, ready to throw) */
+    const r=k==='stone'?6.4:k==='rock'?8.6:11.6,cx=L*.5+1,n=k==='stone'?8:k==='rock'?10:12,pts=[];
+    for(let i=0;i<n;i++){const a=i*TAU/n+.3,rr=r*(.84+.2*Math.sin(i*2.7+r)+(k!=='stone'&&i%3===0?.1:0));pts.push([cx+Math.cos(a)*rr,Math.sin(a)*rr*.92])}
+    poly(pts,bc);
+    c.save();c.fillStyle='rgba(255,255,255,.38)';c.beginPath();c.arc(cx-r*.3,-r*.34,r*.34,0,TAU);c.fill();c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.arc(cx+r*.32,r*.36,r*.42,0,TAU);c.fill();c.restore();
+    c.save();c.strokeStyle='#12141c';c.lineWidth=1;c.beginPath();c.moveTo(cx-r*.1,-r*.7);c.lineTo(cx+r*.1,-r*.1);c.lineTo(cx-r*.25,r*.3);if(k!=='stone'){c.moveTo(cx+r*.4,-r*.2);c.lineTo(cx+r*.1,r*.15)}if(k==='boulder'){c.moveTo(cx+r*.55,r*.1);c.lineTo(cx+r*.2,r*.55);c.moveTo(cx-r*.6,-r*.1);c.lineTo(cx-r*.3,.2*r)}c.stroke();c.restore();
+    if(k!=='stone'){c.save();c.fillStyle='#5f9e3a';c.beginPath();c.ellipse(cx-r*.2,-r*.72,r*.4,r*.16,-.2,0,TAU);c.fill();c.restore()}
   }else if(MACEK[k]){ /* Mace, Two-Headed Mace (two heads on chains), Three-Headed Mace (three) */
     grip(-14,4);ball(-14.5,0,2.3,s.g);box(4,-2,L-18,4,s.h);box(L-16,-3,3,6,s.g);
     const head=(x,y,r)=>{for(let i=0;i<8;i++){const a=i*TAU/8;poly([[x+Math.cos(a-.32)*r*.9,y+Math.sin(a-.32)*r*.9],[x+Math.cos(a)*(r+3.6),y+Math.sin(a)*(r+3.6)],[x+Math.cos(a+.32)*r*.9,y+Math.sin(a+.32)*r*.9]],'#dfe4ec')}ball(x,y,r,bc);c.save();c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.arc(x-r*.35,y-r*.35,r*.3,0,TAU);c.fill();c.restore()};
@@ -2451,7 +2462,7 @@ function vkArt(c,s,t,bc,L,k,grip,ball){
 const WPX_U=2,WPX_CACHE=new WeakMap();
 function weaponShape(c,s,t,nofx){
   if(!s){return}
-  const K=c===ctx?({f:.7,k:.6,g:.55,b:.5,r:.6,m:.55,a:.6,c:.55})[s.tab||({punch:'f',knife:'k',gun:'g',bomb:'b',boomer:'r',magic:'m',bow:'a',mace:'c'})[s.pk]]||.6:1; /* in the fighter's hands weapons draw smaller (menus and loot previews stay full size); still whole pixels */
+  const K=c===ctx?({f:.7,k:.6,g:.55,b:.5,r:.6,m:.55,a:.6,c:.55,s:.6})[s.tab||({punch:'f',knife:'k',gun:'g',bomb:'b',boomer:'r',magic:'m',bow:'a',mace:'c',stone:'s'})[s.pk]]||.6:1; /* in the fighter's hands weapons draw smaller (menus and loot previews stay full size); still whole pixels */
   const L=s.len||36,ri=RI[s.r]||0,anim=ri>=5||s.vfx,fr=anim?((t*6)|0)%12:0,key=fr+(nofx?'n':'f')+K;
   let m=WPX_CACHE.get(s);if(!m){m=new Map();WPX_CACHE.set(s,m)}
   let e=m.get(key);
@@ -3173,6 +3184,7 @@ const CHARS=[
  {id:'ember',n:'Rookie',t:'Balanced Starter',d:'Balanced in every way. No tricks, no weaknesses. Good with any weapon.',ach:null,body:'#f1ead8',trim:'#12141c',acc:'#ff8a3d',eye:'#12141c',sty:'plain'},
  {id:'scrapper',n:'Scrapper',t:'Quick Feet',d:'Never stands still. Faster on foot and the dash comes back sooner.',ach:'lv5',body:'#f0c9a0',trim:'#2b1a0a',acc:'#ff8a1f',eye:'#2b1a0a',sty:'headband',spd:1.1,dash:.8},
  {id:'brawler',n:'Brawler',t:'Close Combat',d:'Fights with bare hands. Hits much harder and faster with Fists, and takes a punch.',ach:'fists1',body:'#d96a4a',trim:'#2a0805',acc:'#8a1a12',acc2:'#ff4d2e',eye:'#ffffff',sty:'mohawk',hp:1,wb:{w:'f',dm:.5,cd:.85}},
+ {id:'grug',n:'Grug',t:'Rock Thrower',d:'Grug throw rock. Rock hit hard. Deals double damage with the Stone, the Rock and the Boulder.',ach:'stone10k',body:'#c89a6a',trim:'#6a4a2a',acc:'#8a6a3a',acc2:'#d8c8a0',eye:'#1c140c',sty:'grug',hp:1,wb:{w:'s',pm:2}},
  {id:'duelist',n:'Duelist',t:'Melee Specialist',d:'A blade master. Longer reach and deadly crits with the Knife and every sword it grows into.',ach:'knife1',body:'#cdb79a',trim:'#1c140c',acc:'#7a5a3a',acc2:'#e8d8b0',eye:'#1c140c',sty:'ronin',wb:{w:'k',dm:.5,reach:1.2,crit:.15}},
  {id:'gunslinger',n:'Gunslinger',t:'Ranged Specialist',d:'Quick on the draw. Fires faster and hits harder with the Gun, and moves a little quicker.',ach:'gun1',body:'#d8b48a',trim:'#24150a',acc:'#8a5a2a',acc2:'#5b3a1a',eye:'#24150a',sty:'cowboy',spd:1.05,wb:{w:'g',dm:.5,cd:.8}},
  {id:'demo',n:'Demolitionist',t:'Explosives Expert',d:'Loves a big bang. Bigger, harder blasts with Bombs, and an extra heart for the close calls.',ach:'bomb1',body:'#aab4c6',trim:'#10131c',acc:'#ff8a3d',acc2:'#6b7388',eye:'#ff8a3d',sty:'helm',hp:1,wb:{w:'b',dm:.5,reach:1.3}},
@@ -3228,7 +3240,7 @@ function clUp(r){
   const n=[1,2,3,4,5,6].filter(t=>TIER_LV[t]>r.clB&&TIER_LV[t]<=r.clA).map(t=>TIERS[t].n);
   return charById(r.cid).n+' · fighter level '+r.clA+(r.clA>r.clB?' · <b style="color:var(--gold)">LEVEL UP</b>'+(n.length?' · '+n.join(', ')+' abilities unlocked':'')+skinUp(r):'');
 }
-p.cp={};p.spdM=1;p.cdM=1;p.dmgB=0;p.reachM=1;p.dashM=1;p.every=0;p.coinM=1;p.xpM=1;p.rgT=0;p.hitW=false;p.wardUsed=false;
+p.cp={};p.wpm=1;p.spdM=1;p.cdM=1;p.dmgB=0;p.reachM=1;p.dashM=1;p.every=0;p.coinM=1;p.xpM=1;p.rgT=0;p.hitW=false;p.wardUsed=false;
 p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.airN=0;p.flurT=0;
 
 /* --- character art: drawn facing +x. phase 0 = body and gear, phase 1 = face (drawn after the sword) --- */
@@ -3257,6 +3269,7 @@ function charSprite(ch,pose,sk){
     else if(sty==='headband'){d.r(5,1,8,2,trim);d.r(5,3,9,1,acc);d.l(4,3,2,6,acc)}
     else if(sty==='mohawk'){d.r(7,0,3,3,acc);d.p(8,-1,acc2);d.r(5,3,2,2,trim)}
     else if(sty==='ronin'){d.el(9,2,7,1,'#d8b878');d.r(7,0,4,2,'#c8a060');d.r(5,3,2,3,trim)}
+    else if(sty==='grug'){d.r(4,1,10,3,'#2a1a0e');d.r(3,3,3,4,'#2a1a0e');d.r(12,3,3,3,'#2a1a0e');d.l(5,9,12,9,'#8a6a3a');d.r(5,13,7,2,'#8a6a3a');d.p(6,13,'#d8c8a0');d.p(9,14,'#d8c8a0')}
     else if(sty==='cowboy'){d.r(2,2,14,1,acc);d.r(5,0,8,3,acc);d.r(5,2,8,1,acc2)}
     else if(sty==='helm'){d.el(9,5,5,5,'#aab4c6');d.r(9,4,5,1,'#10131c');d.p(12,4,acc);d.p(8,0,acc);d.p(7,0,acc);d.r(5,9,9,1,'#6b7388')}
     else if(sty==='cap'){d.r(3,1,11,1,'#1d2548');d.r(6,2,6,2,'#1d2548');d.l(13,1,14,4,acc);d.p(14,5,acc)}
@@ -3457,7 +3470,7 @@ function applyChar(){
   p.cp=brMode?{}:Object.assign({},c.cp||{});p.r=c.r||11;p.rgT=0;p.hitW=false;p.wardUsed=false;
   if(!isDevId(eq[wType])){p.cdM/=1+wmSum(wType,'spd');p.reachM*=1+wmSum(wType,'reach')}
   if(c.mel&&(wType==='f'||wType==='k'))p.dmgB+=c.mel; /* melee specialists */
-  if(c.wb&&c.wb.w===wType){const b=c.wb;p.dmgB+=b.dm||0;p.cdM*=b.cd||1;p.reachM*=b.reach||1;if(b.crit)p.cp.crit=(p.cp.crit||0)+b.crit}
+  if(c.wb&&c.wb.w===wType){const b=c.wb;p.dmgB+=b.dm||0;if(b.pm)p.wpm=b.pm;p.cdM*=b.cd||1;p.reachM*=b.reach||1;if(b.crit)p.cp.crit=(p.cp.crit||0)+b.crit}
   if(diff!=='nowin'&&c.hp){p.maxhp=Math.max(1,p.maxhp+c.hp);p.hp=p.maxhp}
   if(!brMode)(c.start||[]).forEach(id=>{const a=abilById(id);if(a&&abilOk(a))applyAbility(id)});
 }
@@ -3478,7 +3491,7 @@ function kitChips(ch){
   if(ch.every)o.push(['Spin attack every '+ch.every+'nd swing',true]);
   if(ch.coin)o.push([(ch.coin>1?'+':'\u2212')+pc(ch.coin-1)+'% coins',ch.coin>1]);
   if(ch.xp)o.push(['+'+pc(ch.xp-1)+'% XP',true]);
-  if(ch.wb){const b=ch.wb,n=WTAG[b.w];if(b.dm)o.push(['+'+b.dm+' damage with '+n,true]);if(b.cd)o.push(['+'+pc(1/b.cd-1)+'% attack speed with '+n,true]);if(b.reach)o.push(['+'+pc(b.reach-1)+'% '+(b.w==='b'?'blast size':b.w==='g'?'range':'reach')+' with '+n,true]);if(b.crit)o.push([pc(b.crit)+'% crit with '+n,true])}
+  if(ch.wb){const b=ch.wb,n=WTAG[b.w];if(b.dm)o.push(['+'+b.dm+' damage with '+n,true]);if(b.pm)o.push(['+'+Math.round((b.pm-1)*100)+'% damage with '+n,true]);if(b.cd)o.push(['+'+pc(1/b.cd-1)+'% attack speed with '+n,true]);if(b.reach)o.push(['+'+pc(b.reach-1)+'% '+(b.w==='b'?'blast size':b.w==='g'?'range':'reach')+' with '+n,true]);if(b.crit)o.push([pc(b.crit)+'% crit with '+n,true])}
   if(ch.mel)o.push(['+'+ch.mel+' damage with Fists and Knife',true]);
   const cp=ch.cp||{};
   if(cp.exec)o.push(['+'+pc(cp.exec)+'% damage to enemies under 35% health',true]);
@@ -3613,6 +3626,7 @@ const wwin=k=>((stats.wwin||{})[k]||0)>=1;
 ACH.push(
  ['fists1','These Hands','Beat World 1 using only Fists',0,()=>wwin('1f')],
  ['knife1','Sharp Solution','Beat World 1 using only the Knife (and the swords it grows into)',0,()=>wwin('1k')],
+ ['stone10k','Rock Solid','Defeat 10,000 enemies with the Stone line (Stone, Rock, Boulder)',0,()=>(stats.stk||0)>=10000],
  ['gun1','Trigger Happy','Beat World 1 using only the Gun',0,()=>wwin('1g')],
  ['bomb1','Explosive Personality','Beat World 1 using only Bombs',0,()=>wwin('1b')],
  ['fists3','Bare-Knuckle Legend','Beat World 3 using only Fists',0,()=>wwin('3f')],
@@ -3958,7 +3972,7 @@ const UPDATES=[
   'Difficulty rewards: Hard no longer gives extra coins (it still gives 1.5x XP), You\u2019re Not Winning Bro gives no bonus coins or XP, and Easy still gives half coins.',
   'Difficulty achievements are back for Easy, Medium and Hard: beat Worlds 1, 3 and 5 on each. There are none for the hardest difficulty.',
   'The shop has three tabs. SKINS: loot boxes, sorted by weapon. UPGRADES: each weapon has its own upgrades. UNLOCKS: buy new weapons.',
-  'Weapons are bought in Unlocks: Fists are free, then Boomerang 500, Knife 1K, Mace 1.5K, Bow 2K, Gun 2.5K, Bomb 3K and Wand 5K. The more a weapon costs, the stronger it is. Weapons you already had stay unlocked.',
+  'Weapons are bought in Unlocks: Fists are free, then Boomerang 500, Stone 750, Knife 1K, Mace 1.5K, Bow 2K, Gun 2.5K, Bomb 3K and Wand 5K. The more a weapon costs, the stronger it is. Weapons you already had stay unlocked.',
   'Weapon upgrades come in tiers. Tier I is 5 upgrades of 2 ranks (0/10). Beat World 1 with a weapon to open its Tier II (10/20) with new upgrades, World 2 for Tier III (20/30), and so on. The weapon evolves at 4 and 8 points, and finishing Tier I gives it its special. Your old mastery steps carried over.',
   'Magic is now the Wand, and it plays differently: it casts a magic circle on the ground that bursts and hits everything inside. New wand abilities make the circle bigger, add poison, fire or frost, leave it lingering, cast extra circles and call lightning.',
   'The Bow charges: hold attack to draw, let go to shoot. A full draw hits up to 2.6x harder, flies faster and pierces more. New bow abilities: Quick Draw, Heavy Draw, Piercing Arrows, Fire Arrows and Split Shot. The Boomerang and Mace have new abilities too.',
@@ -4422,6 +4436,7 @@ const PXI_ART={
  boomerang(g,D){D.line(g,2,4,7,11,'E');D.line(g,3,4,8,11,'E');D.line(g,2,5,7,12,'b');D.line(g,7,11,13,3,'E');D.line(g,8,11,13,4,'E');D.line(g,8,12,14,4,'b');D.px(g,7,12,'b');D.px(g,2,4,'w');D.px(g,13,3,'w')},
  orb(g,D){D.line(g,7,9,3,14,'b');D.line(g,8,9,4,14,'B');D.disc(g,9,5.5,3.8,'v');D.px(g,8,3,'Y');D.px(g,7,4,'Y');D.px(g,8,4,'w');D.ring(g,9,5.5,3,3.9,'V');D.px(g,9,10,'g');D.px(g,7,9,'g')},
  arrow(g,D){D.line(g,2,13,12,3,'b');D.line(g,10,2,13,2,'W');D.line(g,13,2,13,5,'W');D.px(g,12,3,'w');D.px(g,11,3,'w');D.px(g,12,4,'w');D.px(g,1,11,'r');D.px(g,2,11,'r');D.px(g,1,12,'r');D.px(g,4,14,'r');D.px(g,4,13,'r');D.px(g,3,14,'r')},
+ rock(g,D){D.disc(g,8,9,6.2,'W');D.disc(g,6.5,7,2.6,'w');D.disc(g,10,11.5,3,'s');D.line(g,8,3,9,8,'d');D.line(g,9,8,7,12,'d');D.px(g,12,6,'w')},
  mace(g,D){D.line(g,8,8,2,14,'b');D.line(g,7,8,1,14,'B');D.disc(g,10,5,3.3,'W');D.disc(g,9.5,4.5,1.5,'w');for(const [x,y] of [[10,0],[15,5],[10,10],[5,5],[13,2],[13,8],[7,2],[7,8]])D.px(g,x,y,'w')},
  quake(g,D){D.rect(g,0,11,16,4,'b');D.rect(g,0,11,16,1,'E');D.line(g,7,11,6,13,'B');D.line(g,6,13,8,14,'B');D.line(g,8,11,10,13,'B');for(const [x,y] of [[7,1],[2,4],[13,4],[1,8],[14,8]])D.line(g,7.5,7,x,y,'o');D.disc(g,7.5,7.5,2.4,'y');D.px(g,7,7,'Y');D.px(g,3,9,'W');D.px(g,12,9,'W');D.px(g,4,1,'W')},
  meteor(g,D){D.line(g,1,14,8,7,'r');D.line(g,2,14,8,8,'o');D.line(g,1,13,7,7,'o');D.line(g,3,14,8,9,'y');D.disc(g,10.5,5.5,3.3,'o');D.disc(g,10,6,2,'y');D.px(g,9,5,'Y');D.px(g,12,3,'R');D.px(g,13,4,'R')},
@@ -4446,7 +4461,7 @@ function pxIconURL(id){
 const pxImg=(id,cls)=>'<img class="pxi'+(cls?' '+cls:'')+'" src="'+pxIconURL(id)+'" alt="" draggable="false">';
 /* which picture each ability gets */
 const HOT_ICON={hot_throw:'throw',hot_quake:'quake',hot_blink:'blink',hot_storm:'storm',hot_heal:'heal',hot_meteor:'meteor',hot_zap:'zap',hot_hay:'hay',hot_flurry:'flurry',hot_fan:'fan',hot_rail:'rail',hot_air:'air',hot_barrage:'barrage',hot_knives:'knives',hot_exec:'exec'};
-const W_ICON={k:'knife',f:'fist',g:'bullet',b:'bomb',r:'boomerang',m:'orb',a:'arrow',c:'mace'};
+const W_ICON={k:'knife',f:'fist',g:'bullet',b:'bomb',r:'boomerang',m:'orb',a:'arrow',c:'mace',s:'rock'};
 function abilIcon(a){
   if(!a)return 'sword';if(HOT_ICON[a.id])return HOT_ICON[a.id];
   const t=(a.id+' '+a.name+' '+a.d).toLowerCase(),has=r=>r.test(t);
@@ -6439,7 +6454,7 @@ const ABIL=[
 /* the old abilities were all about knives and swords: they now only show up for knife (or knife and fists) builds. The rest work with every weapon */
 const KNIFE_ONLY=['knife','razor','rush','heavysw','swiftsw','leechsw','thundersw','frostsw','windsw','revenge','shadowsw','vampsw','critsw','fire','stormsw','soulreap','magmasw','berserksw','timesw','dragonsw','reaper','celestial','realitysw','phxsw','devour','godslayer','infinity'];
 ABIL.forEach(a=>{if(KNIFE_ONLY.indexOf(a.id)>=0)a.w='k';if(a.id==='fury')a.w='kf'});
-const WTAG={k:'Knife',f:'Fists',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace',kf:'Knife / Fists',kfb:'Knife / Fists / Bomb',kfbc:'Knife / Fists / Bomb / Mace'};
+const WTAG={k:'Knife',f:'Fists',g:'Gun',b:'Bomb',r:'Boomerang',m:'Wand',a:'Bow',c:'Mace',s:'Stone',kf:'Knife / Fists',kfb:'Knife / Fists / Bomb',kfbc:'Knife / Fists / Bomb / Mace'};
 const abilOk=a=>!a.w||a.w.indexOf(wType)>=0;
 const abilById=id=>ABIL.find(a=>a.id===id);
 function costOf(a){return Math.round(a.base*(1+.1*(wave-1))*(1+.45*p.mods[a.id]))}
@@ -7912,7 +7927,7 @@ jz.addEventListener('pointermove',e=>{if(e.pointerId===joy.id)joyMove(e)});
 function joyEnd(e){if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;knob.style.transform=''}}
 jz.addEventListener('pointerup',joyEnd);jz.addEventListener('pointercancel',joyEnd);
 /* weapon select: pick a weapon type. The skin you equipped for that type in the shop is the one you take */
-const WTYPES=[['f','Fists'],['k','Knife'],['g','Gun'],['b','Bomb'],['r','Boomerang'],['m','Wand'],['a','Bow'],['c','Mace']],WPREV={k:'kn1',g:'gu1',b:'bo1',f:'pu1'};
+const WTYPES=[['f','Fists'],['k','Knife'],['g','Gun'],['b','Bomb'],['r','Boomerang'],['m','Wand'],['a','Bow'],['c','Mace'],['s','Stone']],WPREV={k:'kn1',g:'gu1',b:'bo1',f:'pu1'};
 const wpnTypeSkin=t=>(eq[t]&&typeOpen(t))?skinBase(eq[t]):null;
 function renderWpn(){
   if(!eq[wType]||!typeOpen(wType))wType='f';
@@ -8263,6 +8278,11 @@ function fireRanged(sk,w,heavy,a,ch){
     p.ix-=Math.cos(a)*(heavy?90:35);p.iy-=Math.sin(a)*(heavy?90:35)}
     shake=Math.max(shake,w.strm?.25:heavy?3:.8);
     gunSfx(sk.k,heavy);
+  }else if(w.rng==='rock'){ /* 1.0: the Stone line. A thrown rock: straight and heavy, spinning; Rock and Boulder keep going through enemies */
+    const d0=p.r*.45+sk.len*.5,mx=p.x+Math.cos(a)*d0,my=p.y+Math.sin(a)*d0;
+    pbul.push({kind:'rock',sz:w.sz,hv:!!w.hv,x:mx,y:my,vx:Math.cos(a)*w.spd,vy:Math.sin(a)*w.spd,a,d:0,rg:w.rg*rm,dmg:dmg,pr:w.pr+(m.gpierce||0),rc:0,de:false,hit:new Set(),col:'#b4b4bc',big:true,sp0:R()*TAU});
+    sfx(180,.08,'triangle',.03,.7);fnoise(.07,.03,'lowpass',900);
+    p.ix-=Math.cos(a)*14;p.iy-=Math.sin(a)*14;
   }else if(w.rng==='boom'){ /* 0.5: Boomerang. Flies out, cuts through everything, comes back and cuts again */
     const mxN=(w.tri?2:1)+(m.rmulti||0);if(boomers.filter(q=>!q.dead).length>=mxN){p.cd=.06;return}
     const sp=w.spd;
@@ -8308,6 +8328,9 @@ function fireRanged(sk,w,heavy,a,ch){
 }
 /* 0.5: arrows (wooden shaft, steel head, fletching; charged ones glow gold) and magic bolts (a glowing orb with a white core) */
 function drawPB(b){
+  if(b.kind==='rock'){const r=b.sz;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.sp0+b.d*.05);
+    const poly9=(rr,col)=>{ctx.fillStyle=col;ctx.beginPath();for(let i=0;i<9;i++){const a=i*TAU/9,q=rr*(.84+.2*Math.sin(i*2.7+r));ctx.lineTo(Math.cos(a)*q,Math.sin(a)*q*.92)}ctx.closePath();ctx.fill()};
+    poly9(r+2,'#12141c');poly9(r,'#9a9aa2');ctx.fillStyle='rgba(255,255,255,.4)';ctx.beginPath();ctx.arc(-r*.3,-r*.3,r*.34,0,TAU);ctx.fill();ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.arc(r*.3,r*.34,r*.42,0,TAU);ctx.fill();ctx.restore();return}
   if(b.kind==='arrow'){ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.a);const L2=b.bolt?14:18;
     if(b.big){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.45;ctx.fillStyle='#ffd36b';ctx.fillRect(-L2-12,-3,L2+12,6);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over'}
     ctx.fillStyle='#12141c';ctx.fillRect(-L2-1,-2,L2+2,4);ctx.fillStyle=b.big?'#ffd36b':'#c9a06a';ctx.fillRect(-L2,-1,L2,2);
@@ -8420,7 +8443,7 @@ function wpnTick(dt){
     for(const e of enemies){
       if(e.dead||e.spawnT>0||e.ghost||b.hit.has(e))continue;
       if(Math.hypot(e.x-b.x,e.y-b.y)<e.r+(b.big?6:4)){
-        b.hit.add(e);gunShot=true;try{swordHit(e,b.dmg*(b.de?1+Math.min(.6,b.d/1000):1),b.a,false,b.a,60,Math.PI)}finally{gunShot=false}combo++;comboT=2.4;spark(b.x,b.y,b.kind==='magic'?b.col:'#ffe9a8',3,160);
+        b.hit.add(e);gunShot=true;try{swordHit(e,b.dmg*(b.de?1+Math.min(.6,b.d/1000):1),b.a,!!b.hv,b.a,60,Math.PI)}finally{gunShot=false}combo++;comboT=2.4;spark(b.x,b.y,b.kind==='magic'?b.col:b.kind==='rock'?'#c8c8d0':'#ffe9a8',b.kind==='rock'?7:3,b.kind==='rock'?220:160);if(b.kind==='rock'){shake=Math.max(shake,b.hv?4:1.5);sfx(110,.1,'square',.05,.5);noise(.06,.04)}
         if(b.burnD&&!e.dead){e.burnT=Math.max(e.burnT||0,1.5);e.burnD=Math.max(e.burnD||0,b.burnD);e.burnA=e.burnA||0}
         if(b.rc>0){
           const t=enemies.filter(o=>!o.dead&&o.spawnT<=0&&!o.ghost&&!b.hit.has(o)&&Math.hypot(o.x-b.x,o.y-b.y)<320).sort((u,v)=>Math.hypot(u.x-b.x,u.y-b.y)-Math.hypot(v.x-b.x,v.y-b.y))[0];
@@ -8571,7 +8594,7 @@ function killChainFx(){
 function pickChime(base,type){const now=performance.now();pickLad=now-pickLadT<450?Math.min(10,pickLad+1):0;pickLadT=now;sfx(base*Math.pow(1.0595,pickLad*2),.07,type,.04,1.3)}
 function waveStartSfx(boss){if(boss)return;sfx(220,.14,'square',.035,1.5);setTimeout(()=>sfx(330,.16,'square',.035,1.5),90);if(wave>1&&wave%5===0)setTimeout(()=>sfx(494,.2,'triangle',.04,1.4),180)}
 function swordHit(e,dmg,a,heavy,aim,rad,arc){
-  const m=p.mods,n=++p.hits;let mult=1,pierce=false;
+  const m=p.mods,n=++p.hits;let mult=p.wpm||1,pierce=false;
   const wmS=wmSpec(wType)&&!isDevId(eq[wType]); /* mastery step 9 special for the weapon in hand */
   mult*=1+wmSum(wType,'dmg');
   mult*=WPOW[wType]||1; /* 0.6: pricier weapons hit harder */
@@ -8727,7 +8750,7 @@ function spillLoot(x,y,k,total,n){
     drops.push({k:k,v:k==='coin'?Math.floor(total/n)+(i<Math.round(total)%n?1:0):total/n,x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,age:0,life:25,sd:R()*TAU})}
 }
 function kill(e){
-  e.dead=true;kills++;if(e.t!=='boss'&&state==='play')killChainFx();if(state==='play'&&!isDevId(eq[wType])){const hl=wmSum(wType,'heal');if(hl&&R()<hl)healP(1)}stats.kills++;if(e.t==='boss'&&!e.dkb&&!brMode)stats.boss++;if(world>=2&&!brMode){const wk='w'+world;stats[wk+'k']=(stats[wk+'k']||0)+1;if(e.t==='boss')stats[wk+'b']=(stats[wk+'b']||0)+1}
+  e.dead=true;kills++;if(e.t!=='boss'&&state==='play')killChainFx();if(state==='play'&&!isDevId(eq[wType])){const hl=wmSum(wType,'heal');if(hl&&R()<hl)healP(1)}stats.kills++;if(wType==='s'&&state==='play'&&!tut)stats.stk=(stats.stk||0)+1;if(e.t==='boss'&&!e.dkb&&!brMode)stats.boss++;if(world>=2&&!brMode){const wk='w'+world;stats[wk+'k']=(stats[wk+'k']||0)+1;if(e.t==='boss')stats[wk+'b']=(stats[wk+'b']||0)+1}
   if(e.t==='boss'&&!e.dkb){
     if(e.cfg)bossCall(e.cfg.boss,'dead');
     for(const o of enemies)if(o!==e&&!o.dead){o.dead=true;spark(o.x,o.y,o.c,10,240)}
@@ -9201,7 +9224,7 @@ const TOUR=[
  {t:()=>'WELCOME, '+playerName().toUpperCase()+'!',d:'Before your first run: a quick look at the shop, then a short practice in the tutorial world.',next:'LET’S GO'},
  {sel:'#hcos',t:'THE SHOP',d:'Coins you pick up in runs are spent in the shop. Open the SHOP.',done:()=>sub==='cos'},
  {sel:'#stl',t:'UNLOCKS',d:'Open the UNLOCKS tab.',on:()=>{if(sub!=='cos')openSub('cos',$('hcos'))},done:()=>cosTab==='l'},
- {sel:'#cosscroll',t:'NEW WEAPONS',d:'You start with your Fists. New weapons are bought here: Boomerang 500, Knife 1K, Mace 1.5K, Bow 2K, Gun 2.5K, Bomb 3K and Wand 5K. The more a weapon costs, the stronger it is.',next:'NEXT',on:()=>{if(cosTab!=='l'){cosTab='l';renderCos()}}},
+ {sel:'#cosscroll',t:'NEW WEAPONS',d:'You start with your Fists. New weapons are bought here: Boomerang 500, Stone 750, Knife 1K, Mace 1.5K, Bow 2K, Gun 2.5K, Bomb 3K and Wand 5K. The more a weapon costs, the stronger it is.',next:'NEXT',on:()=>{if(cosTab!=='l'){cosTab='l';renderCos()}}},
  {sel:'#stu',t:'UPGRADES',d:'Open the UPGRADES tab.',done:()=>cosTab==='u'},
  {sel:()=>$('packs').querySelector('[data-wu^="f:"]:not([disabled])'),t:'YOUR FIRST UPGRADE IS FREE',d:'Every weapon has its own upgrades. Your first Fists upgrade costs nothing: pick one and buy it!',
   skip:()=>!wuFree('f',1),on:()=>{if(cosTab!=='u'||upgTab!=='f'){cosTab='u';upgTab='f';renderCos()}},done:()=>!!stats.tutFree},
