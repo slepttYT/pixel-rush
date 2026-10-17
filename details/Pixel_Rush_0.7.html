@@ -12909,6 +12909,229 @@ function drawDragon(e,fl,P){
 /* BOSS_DRAW[name or 'F1'..'F5'] = (e,fl)=>{...} draws a boss straight onto ctx in arena coordinates (e.x, e.y is its centre, e.r its radius; fl = white hit flash) */
 const BOSS_DRAW={};
 /* ---- 0.7 art pass 2: redesigned bosses ---- */
+/* d2: THE LAKE HYDRA (World 1 zone 6). A coiled serpent mass rising from the lake, three long scaled necks, three different snake-dragon heads.
+   Animation inputs kept: e.w1s (idle/tele/rest), e.w1t/e.w1m, e.hd (attacking head), e.tx/e.ty (strike target), e.phase, e.spawnT, p.x/p.y, time. */
+let d2_F=false;
+const d2_c=c=>d2_F?'#ffffff':c;
+const d2_mix=(a,b,t)=>{const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),f=v=>Math.round(((A>>v)&255)*(1-t)+((B>>v)&255)*t);return '#'+((1<<24)|(f(16)<<16)|(f(8)<<8)|f(0)).toString(16).slice(1)};
+const d2_G={D:'#10281e',B:'#1f4e34',b:'#35803f',bm:'#3f8e48',l:'#66b552',h:'#a8e07c',bl:'#ece4b0',bs:'#c4b878',bd:'#8e8250',iv:'#f2eac8',ivs:'#bba97a',ivd:'#7a6a48',
+  fr:'#e0853a',frd:'#a24a24',frl:'#ffc26a',eye:'#ffe14a',eyeA:'#ff4a2a',mo:'#4a0a18',mo2:'#8a1a2e',tg:'#e8405a',tgd:'#9a1e3c',gl:'#8ee8a0'};
+const d2_H={D:'#26080e',B:'#561620',b:'#a02e26',bm:'#b43a2a',l:'#e06034',h:'#ffa860',bl:'#ffd98a',bs:'#f0a458',bd:'#b86a34',iv:'#fff0cc',ivs:'#dcae78',ivd:'#8a5a38',
+  fr:'#ffb02e',frd:'#c03a1a',frl:'#fff08a',eye:'#ffc23a',eyeA:'#ff2a1a',mo:'#3a0610',mo2:'#ff6a1a',tg:'#ffb04a',tgd:'#e05a1a',gl:'#ff7a2a'};
+const d2_PC={};
+function d2_pal(hot,kind){
+  const key=(hot?1:0)+'_'+kind;if(d2_PC[key])return d2_PC[key];
+  const B=hot?d2_H:d2_G,tint=kind===0?['#7a6a3a',.42]:kind===2?(hot?['#ffc040',.28]:['#2fa8a0',.3]):null,o={};
+  for(const k in B)o[k]=(tint&&(k==='b'||k==='bm'||k==='l'||k==='h'||k==='B'))?d2_mix(B[k],tint[0],tint[1]):B[k];
+  return d2_PC[key]=o;
+}
+function d2_sm(pts){const n=pts.length;ctx.beginPath();ctx.moveTo((pts[n-1][0]+pts[0][0])/2,(pts[n-1][1]+pts[0][1])/2);
+  for(let i=0;i<n;i++){const a=pts[i],b=pts[(i+1)%n];ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2)}ctx.closePath()}
+const d2_S=(pts,c)=>{d2_sm(pts);ctx.fillStyle=d2_c(c);ctx.fill()};
+const d2_P=(pts,c)=>{ctx.beginPath();for(let i=0;i<pts.length;i++)i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=d2_c(c);ctx.fill()};
+const d2_E=(x,y,rx,ry,c,rot)=>{ctx.beginPath();ctx.ellipse(x,y,Math.max(.001,rx),Math.max(.001,ry),rot||0,0,TAU);ctx.fillStyle=d2_c(c);ctx.fill()};
+const d2_L=(pts,w,c)=>{ctx.beginPath();for(let i=0;i<pts.length;i++)i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);ctx.lineWidth=w;ctx.strokeStyle=d2_c(c);ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke()};
+const d2_shr=(pts,cx,cy,k,dx,dy)=>pts.map(v=>[cx+(v[0]-cx)*k+dx,cy+(v[1]-cy)*k+dy]);
+/* a curved tapered spike / horn / whisker along a quadratic curve */
+function d2_taper(p0,p1,p2,w0,w1,c,seg){
+  const n=seg||8,L=[],R=[];
+  for(let i=0;i<=n;i++){const t=i/n,x=(1-t)*(1-t)*p0[0]+2*(1-t)*t*p1[0]+t*t*p2[0],y=(1-t)*(1-t)*p0[1]+2*(1-t)*t*p1[1]+t*t*p2[1],
+    dx=2*(1-t)*(p1[0]-p0[0])+2*t*(p2[0]-p1[0]),dy=2*(1-t)*(p1[1]-p0[1])+2*t*(p2[1]-p1[1]),m=Math.hypot(dx,dy)||1,w=(w0+(w1-w0)*t)/2;
+    L.push([x-dy/m*w,y+dx/m*w]);R.push([x+dy/m*w,y-dx/m*w])}
+  d2_P(L.concat(R.reverse()),c);
+}
+/* one scaled ring of a neck / coil tube (units of r) */
+function d2_ring(P,x,y,a,w,ry,i,sb,spk,hot){
+  const nx=-Math.sin(a),ny=Math.cos(a),rot=a+Math.PI/2,h=w/2,ls=(nx*-.7+ny*-.7)>=0?1:-1,tx=Math.cos(a),ty=Math.sin(a);
+  if(spk&&i%5===2){const bx=x-nx*sb*h*.9,by=y-ny*sb*h*.9,hh=w*.5;
+    d2_P([[bx-tx*ry*1.1,by-ty*ry*1.1],[bx-nx*sb*hh+tx*ry*.5,by-ny*sb*hh+ty*ry*.5],[bx+tx*ry*.9,by+ty*ry*.9]],P.ivs);
+    d2_P([[bx-tx*ry*.9,by-ty*ry*.9],[bx-nx*sb*hh*.8+tx*ry*.3,by-ny*sb*hh*.8+ty*ry*.3],[bx,by]],P.iv)}
+  d2_E(x,y,h,ry,P.B,rot);
+  d2_E(x+nx*ls*w*.07,y+ny*ls*w*.07,h*.85,ry*.86,(i&1)?P.b:P.bm,rot);
+  d2_E(x+nx*ls*h*.48,y+ny*ls*h*.48,h*.2,ry*.5,P.l,rot);
+  if(!(i%3))d2_E(x+nx*ls*h*.56,y+ny*ls*h*.56,h*.08,ry*.28,P.h,rot);
+  d2_E(x+nx*sb*h*.6,y+ny*sb*h*.6,h*.36,ry*.92,P.bs,rot);
+  d2_E(x+nx*sb*h*.55-tx*ry*.12,y+ny*sb*h*.55-ty*ry*.12,h*.22,ry*.62,P.bl,rot);
+}
+function d2_tube(P,pt,w0,w1,ry0,fixSb,spk,hot,fcs){
+  /* pt(t)->[x,y]; draws rings base -> tip */
+  let len=0,pp=pt(0);for(let i=1;i<=12;i++){const q=pt(i/12);len+=Math.hypot(q[0]-pp[0],q[1]-pp[1]);pp=q}
+  const N=Math.max(14,Math.min(52,Math.ceil(len/.07)));
+  for(let i=0;i<=N;i++){const t=i/N,c=pt(t),c2=pt(Math.min(1,t+.02)),c0=pt(Math.max(0,t-.02)),a=Math.atan2(c2[1]-c0[1],c2[0]-c0[0]),nx=-Math.sin(a),ny=Math.cos(a);
+    const w=w0+(w1-w0)*t+Math.sin(Math.PI*t)*.045,sb=fixSb||((nx*(fcs>=0?1:-1)+ny*.25)>=0?1:-1);
+    d2_ring(P,c[0],c[1],a,w,Math.max(.075,len/N*.62+.02),i,sb,spk,hot)}
+  if(hot&&!d2_F){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.32+.16*Math.sin(time*6+len*3);ctx.strokeStyle='#ff6a1a';ctx.lineWidth=.03;ctx.lineCap='round';ctx.beginPath();
+    for(let i=0;i<=N;i++){const t=i/N,c=pt(t),c2=pt(Math.min(1,t+.02)),c0=pt(Math.max(0,t-.02)),a=Math.atan2(c2[1]-c0[1],c2[0]-c0[0]),w=w0+(w1-w0)*t,sb=fixSb||((-Math.sin(a)*(fcs>=0?1:-1)+Math.cos(a)*.25)>=0?1:-1),o=w*.3*sb;
+      const x=c[0]-Math.sin(a)*o,y=c[1]+Math.cos(a)*o;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();ctx.restore()}
+}
+const d2_bz=(P0,P1,P2,P3)=>t=>{const u=1-t,a=u*u*u,b=3*u*u*t,c=3*u*t*t,d=t*t*t;return[a*P0[0]+b*P1[0]+c*P2[0]+d*P3[0],a*P0[1]+b*P1[1]+c*P2[1]+d*P3[1]]};
+
+/* ---------- the three heads (design units: 1 unit = r/74; faces +x, origin at the skull centre) ---------- */
+function d2_head(kind,hot,fcs,ang,op,atk,T,ph,tlen){
+  const P=d2_pal(hot,kind),jr=op*.85,PV=[-2,5];
+  const rj=(x,y)=>{const dx=x-PV[0],dy=y-PV[1],c=Math.cos(jr),s=Math.sin(jr);return[PV[0]+dx*c-dy*s,PV[1]+dx*s+dy*c]};
+  ctx.save();ctx.scale(fcs*1.55/74,1.55/74);ctx.rotate(ang);
+  const wob=Math.sin(T*3+ph);
+  /* frill / crest / horns behind the skull */
+  if(kind===2){ /* frilled collar */
+    const C=[-10,-2],tips=[];for(let k=0;k<7;k++){const f=(255-k*21)*Math.PI/180,L=k===0||k===6?24:k===3?36:32;tips.push([C[0]+Math.cos(f)*L,C[1]+Math.sin(f)*L*(1+.04*wob),f])}
+    ctx.beginPath();ctx.moveTo(C[0],C[1]);tips.forEach((t,k)=>{if(k)ctx.quadraticCurveTo((tips[k-1][0]+t[0])/2+(C[0]-t[0])*.22*0-2,(tips[k-1][1]+t[1])/2+4,t[0],t[1]);else ctx.lineTo(t[0],t[1])});ctx.closePath();ctx.fillStyle=d2_c(P.fr);ctx.fill();
+    ctx.beginPath();ctx.moveTo(C[0],C[1]);tips.forEach((t,k)=>ctx.lineTo(C[0]+(t[0]-C[0])*.55,C[1]+(t[1]-C[1])*.55));ctx.closePath();ctx.fillStyle=d2_c(P.frd);ctx.fill();
+    tips.forEach(t=>{d2_L([[C[0]+(t[0]-C[0])*.2,C[1]+(t[1]-C[1])*.2],[t[0],t[1]]],1.6,P.frl);d2_taper([C[0]+(t[0]-C[0])*.85,C[1]+(t[1]-C[1])*.85],[t[0],t[1]],[t[0]+Math.cos(t[2])*7,t[1]+Math.sin(t[2])*7],3,.4,P.iv,4)});
+  }else if(kind===1){ /* tall sail crest + two long swept horns */
+    const C=[-8,-8],tips=[[-12,-40],[-23,-36],[-31,-26],[-35,-15]];
+    d2_P([[C[0]+4,C[1]],[tips[0][0],tips[0][1]],[tips[1][0],tips[1][1]],[tips[2][0],tips[2][1]],[tips[3][0],tips[3][1]],[-22,-3],[-12,2]],P.fr);
+    d2_P([[C[0]+2,C[1]+3],[-14,-26],[-24,-22],[-28,-12],[-20,-3],[-12,1]],P.frd);
+    tips.forEach(t=>{d2_L([[C[0],C[1]+2],[t[0],t[1]]],1.5,P.frl);d2_taper([C[0]+(t[0]-C[0])*.8,C[1]+(t[1]-C[1])*.8],[t[0],t[1]],[t[0]-2,t[1]-6],3.2,.4,P.iv,4)});
+    d2_taper([-2,-13],[-12,-33],[-34,-42],7,1,P.ivd,9);d2_taper([4,-14],[-4,-36],[-28,-50],8,1,P.ivs,10);d2_taper([5,-14],[-3,-35],[-26,-49],3,.5,P.iv,10);
+  }else{ /* the scarred one: ragged spines, one horn snapped off */
+    d2_taper([-6,-13],[-12,-26],[-24,-34],6,1,P.ivd,8);
+    d2_taper([2,-15],[1,-24],[-3,-28],7,3.5,P.ivs,5);d2_P([[-6,-28],[-2,-31],[0,-27],[-3,-26]],P.iv);d2_P([[-5,-28],[-2,-27.5],[-3,-25]],P.bd);
+    d2_taper([-12,-7],[-22,-14],[-27,-20],5,.8,P.ivd,6);d2_taper([-13,-1],[-23,-5],[-30,-3],4.5,.8,P.ivd,6);
+  }
+  /* crest teeth along the snout (king) */
+  if(kind===1)for(let k=0;k<3;k++){const x=18+k*8;d2_P([[x-3,-12+k*.9],[x-1.5,-18+k*1.4],[x+2.5,-11+k*.8]],P.ivs)}
+  /* mouth interior, tongue, lower jaw */
+  const tipY=rj(48,5);
+  if(op>.06){d2_P([[-2,3],[48,2.5],tipY,rj(24,6),rj(-2,5)],P.mo);d2_P([[4,3.2],[40,3],rj(38,5.5),rj(10,5.5)],hot?P.mo2:P.mo2);
+    d2_E(26,4+ (rj(26,6)[1]-4)*.5,12,Math.max(.5,(rj(26,6)[1]-3)*.34),P.mo,0)}
+  /* forked tongue */
+  const fl=Math.max(0,Math.sin(T*2.2+ph*1.7));let L=(op>.2?9+11*op:0)+Math.pow(fl,8)*20+(atk?4:0);
+  if(L>2.5){const ym=(rj(46,5)[1]+3)/2,x0=14,x1=50,y1=ym,xe=x1+L,ye=y1+L*.12+Math.sin(T*16+ph)*1.6;
+    const pts=[[x0,(rj(14,5.5)[1]+3.4)/2],[30,(rj(30,5.5)[1]+3.4)/2+.5],[x1,y1],[x1+L*.55,y1+Math.sin(T*14+ph)*1.4+L*.06],[xe,ye]];
+    d2_L(pts,3.6,P.tgd);d2_L(pts,2.2,P.tg);const fk=Math.min(6,L*.32);
+    d2_L([[xe,ye],[xe+fk,ye-fk*.55]],2.8,P.tgd);d2_L([[xe,ye],[xe+fk,ye+fk*.55]],2.8,P.tgd);d2_L([[xe,ye],[xe+fk,ye-fk*.55]],1.6,P.tg);d2_L([[xe,ye],[xe+fk,ye+fk*.55]],1.6,P.tg)}
+  /* lower jaw (rotates open about the hinge) */
+  ctx.save();ctx.translate(PV[0],PV[1]);ctx.rotate(jr);ctx.translate(-PV[0],-PV[1]);
+  d2_S([[-6,5],[-8,10],[6,14],[22,14.5],[38,12.5],[47,8.5],[50,5],[40,5.6],[24,6.5],[8,6]],P.D);ctx.lineWidth=2;ctx.strokeStyle=d2_c(P.D);ctx.stroke();
+  d2_S([[-5,6],[-6.5,10],[6,12.8],[22,13],[37,11],[46,8],[48,5.4],[40,6],[24,7],[8,7]],P.b);
+  d2_S([[-2,9.5],[8,12.4],[22,12.8],[35,10.8],[43,8.5],[34,9.3],[22,10.2],[8,9.4]],P.bl);
+  for(const x of[12,20,28,36])d2_L([[x,9.6],[x+.6,12.6]],.9,P.bs);
+  d2_L([[-4,7],[8,8.6],[24,8],[40,7]],1.2,P.B);
+  for(const q of[[14,6.2,6],[27,6.2,7],[38,6.2,8],[45,5.8,5]]){d2_P([[q[0]-2,q[1]+1],[q[0]+2,q[1]+1],[q[0]+.4,q[1]-q[2]]],P.iv);d2_P([[q[0],q[1]+1],[q[0]+2,q[1]+1],[q[0]+.4,q[1]-q[2]]],P.ivs)}
+  d2_P([[24,13],[27,13.4],[26,18]],P.ivs);d2_P([[33,12],[36,12],[35.5,16.5]],P.ivs);
+  ctx.restore();
+  /* upper jaw teeth */
+  const ft=[[22,5],[32,11],[41,7],[48,5]];
+  ft.forEach((q,k)=>{if(kind===0&&k===2)return;d2_P([[q[0]-2.2,3],[q[0]+2.2,3],[q[0]+.4,3+q[1]]],P.iv);d2_P([[q[0]+.2,3],[q[0]+2.2,3],[q[0]+.4,3+q[1]]],P.ivs)});
+  if(kind===0)d2_P([[39,3],[43,3],[41.4,6]],P.ivd);
+  /* skull and snout */
+  const UH=[[-16,-3],[-14,-13],[-3,-18],[9,-17],[20,-13.5],[32,-11],[43,-10],[51,-7.5],[55,-2.5],[52,3.2],[44,4.4],[36,3],[26,4.4],[14,5.4],[2,8],[-8,8.5],[-16,5]];
+  d2_S(UH,P.D);d2_sm(UH);ctx.lineWidth=2.2;ctx.strokeStyle=d2_c(P.D);ctx.stroke();
+  d2_S(d2_shr(UH,18,-3,.93,-.4,-.6),P.b);
+  d2_S([[11,5.2],[26,4.2],[36,2.9],[44,4.1],[52,3.2],[53,.4],[44,1.6],[36,.2],[26,1.6],[12,3]],P.bs);
+  d2_L([[26,2.6],[36,1.4],[46,2.6]],.8,P.bd);d2_L([[0,6.4],[14,5.4],[26,4.4],[38,3.4],[46,3.6],[53,.8]],1.3,P.D);
+  d2_S([[-10,-16],[0,-17],[10,-16],[21,-12.5],[33,-10.5],[24,-9.4],[10,-12],[0,-12.5]],P.l);
+  d2_L([[-8,-16],[5,-16.5],[18,-13],[30,-10.7],[42,-9.2]],1.5,P.h);
+  d2_E(0,5,11,3.6,P.B,-.08);d2_E(-3,3,6,2.2,P.bm,0);
+  for(const q of[[-8,-8],[-3,-12],[3,-8],[-9,-2],[-1,-3],[6,-2],[26,-8.8],[34,-7.6]])d2_L([[q[0]-2,q[1]],[q[0],q[1]+1.6],[q[0]+2,q[1]]],.9,P.B);
+  for(const q of[[-3,-14],[7,-13],[15,-10.5]])d2_E(q[0],q[1],1.4,.7,P.h);
+  /* nostril */
+  d2_E(47,-5.4,1.8,1.05,P.D,-.3);d2_E(46,-7.6,2.6,.9,P.l,-.2);
+  /* eye: brow, glowing slit */
+  const ec=atk?P.eyeA:P.eye,ex=14,ey=-6.2;
+  if(kind===0){ /* scarred: the near eye is milky and blind */
+    d2_E(ex,ey,6.4,4.4,P.D,-.15);d2_E(ex,ey,5.4,3.5,'#e6ecd2',-.15);d2_E(ex+.6,ey+.2,2.4,2.4,'#b8c0a8');d2_E(ex+.6,ey+.2,.9,.9,'#6a7060');d2_L([[ex-5,ey+2.6],[ex+4,ey-3.2]],1.2,'#e8a898');
+  }else{
+    if(atk||hot){d2_E(ex,ey,8.5,6,d2_mix(ec,P.b,.5),0);}
+    d2_E(ex,ey,6.2,4.1,P.D,-.15);d2_E(ex,ey,5.2,3.3,ec,-.15);d2_E(ex-1.2,ey-1,3.2,1.6,hot?'#fff0a0':'#fffbd0',-.15);
+    d2_E(ex+.6,ey,1.15,3.2,P.D,0);d2_E(ex-2.4,ey-1.6,.9,.7,'#ffffff',0)}
+  d2_P([[ex-8,ey-4.8],[ex+3,ey-7.6],[ex+9.5,ey-3.4],[ex+8,ey-2.4],[ex+1,ey-4.3],[ex-6,ey-1.8]],atk?P.B:P.D);
+  d2_L([[ex-6,ey-4.4],[ex+2,ey-6.6],[ex+8.5,ey-3.4]],1,P.l);
+  /* personalities */
+  if(kind===0){ /* the long scar across the face, stitched, and a torn lip */
+    const sc=[[23,-12],[27,-7],[32,-1],[37,4.5]];d2_L(sc,4.6,P.D);d2_L(sc,3,'#f0b8a8');
+    for(let k=0;k<4;k++){const q=sc[k];d2_L([[q[0]-2.2,q[1]-1.2],[q[0]+2.2,q[1]+1.2]],1.1,P.D)}
+    d2_P([[34,2.6],[38,1],[36.6,5.6]],P.mo);d2_E(-6,-6,2,1.4,P.bd,0);d2_E(0,3,1.6,1,P.bd,0)}
+  else if(kind===1){ /* the king: heavy brow plates and a gold ring on the snout */
+    d2_P([[24,-12],[34,-10.6],[34,-7.6],[26,-8.6]],P.B);d2_L([[27,-10.5],[33,-9.4]],1,P.l);
+    d2_E(30,-3,2.2,3.4,P.fr,0);d2_E(29.5,-3.6,.8,2,P.frl,0)}
+  else{ /* the whiskered one: long barbels and cheek spines */
+    const w1=Math.sin(T*3.4+ph)*4,w2=Math.cos(T*3+ph)*4;
+    d2_L([[46,2],[58,8+w1],[52,20+w2],[60,27+w1]],2.2,P.frd);d2_L([[46,2],[58,8+w1],[52,20+w2],[60,27+w1]],1.2,P.fr);
+    d2_L([[42,3.5],[52,12+w2],[44,22+w1]],2,P.frd);d2_L([[42,3.5],[52,12+w2],[44,22+w1]],1,P.fr);
+    d2_taper([-4,7],[-10,12],[-16,20],6,.6,P.iv,5);d2_taper([4,8],[0,14],[-5,21],5,.6,P.ivs,5)}
+  ctx.restore();
+}
+
+/* ---------- the whole boss ---------- */
+BOSS_DRAW['Lake Hydra']=(e,fl)=>{
+  const r=e.r,T=time,s=e.w1s||'',ph=e.phase||1,hot=ph>=3,P=d2_pal(hot,1);d2_F=!!fl;
+  const q=e.spawnT>0?Math.min(1,e.spawnT/1.4):0,lk=1-q;
+  /* the red strike warning (same geometry as before) goes straight onto the arena */
+  {const _pc=ctx;if(PXM)ctx=PXM;
+   if(s==='tele'||(s==='rest'&&e.w1t>.9)){const w=s==='tele'?Math.min(1,1-e.w1t/(e.w1m||1)):1;ctx.save();ctx.globalAlpha=.15+.3*w;ctx.fillStyle='#ff4d5e';ctx.beginPath();ctx.arc(e.tx,e.ty,72*w,0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff4d5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.tx,e.ty,72,0,TAU);ctx.stroke();ctx.restore()}
+   ctx=_pc}
+  /* smoothed head state */
+  const dt=e.d2t===undefined?1:Math.min(.1,Math.max(0,T-e.d2t));e.d2t=T;
+  const fcw=Math.cos(Math.atan2(p.y-e.y,p.x-e.x))>=0?1:-1;e.d2f=e.d2f===undefined?fcw:e.d2f+(fcw-e.d2f)*Math.min(1,dt*9);
+  const fcs=Math.abs(e.d2f)<.12?(e.d2f<0?-.12:.12):e.d2f,fcg=fcs>=0?1:-1;
+  const hs=e.d2h=e.d2h||[[],[],[]],kf=Math.min(1,dt*13),hd=e.hd||0;
+  const atkS=s==='tele'?1:(s==='rest'&&e.w1t>.6)?2:0,w=s==='tele'?Math.min(1,1-e.w1t/(e.w1m||1)):1;
+  for(let i=0;i<3;i++){
+    let hx=(i-1)*1.5+Math.sin(T*1.5+i*2)*.2,hy=-(i===1?2:1.7)+Math.cos(T*1.3+i)*.15,ang=.28+.12*Math.sin(T*1.6+i*1.7),op=.1+.08*Math.sin(T*2.1+i*2),atk=false;
+    if(i===hd&&atkS===1){hx=(e.tx-e.x)*.6/r;hy=(Math.min(e.ty-e.y,0)-r*2.2)/r;ang=-.4+Math.sin(T*9)*.08*w;op=.25+.7*w;atk=true}
+    else if(i===hd&&atkS===2){const h0=hs[i];let tx2=(e.tx-e.x)/r,ty2=(e.ty-e.y)/r;ang=Math.max(-.9,Math.min(1.45,Math.atan2(ty2-(h0[1]===undefined?hy:h0[1]),fcg*(tx2-(h0[0]===undefined?hx:h0[0])))));hx=tx2-fcg*Math.cos(ang)*.32;hy=ty2-Math.sin(ang)*.32;op=1;atk=true}
+    const h=hs[i];if(h[0]===undefined){h[0]=hx;h[1]=hy;h[2]=ang;h[3]=op}else{h[0]+=(hx-h[0])*kf;h[1]+=(hy-h[1])*kf;h[2]+=(ang-h[2])*kf;h[3]+=(op-h[3])*kf}
+    h[4]=atk;
+  }
+  ctx.save();ctx.translate(e.x,e.y);ctx.lineJoin='round';
+  /* lake: footprint unchanged */
+  const _F=d2_F;d2_F=false;
+  ctx.save();ctx.globalAlpha=.9;d2_E(0,r*.5,r*2.7*lk,r*1.6*lk,'#1d5a8a');ctx.globalAlpha=.6;d2_E(0,r*.5,r*2.2*lk,r*1.25*lk,'#2b7fb8');
+  {ctx.strokeStyle='#bfefff';ctx.lineWidth=2;for(let i=0;i<3;i++){const t2=(T*.6+i/3)%1;ctx.globalAlpha=(1-t2)*.5;ctx.beginPath();ctx.ellipse(0,r*.5,r*(1+t2*1.6)*lk,r*(.6+t2*.9)*lk,0,0,TAU);ctx.stroke()}}ctx.restore();
+  d2_F=_F;
+  if(hot&&!d2_F){ctx.save();ctx.globalCompositeOperation='lighter';for(let k=0;k<4;k++){ctx.globalAlpha=(.05+.025*Math.sin(T*5))*(1-k*.18);d2_E(0,r*.15,r*(2.3-k*.4),r*(1.5-k*.25),'#ff6a2a')}ctx.restore()}
+  ctx.translate(0,q*r*1.4);
+  ctx.save();ctx.scale(r,r);ctx.lineWidth=.03;
+  const heave=1+Math.sin(T*1.8)*.012;
+  /* coils and tail behind the body */
+  ctx.save();ctx.translate(0,.75);ctx.scale(1,heave);ctx.translate(0,-.75);
+  d2_tube(P,d2_bz([-2.35,.78],[-2.95,-.45],[-1.45,-1.1],[-.9,.4]),.56,.52,.1,-1,0,hot,fcs);
+  d2_tube(P,d2_bz([.9,.4],[1.35,-.75],[2.15,-.6],[1.85,.72]),.54,.46,.1,1,0,hot,fcs);
+  d2_tube(P,d2_bz([1.95,.88],[2.55,.8],[2.62,.1],[2.25,-.5]),.4,.05,.08,1,0,hot,fcs);
+  {const tp=[2.25,-.5];d2_P([[tp[0]-.02,tp[1]+.04],[tp[0]-.16,tp[1]-.12],[tp[0]-.08,tp[1]-.3],[tp[0]+.08,tp[1]-.22],[tp[0]+.2,tp[1]-.36],[tp[0]+.2,tp[1]-.1]],P.ivs);d2_P([[tp[0]-.02,tp[1]+.02],[tp[0]-.1,tp[1]-.14],[tp[0]-.05,tp[1]-.26],[tp[0]+.04,tp[1]-.18]],P.iv)}
+  ctx.restore();
+  /* spikes along the back */
+  for(let k=0;k<9;k++){const a=Math.PI*(1.1+k*.1),x=Math.cos(a)*1.0,y=-.42+Math.sin(a)*.52,sz=.16+.05*Math.sin(k*.9);d2_P([[x-.1,y+.08],[x+Math.cos(a)*.08-.03,y+Math.sin(a)*sz*1.6],[x+.1,y+.08]],P.ivs)}
+  /* the coiled body: a scaly mass with two thick loops of the serpent coiled across its front */
+  {const rx=1.12,ry=.78,cy=-.12,body=[[-rx,cy+.2],[-rx*.92,cy-.35],[-.5,cy-ry*.95],[0,cy-ry],[.5,cy-ry*.95],[rx*.92,cy-.35],[rx,cy+.2],[.7,cy+.7],[-.7,cy+.7]];
+   d2_S(body,P.D);d2_S(d2_shr(body,0,cy,.95,0,-.01),P.B);d2_S(d2_shr(body,0,cy,.88,-.02,-.04),P.b);d2_E(-.25,cy-.3,.55,.28,P.bm);d2_E(-.35,cy-.4,.3,.12,P.l);
+   ctx.save();d2_sm(body);ctx.clip();ctx.lineCap='round';
+   for(let j=0;j<9;j++){const yy=cy-.62+j*.14;ctx.strokeStyle=d2_c(P.B);ctx.globalAlpha=.75;ctx.lineWidth=.022;ctx.beginPath();for(let x=-1.1+((j&1)?.09:0);x<1.1;x+=.18){ctx.moveTo(x,yy);ctx.quadraticCurveTo(x+.045,yy+.07,x+.09,yy)}ctx.stroke();
+     ctx.strokeStyle=d2_c(P.h);ctx.globalAlpha=.45;ctx.beginPath();for(let x=-.9+((j&1)?.09:0);x<-.1;x+=.18){ctx.moveTo(x,yy-.025);ctx.quadraticCurveTo(x+.045,yy+.02,x+.09,yy-.025)}ctx.stroke()}
+   ctx.restore()}
+  d2_tube(P,d2_bz([-1.3,.0],[-1.45,1.1],[1.45,1.1],[1.3,.0]),.6,.6,.1,1,0,hot,fcs);
+  d2_tube(P,d2_bz([-1.0,-.3],[-1.1,.55],[1.1,.55],[1.0,-.3]),.56,.56,.1,1,0,hot,fcs);
+  /* the lake laps over the base of the body */
+  {const _F2=d2_F;d2_F=false;
+  ctx.save();ctx.globalAlpha=.62;d2_E(0,1.3,1.9,.2,'#2b7fb8');ctx.globalAlpha=.85;d2_E(0,1.38,1.6,.12,'#1d5a8a');ctx.restore();
+  if(!d2_F){ctx.save();ctx.strokeStyle='#e8fbff';ctx.lineCap='round';ctx.lineWidth=.04;for(let k=0;k<3;k++){ctx.globalAlpha=.8-k*.2;ctx.beginPath();ctx.ellipse(0,1.2+k*.05,1.5+k*.12,.16+k*.03,0,.15+Math.sin(T*2+k)*.1,Math.PI-.15);ctx.stroke()}
+    for(const o of[[-2.35,.82],[1.95,.92],[-.9,.5],[.92,.5]]){ctx.globalAlpha=.7;ctx.lineWidth=.035;ctx.beginPath();ctx.ellipse(o[0],o[1],.32,.09,0,0,TAU);ctx.stroke()}ctx.restore()}
+  d2_F=_F2}
+  /* necks and heads: the middle one is furthest back, the striking one in front */
+  const order=[1,0,2].sort((a,b)=>(hs[a][4]?1:0)-(hs[b][4]?1:0));
+  const bases=[[-.6,-.5],[0,-.68],[.6,-.5]];
+  for(const i of order){
+    const h=hs[i],Bp=bases[i],H=[h[0],h[1]],dir=[fcg*Math.cos(h[2]),Math.sin(h[2])],dx=H[0]-Bp[0],dy=H[1]-Bp[1],len=Math.hypot(dx,dy);
+    const arm=Math.min(1.1,.5+len*.2);
+    const C1=[Bp[0]+(i-1)*.42+Math.sin(T*1.3+i)*.1,Bp[1]-Math.min(1.1,Math.abs(dy)*.6+.35)*(dy<0?1:-.2)],C2=[H[0]-dir[0]*arm,H[1]-dir[1]*arm];
+    d2_E(Bp[0],Bp[1]+.08,.6,.28,P.bm);d2_E(Bp[0]-.1,Bp[1]+.02,.3,.1,P.l);
+    const bz=d2_bz(Bp,C1,C2,H);
+    const sw=t=>{const c=bz(t),k=Math.sin(Math.PI*t)*Math.sin(T*3-t*6+i*2)*.025;return[c[0]+k,c[1]]};
+    d2_tube(P,sw,.64,.36,.1,0,1,hot,fcs);
+    ctx.save();ctx.translate(H[0],H[1]);
+    d2_head(i,hot,fcs,h[2],h[3],h[4],T,i*2.1,0);
+    ctx.restore();
+  }
+  /* phase 3: two regrowing buds glow beside the main necks */
+  if(hot){for(const sd of[-1,1]){const B2=[sd*.95,-.25],H2=[sd*1.5+Math.sin(T*2+sd)*.08,-1.0+Math.cos(T*2.4+sd)*.08],bz=d2_bz(B2,[sd*1.4,-.35],[sd*1.7,-.7],H2);
+    d2_E(B2[0],B2[1]+.03,.3,.16,P.bm);d2_tube(P,bz,.26,.16,.08,0,0,hot,fcs);
+    ctx.save();ctx.translate(H2[0],H2[1]);ctx.scale(.5,.5);d2_head(1,hot,fcs,.35,.2+.15*Math.sin(T*3+sd),false,T,sd*3,0);ctx.restore();
+    if(!d2_F){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.25+.12*Math.sin(T*7+sd);d2_E(H2[0],H2[1],.22,.2,'#ff5a1a');ctx.restore()}}}
+  ctx.restore();
+  ctx.restore();
+};
 /* d1: THE DRAGON (World 1 final boss, key 'F1'). Parts are painted once as small pixel sprites (1 sprite px = 1 pixel of the boss pixel pass) and posed every frame:
    head + hinged jaw, plated neck, body with belly plates, hind and fore legs, plated tail with spade, two finger-boned wings (10 flap frames). */
 const d1_PI2=Math.PI*2;
