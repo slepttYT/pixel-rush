@@ -11993,6 +11993,7 @@ function drawBossBase(e,fl){
     ctx=_pc;drawFinal(e,fl);return;
   }
   ctx=_pc; /* 0.5.1: every warning above (breath cones, charge lines, fire rings...) goes straight onto the arena, so none are clipped to the boss's own box */
+  {const BD=BOSS_DRAW[cf.boss];if(BD){ctx.save();try{BD(e,fl)}finally{ctx.restore()}return}} /* 0.7: redesigned bosses draw themselves (see BOSS_DRAW) */
   if(cf.ph){drawPlaceholderBoss(e,fl);return}
   if(cf.vine){drawVine(e,fl);return}
   if(cf.crab){
@@ -12286,6 +12287,8 @@ function drawDragon(e,fl,P){
   ctx.restore();
 }
 
+/* BOSS_DRAW[name or 'F1'..'F5'] = (e,fl)=>{...} draws a boss straight onto ctx in arena coordinates (e.x, e.y is its centre, e.r its radius; fl = white hit flash) */
+const BOSS_DRAW={};
 function drawFinal(e,fl){
   const fly=e.fly>0,fz=(fly&&e.fk!==2)?e.fz:0;
   if(!(e.cine&&e.y<M)){ctx.save();ctx.globalAlpha=.34*(1-fz*.5);ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.85,e.r*(1.5-fz*.5),e.r*.38,0,0,TAU);ctx.fill();ctx.restore()} /* no ground shadow while it is up in the sky */
@@ -12296,6 +12299,7 @@ function drawFinal(e,fl){
     ctx=_pc;
 
   }
+  {const BD=BOSS_DRAW['F'+e.fk];if(BD){ctx.save();try{BD(e,fl)}finally{ctx.restore()}return}}
   if(e.fk===2)drawGolem(e,fl);else if(e.fk===3)drawPharaoh(e,fl);else if(e.fk===4)drawSandBoss(e,fl,'OMEGA',1.5);else if(e.fk===5)drawSandBoss(e,fl,'The Mire Kraken',1.5);else drawDragon(e,fl);
 }
 /* the hole the Stone Colossus leaves in the right wall (pixel art: cracks first, then the broken wall) */
