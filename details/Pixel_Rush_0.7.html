@@ -642,6 +642,7 @@ summary:hover{color:var(--bone)}
 #title .tintro{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,2.4cqh,26px);pointer-events:none;will-change:transform,opacity}
 #title .tintro[hidden]{display:none!important}
 #title .tintro .logo{margin:0}
+#title .tcred2{margin-top:.9em;font-size:clamp(8px,min(1.3cqw,2cqh),17px)}
 #title .tcred{margin:0;font-family:'Press Start 2P',monospace;font-size:clamp(10px,min(1.7cqw,2.6cqh),22px);letter-spacing:.14em;color:#e8f0ff;text-shadow:.15em .15em 0 #123a6e;text-align:center;padding:0 16px}
 #title #tscr1{transition:opacity .5s ease}
 #title.intro #tscr1{opacity:0;pointer-events:none}
@@ -751,7 +752,7 @@ summary:hover{color:var(--bone)}
       <button class="btn gold big" id="tplay" type="button">PLAY</button>
       <p class="thint">CHOOSE A SAVE</p>
     </div>
-    <div class="tintro" id="tintro" hidden aria-hidden="true"><h1 class="logo">PIXEL<br><em>RUSH</em></h1><p class="tcred">MADE BY SLEPTT SPYDER CRASH</p></div>
+    <div class="tintro" id="tintro" hidden aria-hidden="true"><h1 class="logo">PIXEL<br><em>RUSH</em></h1><p class="tcred">MADE BY SLEPTT SPYDER CRASH</p><p class="tcred tcred2">MUSIC BY VRAPTOR</p><p class="tcred tcred2">RYOMIND - PLAYTESTER</p></div>
     <div class="tbox" id="tscr2" hidden>
       <h2 class="tseh">SELECT SAVE</h2>
       <div class="tslots" id="tslots"></div>
@@ -959,7 +960,7 @@ summary:hover{color:var(--bone)}
       <h2 id="chart">Characters</h2>
       <div class="chhead">
         <canvas id="chprev" width="300" height="230"></canvas>
-        <div class="chinfo"><div id="chname"></div><div id="chtitle"></div><p id="chdesc"></p><div id="chstats"></div><div id="chkit"></div><div id="chskins"><span id="chsklab">Skin preview</span><button type="button" data-sv="">Current</button><button type="button" data-sv="0">Default</button><button type="button" data-sv="1" class="gld">Gold</button><button type="button" data-sv="2" class="dia">Diamond</button><button type="button" data-sv="3" class="gal">Galaxy</button></div><div id="chlock"></div></div>
+        <div class="chinfo"><div id="chname"></div><div id="chtitle"></div><p id="chdesc"></p><div id="chstats"></div><div id="chkit"></div><div id="chskins"><span id="chsklab">Skin preview</span><button type="button" data-sv="">Current</button><button type="button" data-sv="0">Default</button><button type="button" data-sv="1" class="gld">Gold</button><button type="button" data-sv="2" class="dia">Diamond</button><button type="button" data-sv="3" class="gal">Galaxy</button><button type="button" data-sv="4" id="chvrap" hidden>Vraptor</button><button type="button" id="chvrapeq" hidden></button></div><div id="chlock"></div></div>
       </div>
       <div id="chgrid"></div>
       <div id="chtip" hidden></div>
@@ -1529,6 +1530,7 @@ const DIFFS={
  nowin:{n:"YOU'RE NOT WINNING BRO",c:'#ff4d5e',hp:1,xp:1,coin:1,pd:.5,eh:2.2,es:1.3,ed:1,cw:1.5,bt:1.4,s:'1 heart · half damage',r:'Start with 1 health and deal half damage. Enemies have 1.7x health, move 25% faster and hit harder. No bonus coins or XP: this one is just for bragging rights.'}
 };
 try{Object.assign(stats,JSON.parse(LS.getItem('cinder-stats')||'{}'));ach=JSON.parse(LS.getItem('cinder-ach')||'{}');upg=JSON.parse(LS.getItem('cinder-upg')||'{}')}catch(e){}
+if(stats.vrap===undefined){stats.vrap=1;stats.vrapOn=(stats.runs||0)===0?1:0} /* 1.0: the Vraptor starter skin: owned from the first launch, worn by new saves; existing saves keep their look until they choose it */
 if(ach.rmp2===1)ach.rmp2=2; /* old builds could leave Slaughterhouse half-unlocked; it was already earned */
 function saveMeta(){try{LS.setItem('cinder-stats',JSON.stringify(stats));LS.setItem('cinder-ach',JSON.stringify(ach));LS.setItem('cinder-upg',JSON.stringify(upg))}catch(e){}}
 let diff='medium';try{const d=LS.getItem('cinder-diff');if(DIFFS[d])diff=d}catch(e){}
@@ -3210,10 +3212,11 @@ const CXP=[0,150,450,900,1500,2250,3150,4200,5400,6750];for(let i=10;i<50;i++)CX
 const CL_MAX=CXP.length;
 const TIER_LV={1:1,2:1,3:2,4:4,5:6,6:8}; /* fighter level that unlocks each ability rarity */
 const cxpOf=id=>stats.cxp[id]||0;
-const GOLD_LV=5,DIA_LV=10,GAL_LV=50,SK_LV=[1,GOLD_LV,DIA_LV,GAL_LV],SK_NAME=['Default','Gold','Diamond','Galaxy'],SK_COL=['inherit','#ffd36b','#7fe3ff','#c9a8ff']; /* fighter levels that earn each skin */
+const GOLD_LV=5,DIA_LV=10,GAL_LV=50,SK_LV=[1,GOLD_LV,DIA_LV,GAL_LV,1],SK_NAME=['Default','Gold','Diamond','Galaxy','Vraptor'],SK_COL=['inherit','#ffd36b','#7fe3ff','#c9a8ff','#b98aff']; /* fighter levels that earn each skin */
 function clvl(id){const x=cxpOf(id);let L=1;while(L<CL_MAX&&x>=CXP[L])L++;return L}
 const tierOpen=(id,t)=>clvl(id)>=TIER_LV[t];
-const cSkin=id=>{const L=clvl(id);return L>=GAL_LV?3:L>=DIA_LV?2:L>=GOLD_LV?1:0}; /* 0 default, 1 gold, 2 diamond, 3 galaxy */
+const vrapOn=()=>!!(stats.vrap&&stats.vrapOn);
+const cSkin=id=>{if(id==='ember'&&vrapOn())return 4;const L=clvl(id);return L>=GAL_LV?3:L>=DIA_LV?2:L>=GOLD_LV?1:0}; /* 0 default, 1 gold, 2 diamond, 3 galaxy */
 const skinUp=r=>[1,2,3].map(k=>r.clB<SK_LV[k]&&SK_LV[k]<=r.clA?' · <b style="color:'+SK_COL[k]+'">'+SK_NAME[k].toUpperCase()+' SKIN</b>':'').join('');
 const curCid=()=>(p&&p.ch&&p.ch.id)||CH().id;
 function clvHtml(id){
@@ -3226,15 +3229,15 @@ function clUp(r){
   return charById(r.cid).n+' · fighter level '+r.clA+(r.clA>r.clB?' · <b style="color:var(--gold)">LEVEL UP</b>'+(n.length?' · '+n.join(', ')+' abilities unlocked':'')+skinUp(r):'');
 }
 p.cp={};p.spdM=1;p.cdM=1;p.dmgB=0;p.reachM=1;p.dashM=1;p.every=0;p.coinM=1;p.xpM=1;p.rgT=0;p.hitW=false;p.wardUsed=false;
-p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
+p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.airN=0;p.flurT=0;
 
 /* --- character art: drawn facing +x. phase 0 = body and gear, phase 1 = face (drawn after the sword) --- */
 /* ---------- character pixel sprites: every fighter is a side-view pixel sprite (like the mobs) that faces where you aim, with idle and walk frames.
    The weapon still swings around them. Skins (gold, diamond, galaxy) repaint the outfit ---------- */
-const CHS_SKIN=[null,{b:'#ffd36b',t:'#7a5206'},{b:'#9fe8ff',t:'#1f6a9a'},{b:'#241650',t:'#0b0826'}]; /* gold, diamond, galaxy (deep space, not just purple) */
+const CHS_SKIN=[null,{b:'#ffd36b',t:'#7a5206'},{b:'#9fe8ff',t:'#1f6a9a'},{b:'#241650',t:'#0b0826'},{b:'#8a4fd0',t:'#2f6fe0'}]; /* [4] = Vraptor: purple shirt, blue pants, cowboy hat. A starter skin for Rookie (retires in 2.0) */ /* gold, diamond, galaxy (deep space, not just purple) */
 function charSprite(ch,pose,sk){
   const k=(ch.id||'x')+'|'+pose+'|'+(sk||0),C=CHS_CACHE;if(C[k])return C[k];
-  const S=CHS_SKIN[sk||0],body=S?S.b:ch.body,trim=S?S.t:ch.trim,acc=ch.acc,acc2=ch.acc2||mixHex(ch.acc,'#000000',.35),eye=ch.eye||'#12141c',sty=ch.sty||'plain';
+  const vr=sk===4&&ch.id==='ember',S=CHS_SKIN[sk||0],body=S?S.b:ch.body,trim=S?S.t:ch.trim,acc=vr?'#6a3f1e':ch.acc,acc2=vr?'#d8a85a':(ch.acc2||mixHex(ch.acc,'#000000',.35)),eye=ch.eye||'#12141c',sty=vr?'cowboy':(ch.sty||'plain');
   const skin=sty==='golem'?body:sty==='phantom'?'#e8eeff':'#f2c9a0',dk=mixHex(body,'#000000',.3);
   const out=mobCanvas(18,22,8,d=>{
     const w1=pose==='w1',w2=pose==='w2';
@@ -3321,7 +3324,7 @@ function drawCharSpr(c,ch,x,y,U,pose,flip,sk,alpha){
   const s=charSprite(ch,pose,sk);c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(x),Math.round(y));if(flip)c.scale(-1,1);if(alpha!==undefined)c.globalAlpha*=alpha;else if(ch.alpha)c.globalAlpha*=ch.alpha;
   const dx=-s.ax*U,dy=-s.c.height*U*.62,dw=s.c.width*U,dh=s.c.height*U;
   c.drawImage(s.c,dx,dy,dw,dh);
-  if(sk){const t=performance.now()/1000,seed=hsh((ch.id||'').length*7.3+(ch.id||'x').charCodeAt(0));c.drawImage(skinFx(s,sk,t,seed),0,0,s.c.width,s.c.height,dx,dy,dw,dh);
+  if(sk&&sk<4){const t=performance.now()/1000,seed=hsh((ch.id||'').length*7.3+(ch.id||'x').charCodeAt(0));c.drawImage(skinFx(s,sk,t,seed),0,0,s.c.width,s.c.height,dx,dy,dw,dh);
     /* galaxy: a faint star now and then twinkles just outside the body */
     if(sk===3){const k=(t*1.2)|0,f=t*1.2-k,a=Math.sin(f*Math.PI)*.85;if(hsh(k+seed)<.55&&a>.05){const ox=dx+hsh(k*3+seed)*dw,oy=dy+hsh(k*5+seed)*dh*.8;c.globalAlpha*=a;c.fillStyle='#e8dcff';c.fillRect(Math.round(ox),Math.round(oy),U,U);c.fillStyle='rgba(200,180,255,.6)';c.fillRect(Math.round(ox)-U,Math.round(oy),U,U);c.fillRect(Math.round(ox)+U,Math.round(oy),U,U);c.fillRect(Math.round(ox),Math.round(oy)-U,U,U);c.fillRect(Math.round(ox),Math.round(oy)+U,U,U)}}}
   c.restore();
@@ -3688,10 +3691,13 @@ function cheatAct(k){
 let charMode='pick',chSel=curChar;
 function renderSkinBtns(){
   document.querySelectorAll('#chskins button').forEach(b=>{const v=b.dataset.sv===''?null:+b.dataset.sv;b.classList.toggle('on',v===skinView)});
+  const rook=chSel==='ember'&&!!stats.vrap;$('chvrap').hidden=!rook;$('chvrapeq').hidden=!rook;
+  if(rook){$('chvrapeq').textContent=stats.vrapOn?'WEARING VRAPTOR · TAP TO TAKE OFF':'WEAR VRAPTOR';$('chvrapeq').classList.toggle('on',!!stats.vrapOn)}
   const real=cSkin(chSel);
-  $('chsklab').textContent=skinView===null?'Skin preview':'Previewing '+SK_NAME[skinView].toLowerCase()+(skinView>real?' · reach fighter level '+SK_LV[skinView]+' to earn it':' · yours');
+  $('chsklab').textContent=skinView===null?'Skin preview':skinView===4?'Vraptor skin · yours (a starter skin, gone in 2.0)':'Previewing '+SK_NAME[skinView].toLowerCase()+(skinView>real?' · reach fighter level '+SK_LV[skinView]+' to earn it':' · yours');
 }
-$('chskins').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;skinView=b.dataset.sv===''?null:+b.dataset.sv;sfx(520,.06,'triangle',.04,1.3);renderSkinBtns()});
+$('chskins').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.id==='chvrapeq'){stats.vrapOn=stats.vrapOn?0:1;saveMeta();sfx(660,.08,'triangle',.05,1.4);skinView=null;renderSkinBtns();try{renderChars()}catch(e2){}return}skinView=b.dataset.sv===''?null:+b.dataset.sv;sfx(520,.06,'triangle',.04,1.3);renderSkinBtns()});
 /* 0.5: a fighter's base stats as pixel bars (hover or focus a card to see them) */
 function charStats(c){
   const bar=(v,mx)=>{const n=Math.max(0,Math.min(10,Math.round(v/mx*10)));return '<span class="sbar">'+'<i class="on"></i>'.repeat(n)+'<i></i>'.repeat(10-n)+'</span>'};
@@ -4344,7 +4350,6 @@ const HOT=[
  {id:'hot_blink',name:'Blink Strike',ico:'⚡',cd:7,d:'Teleport toward your aim and strike everything where you land. Brief invulnerability.'},
  {id:'hot_storm',w:'k',name:'Blade Storm',ico:'🌀',cd:16,d:'Swords whirl around you for 3 seconds, cutting everything that comes close.'},
  {id:'hot_heal',name:'Second Breath',ico:'💚',cd:40,d:'Heal 2 hearts instantly.'},
- {id:'hot_aegis',name:'Aegis',ico:'🛡️',cd:22,d:'Become untouchable for 3 seconds.'},
  {id:'hot_meteor',name:'Meteor Rain',ico:'☄️',cd:18,d:'Call meteors down on enemies across the arena.'},
  {id:'hot_zap',name:'Chain Zap',ico:'⛓️',cd:8,d:'Lightning leaps between up to 8 enemies.'},
  {id:'hot_hay',w:'f',name:'Haymaker',ico:'🥊',cd:9,d:'Lunge forward and smash everything on your path for heavy damage and knockback.'},
@@ -4440,7 +4445,7 @@ function pxIconURL(id){
 }
 const pxImg=(id,cls)=>'<img class="pxi'+(cls?' '+cls:'')+'" src="'+pxIconURL(id)+'" alt="" draggable="false">';
 /* which picture each ability gets */
-const HOT_ICON={hot_throw:'throw',hot_quake:'quake',hot_blink:'blink',hot_storm:'storm',hot_heal:'heal',hot_aegis:'shield',hot_meteor:'meteor',hot_zap:'zap',hot_hay:'hay',hot_flurry:'flurry',hot_fan:'fan',hot_rail:'rail',hot_air:'air',hot_barrage:'barrage',hot_knives:'knives',hot_exec:'exec'};
+const HOT_ICON={hot_throw:'throw',hot_quake:'quake',hot_blink:'blink',hot_storm:'storm',hot_heal:'heal',hot_meteor:'meteor',hot_zap:'zap',hot_hay:'hay',hot_flurry:'flurry',hot_fan:'fan',hot_rail:'rail',hot_air:'air',hot_barrage:'barrage',hot_knives:'knives',hot_exec:'exec'};
 const W_ICON={k:'knife',f:'fist',g:'bullet',b:'bomb',r:'boomerang',m:'orb',a:'arrow',c:'mace'};
 function abilIcon(a){
   if(!a)return 'sword';if(HOT_ICON[a.id])return HOT_ICON[a.id];
@@ -4456,7 +4461,7 @@ function abilIcon(a){
   if(has(/\bxp\b|scholar|experience/))return 'gem';
   if(has(/magnet|pull|vacuum/))return 'magnet';
   if(has(/cooldown|\btime\b|haste/))return 'clock';
-  if(has(/shield|armou?r|iron skin|aegis|guard|block|revenge|thorn/))return 'shield';
+  if(has(/shield|armou?r|iron skin|guard|block|revenge|thorn/))return 'shield';
   if(has(/\bdash/))return 'wing';
   if(has(/speed|swift|quick|fast|move/))return 'boot';
   if(a.w&&a.w.length===1&&W_ICON[a.w])return W_ICON[a.w];
@@ -4521,7 +4526,6 @@ function useHot(i){
     enemies=enemies.filter(e=>!e.dead);
   }else if(id==='hot_storm'){p.stormT=3;p.stormTick=0;sfx(300,.4,'sawtooth',.06,1.8)}
   else if(id==='hot_heal'){p.hp=Math.min(p.maxhp,p.hp+2);hudC={};spark(p.x,p.y,'#5fd0a2',26,300);floatTxt(p.x,p.y-24,'+2','#5fd0a2');sfx(700,.25,'triangle',.07,1.5)}
-  else if(id==='hot_aegis'){p.aegisT=3;p.inv=Math.max(p.inv,3);spark(p.x,p.y,'#ffd36b',24,300);sfx(500,.3,'triangle',.07,1.3)}
   else if(id==='hot_meteor'){
     const t=enemies.filter(e=>!e.dead&&e.spawnT<=0).sort(()=>R()-.5).slice(0,7);let n=0;
     for(const e of t)meteors.push({x:e.x,y:e.y,t:.6+(n++)*.1});
@@ -4594,7 +4598,6 @@ function hotTick(dt){
     p.stormT-=dt;p.stormTick-=dt;
     if(p.stormTick<=0){p.stormTick=.22;for(const e of enemies.slice()){if(e.dead||e.spawnT>0||e.ghost)continue;const dx=e.x-p.x,dy=e.y-p.y;if(Math.hypot(dx,dy)<125+e.r)hurtE(e,hotDmg(1),Math.atan2(dy,dx),false,true)}enemies=enemies.filter(e=>!e.dead)}
   }
-  if(p.aegisT>0)p.aegisT-=dt;
   if(p.flurT>0){p.flurT-=dt;p.flurTick-=dt;
     if(p.flurTick<=0){p.flurTick=.1;const fa=R()*TAU;spark(p.x+Math.cos(fa)*50,p.y+Math.sin(fa)*50,'#ffd36b',4,220);ringFx(p.x,p.y,95,.12);sfx(200+R()*200,.04,'square',.03,.6);
       for(const e of enemies.slice()){if(e.dead||e.spawnT>0||e.ghost)continue;const dx=e.x-p.x,dy=e.y-p.y;if(Math.hypot(dx,dy)<95+e.r)hurtE(e,hotDmg(1),Math.atan2(dy,dx),false)}
@@ -6565,7 +6568,7 @@ function reset(){
   loop=0;dynS=1;runXp=0;winT=0;lastRun=null;runT=0;runSnap=null;stage.classList.remove('dead');$('pause').hidden=true;$('panel').className='ov';
   pet.x=W/2-30;pet.y=H/2+10;clearT=.5;waveActive=false;hitstop=0;shake=0;state='play';resetVault();snapMap();for(const k in mdown)mdown[k]=false;
   $('panel').hidden=true;$('shop').hidden=true;
-  p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.aegisT=0;p.airN=0;p.flurT=0;
+  p.hot=[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=[1,1,1,1];p.stormT=0;p.stormTick=0;p.airN=0;p.flurT=0;
   p.runW=wType;p.runMix=false;p.runHurt=false;p.runDied=false;
   applyChar();
   if(p.cp.startHot&&!brMode){const hp=HOT.filter(hotOk);giveHot(hp[(R()*hp.length)|0].id)}
@@ -9088,7 +9091,7 @@ function continueRun(){
     diff=r.diff;brWant=false;selWorld=r.world;nwGo=true;try{beginRun()}finally{nwGo=false}
     const keep={x:p.x,y:p.y,ch:p.ch};
     Object.assign(p,r.p,{x:keep.x,y:keep.y,vx:0,vy:0,ix:0,iy:0,dashT:0,dashCd:0,cd:0,sw:0,inv:1.5,blink:1.5,ch:keep.ch});
-    p.hot=Array.isArray(p.hot)&&p.hot.length===4?p.hot:[null,null,null,null];p.hotCd=[0,0,0,0];p.hotMx=Array.isArray(p.hotMx)&&p.hotMx.length===4?p.hotMx:[1,1,1,1];
+    p.hot=Array.isArray(p.hot)&&p.hot.length===4?p.hot.map(id=>id&&HOTD[id]?id:null):[null,null,null,null]; /* 1.0: the removed Aegis secret (and any unknown id) frees its slot */p.hotCd=[0,0,0,0];p.hotMx=Array.isArray(p.hotMx)&&p.hotMx.length===4?p.hotMx:[1,1,1,1];
     ABIL.forEach(a=>{if(typeof p.mods[a.id]!=='number')p.mods[a.id]=0});
     p.maxhp=Math.max(1,p.maxhp|0);p.hp=Math.max(1,Math.min(p.maxhp,r.hp|0));buildHp();hudC={};
     runMods=r.mods&&typeof r.mods==='object'?r.mods:{};{const mn=modNames(runMods);$('modhud').textContent=mn.length?mn.join(' \u00b7 ').toUpperCase():''}
@@ -13138,7 +13141,6 @@ function draw(){
     if(p.stormT>0){const f=Math.min(1,p.stormT/.4);for(let i=0;i<5;i++){const a=time*9+i*TAU/5;ctx.save();ctx.globalAlpha=f;ctx.translate(p.x+Math.cos(a)*38,p.y+Math.sin(a)*38);ctx.rotate(a);ctx.scale(2.4,2.4);weaponShape(ctx,hs,ht,true);ctx.restore()}
       ctx.save();ctx.globalAlpha=.18*f;ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,125,0,TAU);ctx.stroke();ctx.restore()}
     for(const m of meteors){const k=Math.max(0,m.t/.9);ctx.save();ctx.strokeStyle='#ff8a3d';ctx.fillStyle='#ff5a2a';ctx.globalAlpha=.25+.3*(1-k);ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.x,m.y,80,0,TAU);ctx.stroke();ctx.globalAlpha=.12+.25*(1-k);ctx.beginPath();ctx.arc(m.x,m.y,80*(1-k),0,TAU);ctx.fill();ctx.globalAlpha=.9;ctx.fillStyle='#ffd36b';ctx.beginPath();ctx.arc(m.x,m.y-k*260,8,0,TAU);ctx.fill();ctx.restore()}
-    if(p.aegisT>0){ctx.save();ctx.strokeStyle='#ffd36b';ctx.lineWidth=3;ctx.globalAlpha=.5+.3*Math.sin(time*14);ctx.beginPath();ctx.arc(p.x,p.y,p.r+11,0,TAU);ctx.stroke();ctx.globalAlpha=.1;ctx.fillStyle='#ffd36b';ctx.fill();ctx.restore()}
   }
   if(p.kp&&p.kp.length&&p.mods.knife){
     ctx.globalAlpha=.1;ctx.strokeStyle='#f1ead8';ctx.lineWidth=1;ctx.beginPath();ctx.arc(p.x,p.y,56+5*p.mods.knife,0,TAU);ctx.stroke();ctx.globalAlpha=1;
